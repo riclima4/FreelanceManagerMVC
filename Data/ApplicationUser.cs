@@ -21,7 +21,7 @@ namespace FreelanceManager.Data
             CreatedAt = DateTime.Now;
         }
 
-        public string FullName { get; set; }
+        public string FullName { get; set; } = string.Empty;
         public DateTime? CreatedAt { get; set; }
         public string CreatedBy { get; set; } = "unknown";
         public DateTime? UpdatedAt { get; set; }

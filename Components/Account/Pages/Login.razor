@@ -48,7 +48,9 @@
                 </div>
             </EditForm>
             <div class="login-footer">
-                <p>Don't have an account? <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">SignUp</a></p>
+                <p>Don't have an account? <a
+                        href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">SignUp</a>
+                </p>
             </div>
         </div>
     </div>
