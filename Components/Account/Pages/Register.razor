@@ -1,4 +1,5 @@
 ﻿@page "/Account/Register"
+@layout FreelanceManager.Components.Layout.LoginLayout
 
 @using System.ComponentModel.DataAnnotations
 @using System.Text
@@ -6,6 +7,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.WebUtilities
 @using FreelanceManager.Data
+@using Syncfusion.Blazor.Notifications
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
@@ -16,60 +18,56 @@
 @inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Register</PageTitle>
-
-<h1>Register</h1>
-
-<div class="row">
-    <div class="col-lg-6">
+<div class="bg-color-black flex justify-content-center align-items-center w-100 h100vh">
+    <div class="signinup-card">
+        <div class=" text-center mb-16">
+            <img src="assets/logo.png" alt="logo freelance manager" class="w-100  border-radius-5" />
+        </div>
+        <div class="fs-18 fb-bold color-darkgrey text-center mb-16">Register new account!</div>
         <StatusMessage Message="@Message" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+        <StatusMessage Message="@statusMessage" />
+        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register"
+            class="w-100 flex flex-column gap-10">
             <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label for="Input.Email">Email</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="Input.Password">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-            </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="Input.ConfirmPassword">Confirm Password</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
-            </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+            <SfTextBox Placeholder='Username' CssClass="e-outline" @bind-Value="Input.Username" id="Input.Username"
+                FloatLabelType="FloatLabelType.Always">
+            </SfTextBox>
+            <SfTextBox Placeholder='Email' CssClass="e-outline" @bind-Value="Input.Email" id="Input.Email"
+                FloatLabelType="FloatLabelType.Always">
+            </SfTextBox>
+            <SfTextBox Placeholder='Password' Type="InputType.Password" CssClass="e-outline"
+                FloatLabelType="FloatLabelType.Always" @bind-Value="Input.Password" id="Input.Password">
+            </SfTextBox>
+            <SfTextBox Placeholder='Confirm Password' Type="InputType.Password" CssClass="e-outline"
+                FloatLabelType="FloatLabelType.Always" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword">
+            </SfTextBox>
+            <SfButton Type="submit" CssClass="e-primary" class="w-100">Sign Up</SfButton>
         </EditForm>
-    </div>
-    <div class="col-lg-4 col-lg-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
+        <div class="fs-14 mt-16 text-center">
+           Already have an account? <a class="color-purple fb-bold text-decoration-none"
+                href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">SignIn</a>
+        </div>
     </div>
 </div>
 
 @code {
     private IEnumerable<IdentityError>? identityErrors;
+    private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
-
+    private string? statusMessage;
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+
 
     public async Task RegisterUser(EditContext editContext)
     {
         var user = CreateUser();
 
-        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+        await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
         var result = await UserManager.CreateAsync(user, Input.Password);
@@ -81,22 +79,12 @@
         }
 
         Logger.LogInformation("User created a new account with password.");
-
+        statusMessage = "Account created successfully.";
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
         code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-
-        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
-
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
-        {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
-        }
+       
+       await UserManager.ConfirmEmailAsync(user, code);
 
         await SignInManager.SignInAsync(user, isPersistent: false);
         RedirectManager.RedirectTo(ReturnUrl);
@@ -126,6 +114,12 @@
 
     private sealed class InputModel
     {
+
+        [Required]
+        [RegularExpression("^[a-zA-Z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>?]+$", ErrorMessage = "The username can contain letters, numbers, and special characters, but not slashes.")]
+        [Display(Name = "Username")]
+        public string Username { get; set; } = "";
+                
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]

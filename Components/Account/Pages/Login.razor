@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 @using FreelanceManager.Data
+@using Syncfusion.Blazor.Inputs
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Login> Logger
@@ -13,45 +14,36 @@
 
 <PageTitle>Log in</PageTitle>
 
-<div class="login-container">
-    <div class="login-card">
-        <div class="loginMain">
-            <div class="login-header">
-                <h2>Freelance Manager</h2>
+<div class="bg-color-black flex justify-content-center align-items-center w-100 h100vh">
+    <div class="signinup-card">
+        <div class="text-center mb-16">
+            <img src="assets/logo.png" alt="logo freelance manager" class="w-100  border-radius-5" />
+        </div>
+        <div class="fs-18 fb-bold color-darkgrey text-center mb-16">Login Now!</div>
+        <StatusMessage Message="@errorMessage" />
+        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login"
+            class="w-100 flex flex-column gap-10">
+            <DataAnnotationsValidator />
+            <SfTextBox Placeholder='Email' CssClass="e-outline" @bind-Value="Input.Email" id="Input.Email"
+                FloatLabelType="FloatLabelType.Always">
+            </SfTextBox>
+            <SfTextBox Placeholder='Password' Type="InputType.Password" CssClass="e-outline"
+                FloatLabelType="FloatLabelType.Always" @bind-Value="Input.Password" id="Input.Password">
+            </SfTextBox>
+
+            @* <SfCheckBox Label="Remember me" @bind-Checked="Input.RememberMe"></SfCheckBox> *@
+
+            <SfButton Type="submit" CssClass="e-primary" class="w-100">Sign In</SfButton>
+            <div class="fs-14">
+                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/ForgotPassword", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))"
+                    class="fs-14 color-darkgrey fb-bold text-decoration-none">
+                    Forgot your password?
+                </a>
             </div>
-            <StatusMessage Message="@errorMessage" />
-            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator />
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username"
-                        aria-required="true" placeholder="name@example.com" />
-                    <label for="Input.Email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
-                </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control"
-                        autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="Input.Password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger" />
-                </div>
-                <div class="checkbox mb-3">
-                    <label class="form-label">
-                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
-                        Remember me
-                    </label>
-                </div>
-                <SfButton Type="submit" CssClass="e-primary login-button">Sign In</SfButton>
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                </div>
-            </EditForm>
-            <div class="login-footer">
-                <p>Don't have an account? <a
-                        href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">SignUp</a>
-                </p>
-            </div>
+        </EditForm>
+        <div class="fs-14 mt-16 text-center">
+            Don't have an account? <a class="color-purple fb-bold text-decoration-none"
+                href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">SignUp</a>
         </div>
     </div>
 </div>
@@ -81,12 +73,13 @@
     {
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure:
+        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe || false,
+        lockoutOnFailure:
         false);
         if (result.Succeeded)
         {
             Logger.LogInformation("User logged in.");
-            RedirectManager.RedirectTo(ReturnUrl);
+            RedirectManager.RedirectTo("home");
         }
         else if (result.RequiresTwoFactor)
         {

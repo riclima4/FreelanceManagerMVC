@@ -1,8 +1,9 @@
 ﻿@page "/counter"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
 
 <PageTitle>Counter</PageTitle>
-
+@attribute [Authorize]
 <h1>Counter</h1>
 
 <p role="status">Current count: @currentCount</p>

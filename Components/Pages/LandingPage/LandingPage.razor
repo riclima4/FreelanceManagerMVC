@@ -1,0 +1,369 @@
+@page "/"
+@layout FreelanceManager.Components.Layout.LoginLayout
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Cards
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Lists
+
+
+<PageTitle>Freelance Manager</PageTitle>
+<div class="d-flex flex-column min-vh-100 text-white bg-color-black">
+
+    <header class=" sticky-top">
+        <nav class="navbar navbar-expand-lg navbar-light text-white">
+            <div class="container d-flex align-items-center">
+                <!-- Logo -->
+                <a href="#inicio" >
+                    <img src="assets/logo.png" alt="Logo" class="border-radius-5" style="width: 200px;">
+                </a>
+
+                <!-- Botão de toggler para mobile -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Itens do menu centralizados -->
+                <div class="collapse navbar-collapse justify-content-center w-100" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link active text-white" aria-current="page" href="#inicio">Início</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#talentos">Talentos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-white" href="#faq">FAQ</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Botões centralizados abaixo do menu -->
+                <div class="d-flex justify-content-center gap-2 mt-2">
+                    @if(!IsUserLoggedIn){
+                    <SfButton CssClass="e-primary e-outline text-white rounded-pill">
+                        <a href="@goToPageRegister" class="text-decoration-none text-white">
+                            Register
+                        </a>
+                    </SfButton>
+                    }
+                    
+                    <SfButton CssClass="e-primary text-white rounded-pill border-0">
+                         <a href="@goToPageLogin" class="text-decoration-none text-white">
+                            @(IsUserLoggedIn ? "Dashboard" : "Login")
+                        </a>
+                    </SfButton>
+                  
+                </div>
+            </div>
+        </nav>
+    </header>
+
+
+    <!-- Hero Section -->
+    <section id="inicio" class="hero text-white min-vh-100 d-flex align-items-center">
+        <div class="container d-flex justify-content-between align-items-center flex-wrap">
+            <!-- Texto à esquerda -->
+            <div class="text-left col-md-6">
+                <h1 class="display-3 fw-bold">
+                    The Ultimate <span class="bg-purple">Dashboard</span> for Freelancers and Teams
+                </h1>
+                <p class="lead text-secondary fw-semibold" style="font-size: 16px;">
+                    Aumente a sua produtividade e racionalize o seu fluxo de trabalho com o FreelanceManager.
+                </p>
+                <SfButton CssClass="e-primary mt-3 e-flat bg-white text-dark rounded-pill py-3 px-4">
+                    <a href="@goToPageRegister" class="text-decoration-none text-dark">
+                        Começar Agora
+                    </a>
+                </SfButton>
+            </div>
+
+            <!-- Imagem à direita -->
+            <div class="col-md-6 d-flex justify-content-end">
+                <img src="/assets/image2.svg" class="img-fluid" alt="Hero Image" style="max-width: 100%; height: auto;">
+            </div>
+        </div>
+    </section>
+
+    <section id="talentos" class="container text-center py-5" style="margin-bottom: 64px;">
+        <h2 class="text-white fw-bold mb-5">Descobre o teu talento</h2>
+        <div class="row g-4">
+            <!-- Card 1: Procurar Projetos -->
+            <div class="col-md-7">
+                <div class="card card-custom gradient-dark">
+                    <div class="card-body d-flex flex-column align-items-start">
+                        <div class="icon-container">
+                            <i class="fas fa-folder-open icon-size bg-purple"></i>
+                        </div>
+                        <h3 class="fw-bold text-white">Entra num projeto</h3>
+                        <p class="text-secondary">Procura e entra em projetos abertos que combinam com as tuas habilidades.</p>
+                        <a href="@goToPageLogin" class="link-custom">Explorar projetos</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Talentos Disponíveis -->
+            <div class="col-md-5">
+                <div class="card card-custom gradient-dark">
+                    <div class="card-body d-flex flex-column align-items-start">
+                        <div class="icon-container">
+                            <i class="fas fa-users icon-size bg-purple"></i>
+                        </div>
+                        <h3 class="fw-bold text-white">5000+ Freelancers</h3>
+                        <p class="text-secondary">Encontra os melhores talentos para o seu projeto.</p>
+                        <a href="@goToPageLogin" class="link-custom">Publicar uma vaga</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Segurança de Pagamento -->
+            <div class="col-md-5">
+                <div class="card card-custom gradient-dark">
+                    <div class="card-body d-flex flex-column align-items-start">
+                        <div class="icon-container">
+                            <i class="fas fa-handshake icon-size bg-purple"></i>
+                        </div>
+                        <h3 class="fw-bold text-white">Transações Seguras</h3>
+                        <p class="text-secondary">Pagamentos protegidos para clientes e freelancers.</p>
+                        <a href="@goToPageLogin" class="link-custom">Saiba mais</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 4: Gestão Financeira -->
+            <div class="col-md-7">
+                <div class="card card-custom gradient-dark">
+                    <div class="card-body d-flex flex-column align-items-start">
+                        <div class="icon-container">
+                            <i class="fas fa-coins icon-size bg-purple"></i>
+                        </div>
+                        <h3 class="fw-bold text-white">Gestão de Pagamentos</h3>
+                        <p class="text-secondary">Acompanhe seus ganhos e levante sempre que precisar.</p>
+                        <a href="@goToPageLogin" class="link-custom">Ver saldo</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="container py-5" style="margin-top: 64px;margin-bottom: 64px;">
+        <h2 class="text-center text-white fw-bold mb-5">Talentos</h2>
+        <div class="row justify-content-center g-4">
+            <!-- Card 1 -->
+            <div class="col-md-2">
+                <div class="talent-card text-center">
+                    <div class="avatar">
+                        <img src="https://randomuser.me/api/portraits/men/10.jpg" alt="Angelina">
+                    </div>
+                    <h5 class="text-white mt-3">Ricardo Fernandes</h5>
+                    <p class="text-secondary small">Senior UX Designer</p>
+                    <p class="rating"><i class="fas fa-star"></i> 4.9 · 32 Jobs</p>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="col-md-2">
+                <div class="talent-card text-center">
+                    <div class="avatar">
+                        <img src="https://randomuser.me/api/portraits/men/20.jpg" alt="Max">
+                    </div>
+                    <h5 class="text-white mt-3">Ricardo Lima</h5>
+                    <p class="text-secondary small">Design Lead</p>
+                    <p class="rating"><i class="fas fa-star"></i> 4.8 · 40 Jobs</p>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="col-md-2">
+                <div class="talent-card text-center">
+                    <div class="avatar">
+                        <img src="https://randomuser.me/api/portraits/men/30.jpg" alt="Stephanie">
+                    </div>
+                    <h5 class="text-white mt-3">Gonçalo Peixoto</h5>
+                    <p class="text-secondary small">Shopify Developer</p>
+                    <p class="rating"><i class="fas fa-star"></i> 5.0 · 64 Jobs</p>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="col-md-2">
+                <div class="talent-card text-center">
+                    <div class="avatar">
+                        <img src="https://randomuser.me/api/portraits/men/40.jpg" alt="Sophia">
+                    </div>
+                    <h5 class="text-white mt-3">Rodrigo Mesquita</h5>
+                    <p class="text-secondary small">Android Developer</p>
+                    <p class="rating"><i class="fas fa-star"></i> 5.0 · 284 Jobs</p>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="col-md-2">
+                <div class="talent-card text-center">
+                    <div class="avatar">
+                        <img src="https://randomuser.me/api/portraits/men/50.jpg" alt="Scarlett">
+                    </div>
+                    <h5 class="text-white mt-3">Lucas Maciel</h5>
+                    <p class="text-secondary small">Technical Writer</p>
+                    <p class="rating"><i class="fas fa-star"></i> 4.6 · 107 Jobs</p>
+                </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="col-md-2">
+                <div class="talent-card text-center">
+                    <div class="avatar">
+                        <img src="https://randomuser.me/api/portraits/men/60.jpg" alt="Henry">
+                    </div>
+                    <h5 class="text-white mt-3">André Maia</h5>
+                    <p class="text-secondary small">Virtual Assistant</p>
+                    <p class="rating"><i class="fas fa-star"></i> 4.5 · 90 Jobs</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão "See More" -->
+        <div class="text-center mt-5">
+            <SfButton CssClass="e-primary e-outline text-white rounded-pill">
+                <a href="@goToPageLogin" class="text-decoration-none text-white">
+                    Ver Mais
+                </a>
+            </SfButton>
+        </div>
+    </section>
+
+
+    <!-- Perguntas Frequentes -->
+    <section class="container py-5" id="faq" style="margin-top: 64px;margin-bottom: 64px;"> 
+        <div class="row g-4 align-items-start">
+            <!-- Texto e botão -->
+            <div class="col-lg-6">
+                <h2 class="text-white fw-bold">
+                    Questões frequentes sobre a <span class="bg-purple">FreelanceManager</span>
+                </h2>
+                <p class="text-secondary" style="max-width: 450px;">
+                    Tem Questões? Nós temos as respostas! Explora as nossas questões frequentes para saber mais sobre como FreelanceManager pode aumentar a tua produtividade.
+                </p>
+                <SfButton CssClass="e-primary e-outline text-white rounded-pill">
+                    <a href="@goToPageRegister" class="text-decoration-none text-white">
+                        Começar Agora
+                    </a>
+                </SfButton>
+            </div>
+
+            <!-- Accordion -->
+            <div class="col-lg-6">
+                <div class="accordion faq-accordion" id="faqAccordion">
+                    @foreach (var faq in FAQs)
+                    {
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapse-@faq.GetHashCode()" aria-expanded="false">
+                                    @faq.Question
+                                </button>
+                            </h2>
+                            <div id="collapse-@faq.GetHashCode()" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    @faq.Answer
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="py-5 text-white" style="margin-top: 64px;margin-bottom: 64px;">
+        <div class="container text-center" style="max-width: 450px;">
+            <h2 class="text-white>">Ready to Take Control of Your Workflow?</h2>
+            <p class="text-secondary">Streamline your tasks and boost your productivity today.</p>
+            <SfButton CssClass="e-primary mt-3 e-flat bg-white text-dark rounded-pill py-3 px-4">
+                <a href="@goToPageRegister" class="text-decoration-none text-dark">
+                    Começar Agora
+                </a>
+            </SfButton>
+        </div>
+    </section>
+
+    <footer class="text-white py-5">
+        <div class="container">
+            <div class="row d-flex justify-content-between align-items-start p-4 rounded-4" style="background-color: #252525;">
+                <!-- Coluna da Marca e Redes Sociais -->
+                <div class="col-md-4">
+                    <h4 class="fw-bold">FreelanceManager</h4>
+                    <p class="text-secondary">Av. do Atlântico 644 4900-348,<br/> Viana do Castelo</p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="social-icon">
+                            <i class="fab fa-facebook bg-purple"></i>
+                        </a>
+                        <a href="#" class="social-icon">
+                            <i class="fab fa-instagram bg-purple"></i>
+                        </a>
+                        <a href="#" class="social-icon">
+                            <i class="fab fa-twitter bg-purple"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Coluna de Produtos -->
+                <div class="col-md-4">
+                    <h5 class="fw-bold">Product</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-secondary text-decoration-none">Privacy & Cookie Policy</a></li>
+                        <li><a href="#" class="text-secondary text-decoration-none">Security Policy</a></li>
+                        <li><a href="#" class="text-secondary text-decoration-none">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+
+                <!-- Coluna de Informações -->
+                <div class="col-md-4">
+                    <h5 class="fw-bold">Info</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#" class="text-secondary text-decoration-none">Terms of Service</a></li>
+                        <li><a href="#" class="text-secondary text-decoration-none">Right of Withdraw</a></li>
+                        <li><a href="#" class="text-secondary text-decoration-none">Disclaimer</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+    private bool IsUserLoggedIn { get; set; }
+        public string goToPageLogin { get; set; } = string.Empty;
+    public string goToPageRegister { get; set; } = string.Empty;
+
+    public class FAQ
+    {
+        public string Question { get; set; } = string.Empty;
+        public string Answer { get; set; } = string.Empty;
+    }
+
+    private List<FAQ> FAQs = new()
+    {
+        new FAQ { Question = "Como posso me registrar?", Answer = "Clique no botão 'Comece Agora' e siga as instruções." },
+        new FAQ { Question = "Quais métodos de pagamento são aceitos?", Answer = "Aceitamos cartões de crédito, PayPal e transferência bancária." },
+        new FAQ { Question = "Posso cancelar meu projeto?", Answer = "Sim, você pode cancelar seu projeto a qualquer momento antes do pagamento." },
+        new FAQ { Question = "Como posso entrar em contato com o suporte?", Answer = "Nosso suporte está disponível 24/7 através do chat ao vivo." }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        IsUserLoggedIn = authState.User.Identity?.IsAuthenticated ?? false;
+        if(IsUserLoggedIn){
+            goToPageLogin = "/Home";
+            goToPageRegister = "/Home";
+        }else{
+            goToPageLogin = "/Account/Login";
+            goToPageRegister = "/Account/Register";
+        }
+    }
+}
