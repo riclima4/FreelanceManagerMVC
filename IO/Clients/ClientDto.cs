@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FreelanceManager.Data;
-using FreelanceManager.Data.Entities;
 using FreelanceManager.IO._shared;
 
 namespace FreelanceManager.IO.Clients

@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using FreelanceManager.Data.Entities;
-using FreelanceManager.Data.Entities.Enum;
+using FreelanceManager.Data.Enum;
 
 namespace FreelanceManager.IO.Tarefas
 {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FreelanceManager.Data.Entities;
+using FreelanceManager.Data;
 using FreelanceManager.Data.UnitOfWork;
 using FreelanceManager.IO.Tarefas;
 using Microsoft.EntityFrameworkCore;
@@ -49,7 +49,7 @@ namespace FreelanceManager.Services.Tarefas
             await _unitOfWork.TarefasRepository.Delete(id);
         }
 
-        public async Task<bool> CanDeleteAsync(Guid id) => true;
+        public Task<bool> CanDeleteAsync(Guid id) => Task.FromResult(true);
 
         private async Task<int> GetNextNumberAsync()
         {

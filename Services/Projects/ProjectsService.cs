@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FreelanceManager.Data.Entities;
-using FreelanceManager.Data.Entities.Enum;
+using FreelanceManager.Data;
+using FreelanceManager.Data.Enum;
 using FreelanceManager.Data.UnitOfWork;
 using FreelanceManager.IO.Projects;
 using FreelanceManager.IO.Tarefas;
@@ -64,7 +64,7 @@ namespace FreelanceManager.Services.Projects
             await _unitOfWork.ProjectsRepository.FakeDelete(id);
         }
 
-        public async Task<bool> CanDeleteAsync(Guid id) => true;
+        public Task<bool> CanDeleteAsync(Guid id) => Task.FromResult(true);
 
         private async Task<int> GetNextNumberAsync()
         {

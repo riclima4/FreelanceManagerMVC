@@ -1,6 +1,10 @@
 using FreelanceManager.Components;
 using FreelanceManager.Components.Account;
 using FreelanceManager.Data;
+using FreelanceManager.Data.UnitOfWork;
+using FreelanceManager.Services.Clients;
+using FreelanceManager.Services.Projects;
+using FreelanceManager.Services.Tarefas;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +21,13 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+// Scope Services
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IClientsService, ClientsService>();
+builder.Services.AddScoped<IProjectsService, ProjectsService>();
+builder.Services.AddScoped<ITarefasService, TarefasService>();
+builder.Services.AddScoped<ITimesheetService, TimesheetService>();
 
 builder.Services.AddAuthentication(options =>
     {

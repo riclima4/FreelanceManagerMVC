@@ -45,22 +45,22 @@
         </EditForm>
         <div class="fs-14 mt-16 text-center">
            Already have an account? <a class="color-purple fb-bold text-decoration-none"
-                href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">SignIn</a>
+                href="@(NavigationManager.GetUriWithQueryParameters("Account/Login", new Dictionary<string, object> { ["ReturnUrl"] = ReturnUrl }))">SignIn</a>
         </div>
     </div>
 </div>
 
 @code {
-    private IEnumerable<IdentityError>? identityErrors;
+    private IEnumerable<IdentityError> identityErrors;
     private HttpContext HttpContext { get; set; } = default!;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
-    private string? statusMessage;
-    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+    private string ReturnUrl { get; set; }
+    private string statusMessage;
+    private string Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
 
     public async Task RegisterUser(EditContext editContext)

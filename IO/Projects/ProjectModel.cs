@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using FreelanceManager.Data.Entities;
-using FreelanceManager.Data.Entities.Enum;
+using FreelanceManager.Data.Enum;
 
 namespace FreelanceManager.IO.Projects
 {
@@ -18,7 +17,7 @@ namespace FreelanceManager.IO.Projects
         [Required, MaxLength(100)]
         public string Description { get; set; }
         public Guid? ClientId { get; set; }
-        public string? ApplicationUserId { get; set; }
+        public string ApplicationUserId { get; set; }
         public ProjectStatus Status { get; set; } = ProjectStatus.Created;
         [MaxLength(500)]
         public string Notes { get; set; }

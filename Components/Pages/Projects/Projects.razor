@@ -1,0 +1,17 @@
+﻿@page "/projects"
+
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+<PageTitle>Projects</PageTitle>
+
+<h1>Projects Page</h1>
+
+<div>
+    @Nome
+</div>
+
+@code {
+    private string Nome = "Nome do Projeto";
+}

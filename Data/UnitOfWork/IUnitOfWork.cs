@@ -1,5 +1,4 @@
-﻿using FreelanceManager.Data.Entities;
-using FreelanceManager.Data.Repositories;
+﻿using FreelanceManager.Data.Repositories;
 
 namespace FreelanceManager.Data.UnitOfWork
 {

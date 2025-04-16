@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FreelanceManager.Data.Entities.Base;
+using FreelanceManager.Data.Base;
 using FreelanceManager.IO.Tarefas;
 
 namespace FreelanceManager.Data

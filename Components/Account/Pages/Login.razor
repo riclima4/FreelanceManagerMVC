@@ -32,7 +32,7 @@
             </SfTextBox>
             <SfButton Type="submit" CssClass="e-primary" class="w-100">Sign In</SfButton>
             <div class="fs-14">
-                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/ForgotPassword", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))"
+                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/ForgotPassword", new Dictionary<string, object> { ["ReturnUrl"] = ReturnUrl }))"
                     class="fs-14 color-darkgrey fb-bold text-decoration-none">
                     Forgot your password?
                 </a>
@@ -40,13 +40,13 @@
         </EditForm>
         <div class="fs-14 mt-16 text-center">
             Don't have an account? <a class="color-purple fb-bold text-decoration-none"
-                href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">SignUp</a>
+                href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object> { ["ReturnUrl"] = ReturnUrl }))">SignUp</a>
         </div>
     </div>
 </div>
 
 @code {
-    private string? errorMessage;
+    private string errorMessage;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -55,7 +55,7 @@
     private InputModel Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
-    private string? ReturnUrl { get; set; }
+    private string ReturnUrl { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

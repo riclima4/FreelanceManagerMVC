@@ -1,5 +1,5 @@
 ﻿
-using FreelanceManager.Data.Entities.Base;
+using FreelanceManager.Data.Base;
 
 namespace FreelanceManager.IO._shared
 {

@@ -1,5 +1,5 @@
 using System.Runtime.CompilerServices;
-using FreelanceManager.Data.Entities;
+using FreelanceManager.Data;
 using FreelanceManager.Data.UnitOfWork;
 using FreelanceManager.IO.Tarefas;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +42,7 @@ public class TimesheetService : ITimesheetService
     {
         await _unitOfWork.TimesheetsRepository.Delete(id);
     }
-    public async Task<bool> CanDeleteAsync(Guid id) => true;
+    public Task<bool> CanDeleteAsync(Guid id) => Task.FromResult(true);
 
     private async Task<int> GetNextNumberAsync()
     {

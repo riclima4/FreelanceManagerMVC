@@ -58,7 +58,7 @@ namespace FreelanceManager.Services.Clients
             await _unitOfWork.ClientsRepository.FakeDelete(id);
         }
 
-        public async Task<bool> CanDeleteAsync(Guid id) => true;
+        public Task<bool> CanDeleteAsync(Guid id) => Task.FromResult(true);
 
         private async Task<int> GetNextNumberAsync()
         {

@@ -1,4 +1,4 @@
-﻿using FreelanceManager.Data.Entities;
+﻿using FreelanceManager.Data;
 using FreelanceManager.Data.Repositories;
 using FreelanceManager.Data.UnitOfWork;
 

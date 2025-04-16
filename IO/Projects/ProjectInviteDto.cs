@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using FreelanceManager.Data;
-using FreelanceManager.Data.Entities;
-using FreelanceManager.Data.Entities.Enum;
+using FreelanceManager.Data.Enum;
 using FreelanceManager.IO._shared;
 
 namespace FreelanceManager.IO.Projects

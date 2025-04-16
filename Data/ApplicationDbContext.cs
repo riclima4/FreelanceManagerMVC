@@ -1,4 +1,4 @@
-using FreelanceManager.Data.Entities.Base;
+using FreelanceManager.Data.Base;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

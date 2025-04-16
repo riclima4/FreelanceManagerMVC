@@ -1,4 +1,4 @@
-namespace FreelanceManager.Data.Entities.Enum
+namespace FreelanceManager.Data.Enum
 {
     public enum ProjectStatus
     {

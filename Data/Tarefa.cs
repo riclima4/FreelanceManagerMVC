@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FreelanceManager.Data.Entities.Base;
-using FreelanceManager.Data.Entities.Enum;
+using FreelanceManager.Data.Base;
+using FreelanceManager.Data.Enum;
 using FreelanceManager.IO.Tarefas;
 
 namespace FreelanceManager.Data
@@ -32,7 +32,7 @@ namespace FreelanceManager.Data
         public string Notes { get; set; }
         public int InternalNumber { get; set; }
         public string ApplicationUserId { get; set; }
-        public string? AssociatedUserId { get; set; }
+        public string AssociatedUserId { get; set; }
         public Guid? ProjectId { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
         public Project Project { get; set; }

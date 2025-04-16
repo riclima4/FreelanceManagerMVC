@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using FreelanceManager.Data.Entities.Enum;
+using FreelanceManager.Data.Enum;
 
 namespace FreelanceManager.IO.Projects
 {
