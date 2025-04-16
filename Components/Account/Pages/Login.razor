@@ -24,15 +24,12 @@
         <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login"
             class="w-100 flex flex-column gap-10">
             <DataAnnotationsValidator />
-            <SfTextBox Placeholder='Email' CssClass="e-outline" @bind-Value="Input.Email" id="Input.Email"
+            <SfTextBox Placeholder='Username' CssClass="e-outline" @bind-Value="Input.UserName" id="Input.Username"
                 FloatLabelType="FloatLabelType.Always">
             </SfTextBox>
             <SfTextBox Placeholder='Password' Type="InputType.Password" CssClass="e-outline"
                 FloatLabelType="FloatLabelType.Always" @bind-Value="Input.Password" id="Input.Password">
             </SfTextBox>
-
-            @* <SfCheckBox Label="Remember me" @bind-Checked="Input.RememberMe"></SfCheckBox> *@
-
             <SfButton Type="submit" CssClass="e-primary" class="w-100">Sign In</SfButton>
             <div class="fs-14">
                 <a href="@(NavigationManager.GetUriWithQueryParameters("Account/ForgotPassword", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))"
@@ -73,7 +70,7 @@
     {
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe || false,
+        var result = await SignInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe,
         lockoutOnFailure:
         false);
         if (result.Succeeded)
@@ -101,9 +98,8 @@
     private sealed class InputModel
     {
         [Required]
-        [EmailAddress]
-        public string Email { get; set; } = "";
 
+        public string UserName { get; set; } = "";
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";

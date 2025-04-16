@@ -58,6 +58,7 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+/* CSS do AÇO */
 
 .align-self-center {
     align-self: center;
@@ -265,6 +266,7 @@ h1:focus {
 .fb-700 {
     font-weight: 700;
 }
+
 .fb-bold {
     font-weight: bold;
 }
