@@ -2,39 +2,39 @@
 
 @inject NavigationManager NavigationManager
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">FreelanceManager</a>
+<div class="navbar">
+    <div class="flex justify-content-center align-items-center w-100">
+        <img src="assets/logo.png" alt="FreelanceManager Logo" class="border-radius-5" style="max-width: 100px;" />
     </div>
 </div>
-
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
         <AuthorizeView>
             <Authorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="home" Match="NavLinkMatch.All">
-                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                    <NavLink class="nav-link fs-14 fb-bold" href="home" Match="NavLinkMatch.All">
+                        <span class="e-icons e-home mr-8 fs-18"></span> Home
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="projects">
-                        <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Projects
+                    <NavLink class="nav-link fs-14 fb-bold" href="projects">
+                        <span class="e-icons e-folder mr-10 fs-16"></span> Projects
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span>Settings
+                    <NavLink class="nav-link fs-14 fb-bold" href="Account/Manage">
+                        <span class="e-icons e-settings mr-10 fs-16"></span> Settings
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
                     <form action="Account/Logout" method="post">
                         <AntiforgeryToken />
                         <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                        <button type="submit" class="nav-link fs-14 fb-bold">
+                            <span class="e-icons e-arrow-left mr-10 fs-16"></span> Logout
                         </button>
                     </form>
                 </div>

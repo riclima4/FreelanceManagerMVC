@@ -218,6 +218,9 @@ h1:focus {
 .mr-10 {
     margin-right: 10px;
 }
+.mr-8 {
+    margin-right: 8px;
+}
 
 .mr-5 {
     margin-right: 5px;
@@ -243,6 +246,9 @@ h1:focus {
     padding: 20px;
 }
 
+.p-16 {
+    padding: 16px;
+}
 .p-10 {
     padding: 10px;
 }
@@ -443,6 +449,12 @@ h1:focus {
 }
 .bg-color-black{
     background-color: #1f1f1f;
+}
+.bg-color-white{
+    background-color: #fff;
+}
+.color-white{
+    color: white;
 }
 
 .signinup-card {
