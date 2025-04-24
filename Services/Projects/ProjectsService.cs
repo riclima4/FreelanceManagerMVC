@@ -20,6 +20,16 @@ namespace FreelanceManager.Services.Projects
         }
         public async Task<List<ProjectDto>> GetAllAsync() => await _unitOfWork.ProjectsRepository.GetEntityAsNoTracking().Select(c => new ProjectDto(c)).ToListAsync();
 
+        public async Task<List<ProjectDto>> GetByUserIdAsync(Guid userId)
+        {
+            var userIdString = userId.ToString();
+
+            return await _unitOfWork
+                .ProjectsRepository
+                .GetEntityAsNoTracking(p => p.ApplicationUserId == userIdString)
+                .Select(p => new ProjectDto(p))
+                .ToListAsync();
+        }
         public async Task<ProjectDto> GetByIdAsync(Guid id) => await _unitOfWork.ProjectsRepository.GetEntityAsNoTracking(v => v.Id == id).Select(a => new ProjectDto(a)).FirstAsync();
 
         public async Task<ProjectDto> CreateAsync(ProjectModel model)
