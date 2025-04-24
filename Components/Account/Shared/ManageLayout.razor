@@ -1,14 +1,15 @@
 ﻿@inherits LayoutComponentBase
 @layout FreelanceManager.Components.Layout.MainLayout
 
-<h1>Manage your account</h1>
-
-<div>
-    <h2>Change your account settings</h2>
-    <hr />
+<h2 class="text-center text-color-purple fw-semibold py-3">Account Management</h2>
+<hr class="mx-auto w-50 border-color-purple" />
+<div class="container mt-4">
     <div class="row">
         <div class="col-lg-3">
-            <ManageNavMenu />
+            <div class="sub-sidebar bg-white shadow-sm rounded p-3">
+                <h5 class="text-secondary fw-bold">Account Settings</h5>
+                <ManageNavMenu />
+            </div>
         </div>
         <div class="col-lg-9">
             @Body

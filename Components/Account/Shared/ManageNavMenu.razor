@@ -1,31 +1,16 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using FreelanceManager.Data
-
+@inject NavigationManager NavigationManager
 @inject SignInManager<ApplicationUser> SignInManager
 
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/Email">Email</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/ChangePassword">Password</NavLink>
-    </li>
-    @if (hasExternalLogins)
-    {
-        <li class="nav-item">
-            <NavLink class="nav-link" href="Account/Manage/ExternalLogins">External logins</NavLink>
-        </li>
-    }
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/PersonalData">Personal data</NavLink>
-    </li>
-</ul>
+<nav class="nav flex-column manage-nav-menu">
+    <a class="nav-link text-dark fw-bold py-2 px-3 @(IsActive("/Account/Manage/Index") ? "active" : "")" href="/Account/Manage/Index">Profile</a>
+    <a class="nav-link text-dark fw-bold py-2 px-3 @(IsActive("/Account/Manage/ChangePassword") ? "active" : "")" href="/Account/Manage/ChangePassword">Change Password</a>
+    @* <a class="nav-link text-dark fw-bold py-2 px-3 @(IsActive("/Account/Manage/SetPassword") ? "active" : "")" href="/Account/Manage/SetPassword">Set Password</a>
+    <a class="nav-link text-dark fw-bold py-2 px-3 @(IsActive("/Account/Manage/TwoFactorAuthentication") ? "active" : "")" href="/Account/Manage/TwoFactorAuthentication">Two-Factor Authentication</a>
+    <a class="nav-link text-dark fw-bold py-2 px-3 @(IsActive("/Account/Manage/ExternalLogins") ? "active" : "")" href="/Account/Manage/ExternalLogins">External Logins</a> *@
+    <a class="nav-link text-dark fw-bold py-2 px-3 @(IsActive("/Account/Manage/DeletePersonalData") ? "active" : "")" href="/Account/Manage/DeletePersonalData">Delete Account</a>
+</nav>
 
 @code {
     private bool hasExternalLogins;
@@ -33,5 +18,10 @@
     protected override async Task OnInitializedAsync()
     {
         hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+    }
+
+    private bool IsActive(string href)
+    {
+        return NavigationManager.Uri.Contains(href, StringComparison.OrdinalIgnoreCase);
     }
 }

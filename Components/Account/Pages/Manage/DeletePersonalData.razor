@@ -12,31 +12,34 @@
 
 <PageTitle>Delete Personal Data</PageTitle>
 
+<h4 class="mb-4">Delete Personal Data</h4>
 <StatusMessage Message="@message" />
-
-<h3>Delete Personal Data</h3>
-
+<div class="row">
+    <div class="col-xl-6">
 <div class="alert alert-warning" role="alert">
     <p>
-        <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+        <strong>Deleting your account is permanent and cannot be undone.</strong>
     </p>
 </div>
 
-<div>
-    <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
-        <DataAnnotationsValidator />
-        <ValidationSummary class="text-danger" role="alert" />
-        @if (requirePassword)
-        {
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control"
-                    autocomplete="current-password" aria-required="true" placeholder="Please enter your password." />
-                <label for="Input.Password" class="form-label">Password</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
-            </div>
-        }
-        <button class="w-100 btn btn-lg btn-danger" type="submit">Delete data and close my account</button>
-    </EditForm>
+<div >
+    <div >
+        <EditForm Model="Input" FormName="delete-user" OnValidSubmit="OnValidSubmitAsync" method="post">
+            <DataAnnotationsValidator />
+            <ValidationSummary class="text-danger" role="alert" />
+            @if (requirePassword)
+            {
+                <div class="form-floating mb-3">
+                    <SfTextBox Placeholder="Password" Type="InputType.Password" CssClass="e-outline"
+                        FloatLabelType="FloatLabelType.Always" @bind-Value="Input.Password" id="Input.Password" />
+                    <ValidationMessage For="() => Input.Password" class="text-danger small" />
+                </div>
+            }
+            <SfButton Type="submit" CssClass="e-danger w-100">Delete Data and Close My Account</SfButton>
+        </EditForm>
+    </div>
+</div>
+</div>
 </div>
 
 @code {

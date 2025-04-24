@@ -1,0 +1,17 @@
+.nav-link {
+    margin-bottom: 10px; /* Add spacing between items */
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 5px; /* Default border radius */
+}
+
+.nav-link:hover {
+    background-color: #e6d9f7; /* Light purple background on hover */
+    border-radius: 3px; /* Reduced border radius on hover */
+}
+
+.nav-link.active {
+    background-color: #f8f4fc; /* Optional subtle background for active */
+    border: 2px solid #6650a4; /* Purple border for selected item */
+    color: #6650a4; /* Purple text for selected item */
+    border-radius: 3px; /* Reduced border radius for selected item */
+}

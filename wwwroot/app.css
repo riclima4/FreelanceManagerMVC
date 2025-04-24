@@ -457,10 +457,35 @@ h1:focus {
     color: white;
 }
 
+.text-color-purple {
+    color: #5f62b7 !important; /* Ensure the purple color is applied */
+}
+
+.border-color-purple {
+    border-color: #5f62b7 !important; /* Ensure the purple border is applied */
+}
+
 .signinup-card {
     width: 400px;
     padding: 16px;
     border-radius: 15px;
     box-shadow: 0px 0px 2px 4px rgba(255, 255, 255, 0.877);
     background-color: white;
+}
+
+.manage-nav-menu .nav-link {
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 5px; /* Default border radius */
+}
+
+.manage-nav-menu .nav-link:hover {
+    background-color: #e6d9f7; /* Light purple background on hover */
+    border-radius: 3px; /* Reduced border radius on hover */
+}
+
+.manage-nav-menu .nav-link.active {
+    background-color: #f8f4fc; /* Optional subtle background for active */
+    border: 2px solid #6650a4; /* Purple border for selected item */
+    color: #6650a4; /* Purple text for selected item */
+    border-radius: 3px; /* Reduced border radius for selected item */
 }
