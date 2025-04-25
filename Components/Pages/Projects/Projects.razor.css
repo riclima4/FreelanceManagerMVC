@@ -1,0 +1,9 @@
+.statusCircle{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+.statusBadge{
+    padding: 0px 8px;
+    border-radius: 50px;
+}

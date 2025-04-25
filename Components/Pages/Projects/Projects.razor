@@ -1,17 +1,69 @@
 ﻿@page "/projects"
+@using FreelanceManager.IO.Tarefas;
 
 @using Microsoft.AspNetCore.Authorization
 
 @attribute [Authorize]
 
 <PageTitle>Projects</PageTitle>
-
-<h1>Projects Page</h1>
-
-<div>
-    @Nome
+<div class="flex flex-column gap-16">
+    <div class="flex flex-column">
+        <h3>Projects</h3>
+        <div class="flex gap-16 flex-wrap ">
+            <div class="cardStyle h-180px w-300px flex flex-column">
+                <h5>Project ES2</h5>
+                <p class="color-darkgrey">Client: Prof Miguel Cruz</p>
+                <div class="flex gap-6 align-items-center">
+                    <div class="statusCircle" style="background-color: #25AE29;"></div>
+                    <div class="statusBadge" style=" border: 2px solid #25AE29; background-color: rgb(228, 243, 228);">
+                        <div class="color-success fb-bold">
+                            Created
+                        </div>
+                    </div>
+                </div>
+                <p class="color-darkgrey mt-20 align-self-end">Tasks: 21</p>
+            </div>
+            <div class="cardStyle h-180px w-300px flex flex-column">
+                <h5>Project ES2</h5>
+                <p class="color-darkgrey">Client: Prof Miguel Cruz</p>
+                <div class="flex gap-6 align-items-center">
+                    <div class="statusCircle" style="background-color: #25AE29;"></div>
+                    <div class="statusBadge" style=" border: 2px solid #25AE29; background-color: rgb(228, 243, 228);">
+                        <div class="color-success fb-bold">
+                            Created
+                        </div>
+                    </div>
+                </div>
+                <p class="color-darkgrey mt-20 align-self-end">Tasks: 21</p>
+            </div>
+            <div class="cardStyle h-180px w-300px flex flex-column">
+                <h5>Project ES2</h5>
+                <p class="color-darkgrey">Client: Prof Miguel Cruz</p>
+                <div class="flex gap-6 align-items-center">
+                    <div class="statusCircle" style="background-color: #25AE29;"></div>
+                    <div class="statusBadge" style=" border: 2px solid #25AE29; background-color: rgb(228, 243, 228);">
+                        <div class="color-success fb-bold">
+                            Created
+                        </div>
+                    </div>
+                </div>
+                <p class="color-darkgrey mt-20 align-self-end">Tasks: 21</p>
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-column">
+        <h3>Personal Tasks</h3>
+        <SfGrid DataSource="@TarefasData" AllowPaging="true">
+            <GridPageSettings PageSize="10"></GridPageSettings>
+            <GridColumns>
+                <GridColumn Field=@nameof(TarefaDto.Name) HeaderText="Name"></GridColumn>
+                <GridColumn Field=@nameof(TarefaDto.Description) HeaderText="Description"></GridColumn>
+                <GridColumn Field=@nameof(TarefaDto.Status) HeaderText="Satus"></GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
 </div>
 
 @code {
-    private string Nome = "Nome do Projeto";
+    public List<TarefaDto> TarefasData { get; set; }
 }
