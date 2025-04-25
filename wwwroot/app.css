@@ -485,7 +485,7 @@ h1:focus {
 }
 
 .bg-color-created{
-    background-color: #caccca;
+    background-color: #9ea09e;
 }
 .bg-color-inprogress{
     background-color: #367ab9;
@@ -497,17 +497,29 @@ h1:focus {
     background-color: #ecd449;
 }
 
+.bg-color-created-opacity{
+    background-color: #caccca50;
+}
+.bg-color-inprogress-opacity{
+    background-color: #367ab950;
+}
+.bg-color-completed-opacity{
+    background-color: #25AE2950;
+}
+.bg-color-onhold-opacity{
+    background-color: #ecd44950;
+}
 .color-created{
-    background-color: #caccca;
+    color: #585858;
 }
 .color-inprogress{
-    background-color: #367ab9;
+    color: #367ab9;
 }
 .color-completed{
-    background-color: #25AE29;
+    color: #25AE29;
 }
 .color-onhold{
-    background-color: #ecd449;
+    color: #ecd449;
 }
 .color-white{
     color: white;

@@ -25,15 +25,9 @@
                 <h5>@project.Name</h5> 
                 <p class="color-darkgrey">Client: @(project.ClientId == null ? "N/A" : project.Client?.Name)</p>
                 <div class="flex gap-6 align-items-center">
-                    <div class="statusCircle @(project.Status == ProjectStatus.Created ? "bg-color-created" : 
-                    project.Status == ProjectStatus.Completed ? "bg-color-completed" : 
-                    project.Status == ProjectStatus.InProgress ? "bg-color-inprogress" :
-                     "bg-color-onhold")" ></div>
-                    <div class="statusBadge " >
-                        <div class="@(project.Status == ProjectStatus.Created ? "color-created" : 
-                    project.Status == ProjectStatus.Completed ? "color-completed" : 
-                    project.Status == ProjectStatus.InProgress ? "color-inprogress" :
-                     "color-onhold") fb-bold">
+                    <div class="statusCircle @( GetStatusClass(project.Status).bgColor)" ></div>
+                    <div class="statusBadge @( GetStatusClass(project.Status).bgColorOpacity)" >
+                        <div class="@( GetStatusClass(project.Status).textColor) ">
                             @project.Status
                         </div>
                     </div>
@@ -50,7 +44,7 @@
             <GridColumns>
                 <GridColumn Field=@nameof(TarefaDto.Name) HeaderText="Name"></GridColumn>
                 <GridColumn Field=@nameof(TarefaDto.Description) HeaderText="Description"></GridColumn>
-                <GridColumn Field=@nameof(TarefaDto.Status) HeaderText="Satus"></GridColumn>
+                <GridColumn Field=@nameof(TarefaDto.Status) HeaderText="Status"></GridColumn>
             </GridColumns>
         </SfGrid>
     </div>
@@ -75,8 +69,31 @@
                 _tarefas = await TarefasService.GetAllByApplicationUserIdAsync(idClaim.Value);
             }    
         }
+    }
 
+    private colorResult GetStatusClass(ProjectStatus status)
+    {
+        switch (status)
+        {
+            case ProjectStatus.Created:
+                return new colorResult { bgColor = "bg-color-created", textColor = "color-created" , bgColorOpacity = "bg-color-created-opacity" };
+            case ProjectStatus.Completed:
+                return new colorResult { bgColor = "bg-color-completed", textColor = "color-completed" , bgColorOpacity = "bg-color-completed-opacity" };
+            case ProjectStatus.InProgress:
+                return new colorResult { bgColor = "bg-color-inprogress", textColor = "color-inprogress" , bgColorOpacity = "bg-color-inprogress-opacity" };    
+            case ProjectStatus.OnHold:
+                return new colorResult { bgColor = "bg-color-onhold", textColor = "color-onhold" , bgColorOpacity = "bg-color-onhold-opacity" };
+            default:
+                return new colorResult { };
+        }
 
     }
 
+    public class colorResult{
+        public string bgColor { get; set; }
+        public string textColor { get; set; }
+        public string bgColorOpacity { get; set; }
+
+    }
 }     
+
