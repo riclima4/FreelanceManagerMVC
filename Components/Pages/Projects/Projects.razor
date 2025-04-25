@@ -1,4 +1,12 @@
 ﻿@page "/projects"
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IProjectsService ProjectsService
+@inject ITarefasService TarefasService
+@using System.Security.Claims;
+@using FreelanceManager.Services.Projects
+@using FreelanceManager.Services.Tarefas;
+@using FreelanceManager.Data.Enum;
+@using FreelanceManager.IO.Projects
 @using FreelanceManager.IO.Tarefas;
 
 @using Microsoft.AspNetCore.Authorization
@@ -10,50 +18,34 @@
     <div class="flex flex-column">
         <h3>Projects</h3>
         <div class="flex gap-16 flex-wrap ">
+            @foreach (var project in _personalProjects)
+            {
+                
             <div class="cardStyle h-180px w-300px flex flex-column">
-                <h5>Project ES2</h5>
-                <p class="color-darkgrey">Client: Prof Miguel Cruz</p>
+                <h5>@project.Name</h5> 
+                <p class="color-darkgrey">Client: @(project.ClientId == null ? "N/A" : project.Client?.Name)</p>
                 <div class="flex gap-6 align-items-center">
-                    <div class="statusCircle" style="background-color: #25AE29;"></div>
-                    <div class="statusBadge" style=" border: 2px solid #25AE29; background-color: rgb(228, 243, 228);">
-                        <div class="color-success fb-bold">
-                            Created
+                    <div class="statusCircle @(project.Status == ProjectStatus.Created ? "bg-color-created" : 
+                    project.Status == ProjectStatus.Completed ? "bg-color-completed" : 
+                    project.Status == ProjectStatus.InProgress ? "bg-color-inprogress" :
+                     "bg-color-onhold")" ></div>
+                    <div class="statusBadge " >
+                        <div class="@(project.Status == ProjectStatus.Created ? "color-created" : 
+                    project.Status == ProjectStatus.Completed ? "color-completed" : 
+                    project.Status == ProjectStatus.InProgress ? "color-inprogress" :
+                     "color-onhold") fb-bold">
+                            @project.Status
                         </div>
                     </div>
                 </div>
-                <p class="color-darkgrey mt-20 align-self-end">Tasks: 21</p>
+                <p class="color-darkgrey mt-20 align-self-end">Tasks: @project.Tarefas.Count </p>
             </div>
-            <div class="cardStyle h-180px w-300px flex flex-column">
-                <h5>Project ES2</h5>
-                <p class="color-darkgrey">Client: Prof Miguel Cruz</p>
-                <div class="flex gap-6 align-items-center">
-                    <div class="statusCircle" style="background-color: #25AE29;"></div>
-                    <div class="statusBadge" style=" border: 2px solid #25AE29; background-color: rgb(228, 243, 228);">
-                        <div class="color-success fb-bold">
-                            Created
-                        </div>
-                    </div>
-                </div>
-                <p class="color-darkgrey mt-20 align-self-end">Tasks: 21</p>
-            </div>
-            <div class="cardStyle h-180px w-300px flex flex-column">
-                <h5>Project ES2</h5>
-                <p class="color-darkgrey">Client: Prof Miguel Cruz</p>
-                <div class="flex gap-6 align-items-center">
-                    <div class="statusCircle" style="background-color: #25AE29;"></div>
-                    <div class="statusBadge" style=" border: 2px solid #25AE29; background-color: rgb(228, 243, 228);">
-                        <div class="color-success fb-bold">
-                            Created
-                        </div>
-                    </div>
-                </div>
-                <p class="color-darkgrey mt-20 align-self-end">Tasks: 21</p>
-            </div>
+            }
         </div>
     </div>
     <div class="flex flex-column">
         <h3>Personal Tasks</h3>
-        <SfGrid DataSource="@TarefasData" AllowPaging="true">
+        <SfGrid DataSource="@_tarefas" AllowPaging="true">
             <GridPageSettings PageSize="10"></GridPageSettings>
             <GridColumns>
                 <GridColumn Field=@nameof(TarefaDto.Name) HeaderText="Name"></GridColumn>
@@ -65,5 +57,26 @@
 </div>
 
 @code {
-    public List<TarefaDto> TarefasData { get; set; }
-}
+    private List<ProjectDto> _personalProjects = new List<ProjectDto>();
+    private List<TarefaDto> _tarefas = new List<TarefaDto>();
+    protected override async Task OnInitializedAsync()
+    {
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity?.IsAuthenticated ?? false)
+        {
+            var idClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+
+        
+        Console.WriteLine($"User ID claim: {idClaim.Value}");
+        if (idClaim != null){
+                _personalProjects = await ProjectsService.GetByUserIdAsync(idClaim.Value);
+                _tarefas = await TarefasService.GetAllByApplicationUserIdAsync(idClaim.Value);
+            }    
+        }
+
+
+    }
+
+}     

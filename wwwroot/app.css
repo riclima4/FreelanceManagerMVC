@@ -483,6 +483,32 @@ h1:focus {
 .bg-color-white{
     background-color: #fff;
 }
+
+.bg-color-created{
+    background-color: #caccca;
+}
+.bg-color-inprogress{
+    background-color: #367ab9;
+}
+.bg-color-completed{
+    background-color: #25AE29;
+}
+.bg-color-onhold{
+    background-color: #ecd449;
+}
+
+.color-created{
+    background-color: #caccca;
+}
+.color-inprogress{
+    background-color: #367ab9;
+}
+.color-completed{
+    background-color: #25AE29;
+}
+.color-onhold{
+    background-color: #ecd449;
+}
 .color-white{
     color: white;
 }

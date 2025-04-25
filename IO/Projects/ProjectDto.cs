@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FreelanceManager.Data;
 using FreelanceManager.Data.Enum;
 using FreelanceManager.IO._shared;
+using FreelanceManager.IO.Tarefas;
 
 namespace FreelanceManager.IO.Projects
 {
@@ -23,6 +24,8 @@ namespace FreelanceManager.IO.Projects
             Notes = entity.Notes;
             Status = entity.Status;
             ClientId = entity.ClientId;
+            Client = entity.Client;
+            Tarefas = entity.Tarefas.Select(t => new TarefaDto(t)).ToList();
             ApplicationUserId = entity.ApplicationUserId;
         }
 
@@ -33,6 +36,8 @@ namespace FreelanceManager.IO.Projects
         public ProjectStatus Status { get; set; } = ProjectStatus.Created;
         public Guid? ClientId { get; set; }
         public string ApplicationUserId { get; set; }
+        public Client Client { get; set; }
+        public List<TarefaDto> Tarefas { get; set; } = new();
 
 
     }

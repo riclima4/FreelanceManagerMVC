@@ -20,13 +20,14 @@ namespace FreelanceManager.Services.Projects
         }
         public async Task<List<ProjectDto>> GetAllAsync() => await _unitOfWork.ProjectsRepository.GetEntityAsNoTracking().Select(c => new ProjectDto(c)).ToListAsync();
 
-        public async Task<List<ProjectDto>> GetByUserIdAsync(Guid userId)
+        public async Task<List<ProjectDto>> GetByUserIdAsync(string userId)
         {
-            var userIdString = userId.ToString();
 
             return await _unitOfWork
                 .ProjectsRepository
-                .GetEntityAsNoTracking(p => p.ApplicationUserId == userIdString)
+                .GetEntityAsNoTracking(p => p.ApplicationUserId == userId)
+                .Include(p => p.Client)
+                .Include(p => p.Tarefas)
                 .Select(p => new ProjectDto(p))
                 .ToListAsync();
         }
