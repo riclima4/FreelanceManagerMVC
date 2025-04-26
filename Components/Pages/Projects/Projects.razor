@@ -80,6 +80,8 @@
                     </KanbanColumn>
                 </KanbanColumns>
                 <KanbanCardSettings HeaderField="Name" ContentField="Description"></KanbanCardSettings>
+                @* <KanbanSwimlaneSettings KeyField="Assignee"></KanbanSwimlaneSettings> *@
+                <KanbanEvents TValue="TarefaDto" DialogOpen="@OnDialogOpen"></KanbanEvents>
             </SfKanban>
         </div>
     </div>
@@ -271,5 +273,9 @@
         public string textColor { get; set; }
         public string bgColorOpacity { get; set; }
 
+    }
+    private void OnDialogOpen(DialogOpenEventArgs<TarefaDto> args)
+    {
+        args.Cancel = true;
     }
 }
