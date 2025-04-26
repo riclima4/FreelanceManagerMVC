@@ -27,7 +27,7 @@ namespace FreelanceManager.Data
         public string Code { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public string Notes { get; set; }
+        public string Notes { get; set; } = string.Empty;
         public int InternalNumber { get; set; }
         public ProjectStatus Status { get; set; } = ProjectStatus.Created;
         public string ApplicationUserId { get; set; }

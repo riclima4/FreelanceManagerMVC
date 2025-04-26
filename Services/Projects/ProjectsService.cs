@@ -36,6 +36,7 @@ namespace FreelanceManager.Services.Projects
         public async Task<ProjectDto> CreateAsync(ProjectModel model)
         {
             int newNumber = await GetNextNumberAsync();
+            model.Code = await GetNextCodeAsync();
             var entity = await _unitOfWork.ProjectsRepository.CreateAsync(new Project(model, newNumber));
             // Ao criar o project é necessário criar o ProjectUser
             var modelProjectUser = new ProjectUserModel
@@ -43,10 +44,10 @@ namespace FreelanceManager.Services.Projects
                 ApplicationUserId = model.ApplicationUserId!,
                 ProjectId = entity.Id,
                 Role = ApplicationUserType.Admin,
-                JoinedAt = DateTime.Now
+                JoinedAt = DateTime.Now,
             };
 
-            await this.CreateProjectUserAsync(modelProjectUser);
+            await CreateProjectUserAsync(modelProjectUser);
 
             return await GetByIdAsync(entity.Id);
         }

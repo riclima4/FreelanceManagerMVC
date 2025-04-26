@@ -8,67 +8,122 @@
 @using FreelanceManager.Data.Enum;
 @using FreelanceManager.IO.Projects
 @using FreelanceManager.IO.Tarefas;
+@using Syncfusion.Blazor.Inputs
+@using System.ComponentModel.DataAnnotations
+@rendermode InteractiveServer
 
 @using Microsoft.AspNetCore.Authorization
 
 @attribute [Authorize]
 
 <PageTitle>Projects</PageTitle>
-<div class="flex flex-column gap-16">
-    <div class="flex flex-column">
-        <h3>Projects</h3>
-        <div class="flex gap-16 flex-wrap ">
-            @foreach (var project in _personalProjects)
-            {
-                
-            <div class="cardStyle h-180px w-300px flex flex-column">
-                <h5>@project.Name</h5> 
-                <p class="color-darkgrey">Client: @(project.ClientId == null ? "N/A" : project.Client?.Name)</p>
-                <div class="flex gap-6 align-items-center">
-                    <div class="statusCircle @( GetStatusClass(project.Status).bgColor)" ></div>
-                    <div class="statusBadge @( GetStatusClass(project.Status).bgColorOpacity)" >
-                        <div class="@( GetStatusClass(project.Status).textColor) ">
-                            @project.Status
-                        </div>
-                    </div>
-                </div>
-                <p class="color-darkgrey mt-20 align-self-end">Tasks: @project.Tarefas.Count </p>
+<div class="flex">
+    <div class="flex flex-column gap-16 w-100">
+        <div class="flex flex-column gap-10">
+            <div class="flex justify-content-space-between align-items-center">
+                <h3>Projects</h3>
+                <SfButton CssClass="e-primary">Add New +</SfButton>
             </div>
-            }
+            <p hidden="@(_personalProjects.Count > 0)">No Projects created!</p>
+            <div hidden="@(_personalProjects.Count == 0)" class="flex gap-16 flex-wrap ">
+                @foreach (var project in _personalProjects)
+                {
+
+                    <div class="cardStyle addPointer h-180px w-300px flex flex-column">
+                        <h5>@project.Name</h5>
+                        <p class="color-darkgrey">Client: @(project.ClientId == null ? "N/A" : project.Client?.Name)</p>
+                        <div class="flex gap-6 align-items-center">
+                            <div class="statusCircle @( GetStatusClass(project.Status).bgColor)"></div>
+                            <div class="statusBadge @( GetStatusClass(project.Status).bgColorOpacity)">
+                                <div class="@( GetStatusClass(project.Status).textColor) ">
+                                    @project.Status
+                                </div>
+                            </div>
+                        </div>
+                        <p class="color-darkgrey mt-20 align-self-end">Tasks: @project.Tarefas.Count </p>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="divider"></div>
+        <div class="flex flex-column gap-10">
+            <div class="flex justify-content-space-between align-items-center">
+                <h3>Personal Tasks</h3>
+                <SfButton CssClass="e-primary">Add New +</SfButton>
+            </div>
+            <SfGrid DataSource="@_tarefas" AllowPaging="true">
+                <GridPageSettings PageSize="10"></GridPageSettings>
+                <GridColumns>
+                    <GridColumn Field=@nameof(TarefaDto.Name) HeaderText="Name"></GridColumn>
+                    <GridColumn Field=@nameof(TarefaDto.Description) HeaderText="Description"></GridColumn>
+                    <GridColumn Field=@nameof(TarefaDto.Status) HeaderText="Status"></GridColumn>
+                </GridColumns>
+            </SfGrid>
         </div>
     </div>
-    <div class="flex flex-column">
-        <h3>Personal Tasks</h3>
-        <SfGrid DataSource="@_tarefas" AllowPaging="true">
-            <GridPageSettings PageSize="10"></GridPageSettings>
-            <GridColumns>
-                <GridColumn Field=@nameof(TarefaDto.Name) HeaderText="Name"></GridColumn>
-                <GridColumn Field=@nameof(TarefaDto.Description) HeaderText="Description"></GridColumn>
-                <GridColumn Field=@nameof(TarefaDto.Status) HeaderText="Status"></GridColumn>
-            </GridColumns>
-        </SfGrid>
+    <div class="w-50 p-16">
+        <div class="cardStyle">
+            <h5>Created New</h5>
+            <EditForm Model="ProjectModel" method="post" OnValidSubmit="CreateProject" FormName="ProjectForm"
+                class="w-100 flex flex-column gap-10">
+                <DataAnnotationsValidator />
+                <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="ProjectModel.Name"
+                    id="ProjectModel.Name" FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+                <SfTextBox Placeholder='Description' Type="InputType.Text" CssClass="e-outline"
+                    FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Description"
+                    id="ProjectModel.Description">
+                </SfTextBox>
+                <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
+                    FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Notes" id="ProjectModel.Notes">
+                </SfTextBox>
+                <SfButton Type="submit" CssClass="e-primary" class="w-100">Create</SfButton>
+                <ValidationSummary />
+            </EditForm>
+        </div>
     </div>
-</div>
 
+</div>
 @code {
     private List<ProjectDto> _personalProjects = new List<ProjectDto>();
     private List<TarefaDto> _tarefas = new List<TarefaDto>();
+    private string userId;
+    private ProjectModel ProjectModel { get; set; } = new();
     protected override async Task OnInitializedAsync()
     {
+        await GetSessionUserId();
+        await LoadProjects();
+        await LoadTarefas();
 
+    }
+
+    public async Task CreateProject()
+    {
+        ProjectModel.ApplicationUserId = userId;
+
+        var res = await ProjectsService.CreateAsync(ProjectModel);
+        if (res != null)
+        {
+            await LoadProjects();
+        }
+
+    }
+
+    public async Task GetSessionUserId()
+    {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        if (user.Identity?.IsAuthenticated ?? false)
-        {
-            var idClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+        userId = user.FindFirst(ClaimTypes.NameIdentifier).Value;
+    }
 
-        
-        Console.WriteLine($"User ID claim: {idClaim.Value}");
-        if (idClaim != null){
-                _personalProjects = await ProjectsService.GetByUserIdAsync(idClaim.Value);
-                _tarefas = await TarefasService.GetAllByApplicationUserIdAsync(idClaim.Value);
-            }    
-        }
+    public async Task LoadTarefas()
+    {
+        _tarefas = await TarefasService.GetAllByApplicationUserIdAsync(userId);
+    }
+
+    public async Task LoadProjects()
+    {
+        _personalProjects = await ProjectsService.GetByUserIdAsync(userId);
     }
 
     private colorResult GetStatusClass(ProjectStatus status)
@@ -76,24 +131,48 @@
         switch (status)
         {
             case ProjectStatus.Created:
-                return new colorResult { bgColor = "bg-color-created", textColor = "color-created" , bgColorOpacity = "bg-color-created-opacity" };
+                return new colorResult
+                {
+                    bgColor = "bg-color-created",
+                    textColor = "color-created",
+                    bgColorOpacity =
+                "bg-color-created-opacity"
+                };
             case ProjectStatus.Completed:
-                return new colorResult { bgColor = "bg-color-completed", textColor = "color-completed" , bgColorOpacity = "bg-color-completed-opacity" };
+                return new colorResult
+                {
+                    bgColor = "bg-color-completed",
+                    textColor = "color-completed",
+                    bgColorOpacity =
+                "bg-color-completed-opacity"
+                };
             case ProjectStatus.InProgress:
-                return new colorResult { bgColor = "bg-color-inprogress", textColor = "color-inprogress" , bgColorOpacity = "bg-color-inprogress-opacity" };    
+                return new colorResult
+                {
+                    bgColor = "bg-color-inprogress",
+                    textColor = "color-inprogress",
+                    bgColorOpacity =
+                "bg-color-inprogress-opacity"
+                };
             case ProjectStatus.OnHold:
-                return new colorResult { bgColor = "bg-color-onhold", textColor = "color-onhold" , bgColorOpacity = "bg-color-onhold-opacity" };
+                return new colorResult
+                {
+                    bgColor = "bg-color-onhold",
+                    textColor = "color-onhold",
+                    bgColorOpacity =
+                "bg-color-onhold-opacity"
+                };
             default:
                 return new colorResult { };
         }
 
     }
 
-    public class colorResult{
+    public class colorResult
+    {
         public string bgColor { get; set; }
         public string textColor { get; set; }
         public string bgColorOpacity { get; set; }
 
     }
-}     
-
+}

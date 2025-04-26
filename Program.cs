@@ -9,7 +9,15 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Syncfusion.Blazor;
+using Syncfusion.Licensing;
 
+
+DotNetEnv.Env.Load();
+var licenseKey = Environment.GetEnvironmentVariable("SYNCFUSION_LICENSE_KEY");
+if (!string.IsNullOrEmpty(licenseKey))
+{
+    SyncfusionLicenseProvider.RegisterLicense(licenseKey);
+}
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 

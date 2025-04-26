@@ -29,7 +29,7 @@ namespace FreelanceManager.Data
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public TarefaStatus Status { get; set; } = TarefaStatus.Created;
-        public string Notes { get; set; }
+        public string Notes { get; set; } = string.Empty;
         public int InternalNumber { get; set; }
         public string ApplicationUserId { get; set; }
         public string AssociatedUserId { get; set; }

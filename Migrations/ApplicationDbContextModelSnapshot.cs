@@ -35,10 +35,9 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Email")
@@ -49,7 +48,6 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("FullName")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
@@ -85,10 +83,9 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UpdatedBy")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("UserName")
@@ -114,33 +111,27 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("City")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Code")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Country")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("FiscalNumber")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("InternalNumber")
@@ -156,15 +147,12 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Phone")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<byte[]>("RowVersion")
@@ -173,21 +161,18 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("bytea");
 
                     b.Property<string>("Street")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
 
                     b.Property<string>("Website")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ZipCode")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -208,17 +193,15 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Code")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("InternalNumber")
@@ -234,11 +217,9 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<byte[]>("RowVersion")
@@ -250,7 +231,7 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
@@ -271,21 +252,19 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("InvitedApplicationUserId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("InvitedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
@@ -305,14 +284,13 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("bytea");
 
                     b.Property<string>("SenderApplicationUserId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
@@ -335,11 +313,10 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("ApplicationUserId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
@@ -354,17 +331,13 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("JoinedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Notes")
-                        .IsRequired()
-                        .HasColumnType("text");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<Guid>("ProjectId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("RemovedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Role")
                         .HasColumnType("integer");
@@ -375,7 +348,7 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("bytea");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
@@ -396,28 +369,25 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("ApplicationUserId")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("AssociatedUserId")
                         .HasColumnType("text");
 
                     b.Property<string>("Code")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("EndDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal?>("HourlyRate")
                         .HasColumnType("numeric");
@@ -435,11 +405,9 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid?>("ProjectId")
@@ -451,13 +419,13 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("bytea");
 
                     b.Property<DateTime?>("StartDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
@@ -478,16 +446,15 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("Date")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Hours")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("InternalNumber")
@@ -503,7 +470,6 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("Notes")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<byte[]>("RowVersion")
@@ -515,7 +481,7 @@ namespace FreelanceManager.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
@@ -678,9 +644,7 @@ namespace FreelanceManager.Migrations
                 {
                     b.HasOne("FreelanceManager.Data.ApplicationUser", "InvitedApplicationUser")
                         .WithMany()
-                        .HasForeignKey("InvitedApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("InvitedApplicationUserId");
 
                     b.HasOne("FreelanceManager.Data.Project", "Project")
                         .WithMany()
@@ -690,9 +654,7 @@ namespace FreelanceManager.Migrations
 
                     b.HasOne("FreelanceManager.Data.ApplicationUser", "SenderApplicationUser")
                         .WithMany()
-                        .HasForeignKey("SenderApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SenderApplicationUserId");
 
                     b.Navigation("InvitedApplicationUser");
 
@@ -705,9 +667,7 @@ namespace FreelanceManager.Migrations
                 {
                     b.HasOne("FreelanceManager.Data.ApplicationUser", "ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ApplicationUserId");
 
                     b.HasOne("FreelanceManager.Data.Project", "Project")
                         .WithMany("ProjectUsers")
@@ -724,9 +684,7 @@ namespace FreelanceManager.Migrations
                 {
                     b.HasOne("FreelanceManager.Data.ApplicationUser", "ApplicationUser")
                         .WithMany()
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ApplicationUserId");
 
                     b.HasOne("FreelanceManager.Data.Project", "Project")
                         .WithMany("Tarefas")

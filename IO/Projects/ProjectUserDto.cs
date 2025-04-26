@@ -22,7 +22,6 @@ namespace FreelanceManager.IO.Projects
             Role = entity.Role;
             JoinedAt = entity.JoinedAt;
             RemovedAt = entity.RemovedAt;
-            Notes = entity.Notes;
 
         }
         public Guid ProjectId { get; set; }
@@ -30,7 +29,6 @@ namespace FreelanceManager.IO.Projects
         public ApplicationUserType Role { get; set; }
         public DateTime? JoinedAt { get; set; }
         public DateTime? RemovedAt { get; set; }
-        public string Notes { get; set; }
 
     }
 }

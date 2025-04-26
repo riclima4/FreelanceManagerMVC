@@ -14,6 +14,5 @@ namespace FreelanceManager.IO.Projects
         public ApplicationUserType Role { get; set; } = ApplicationUserType.Normal;
         public DateTime? JoinedAt { get; set; }
         public DateTime? RemovedAt { get; set; }
-        public string Notes { get; set; }
     }
 }

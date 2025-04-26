@@ -25,7 +25,10 @@ namespace FreelanceManager.IO.Projects
             Status = entity.Status;
             ClientId = entity.ClientId;
             Client = entity.Client;
-            Tarefas = entity.Tarefas.Select(t => new TarefaDto(t)).ToList();
+            Tarefas = entity.Tarefas
+                           ?.Select(t => new TarefaDto(t))
+                           .ToList()
+                       ?? new List<TarefaDto>();
             ApplicationUserId = entity.ApplicationUserId;
         }
 
