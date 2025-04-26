@@ -28,6 +28,7 @@ namespace FreelanceManager.Services.Projects
                 .GetEntityAsNoTracking(p => p.ApplicationUserId == userId)
                 .Include(p => p.Client)
                 .Include(p => p.Tarefas)
+                .Include(p => p.ProjectUsers)
                 .Select(p => new ProjectDto(p))
                 .ToListAsync();
         }

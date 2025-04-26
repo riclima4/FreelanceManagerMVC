@@ -22,12 +22,15 @@ namespace FreelanceManager.Services.Tarefas
         public async Task<TarefaDto> GetByIdAsync(Guid id) => await _unitOfWork.TarefasRepository.GetEntityAsNoTracking(t => t.Id == id).Select(t => new TarefaDto(t)).FirstAsync();
 
         public async Task<List<TarefaDto>> GetAllByApplicationUserIdAsync(string id) => await _unitOfWork.TarefasRepository.GetEntityAsNoTracking(t => t.ApplicationUserId == id).Select(t => new TarefaDto(t)).ToListAsync();
+
         public async Task<TarefaDto> CreateAsync(TarefaModel model)
         {
             int newNumber = await GetNextNumberAsync();
+            model.Code = await GetNextCodeAsync();
             var entity = await _unitOfWork.TarefasRepository.CreateAsync(new Tarefa(model, newNumber));
             return await GetByIdAsync(entity.Id);
         }
+
         public async Task<TarefaDto> UpdateAsync(Guid id, TarefaModel model)
         {
             var entity = await _unitOfWork.TarefasRepository.GetEntityAsNoTracking(t => t.Id == id).FirstAsync();

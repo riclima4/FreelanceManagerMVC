@@ -5,6 +5,7 @@ using FreelanceManager.Data.UnitOfWork;
 using FreelanceManager.Services.Clients;
 using FreelanceManager.Services.Projects;
 using FreelanceManager.Services.Tarefas;
+using FreelanceManager.Services.Utils;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +37,7 @@ builder.Services.AddScoped<IClientsService, ClientsService>();
 builder.Services.AddScoped<IProjectsService, ProjectsService>();
 builder.Services.AddScoped<ITarefasService, TarefasService>();
 builder.Services.AddScoped<ITimesheetService, TimesheetService>();
+builder.Services.AddScoped<IUtilsService, UtilsService>();
 
 builder.Services.AddAuthentication(options =>
     {

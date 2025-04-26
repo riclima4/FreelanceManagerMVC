@@ -2,8 +2,10 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IProjectsService ProjectsService
 @inject ITarefasService TarefasService
+@inject IUtilsService UtilsService
 @using System.Security.Claims;
 @using FreelanceManager.Services.Projects
+@using FreelanceManager.Services.Utils
 @using FreelanceManager.Services.Tarefas;
 @using FreelanceManager.Data.Enum;
 @using FreelanceManager.IO.Projects
@@ -22,7 +24,9 @@
         <div class="flex flex-column gap-10">
             <div class="flex justify-content-space-between align-items-center">
                 <h3>Projects</h3>
-                <SfButton CssClass="e-primary">Add New +</SfButton>
+                <SfButton CssClass="e-primary" @onclick="ToggleCreateProjectView" hidden="@(createProjectView)">New
+                    Project
+                    +</SfButton>
             </div>
             <p hidden="@(_personalProjects.Count > 0)">No Projects created!</p>
             <div hidden="@(_personalProjects.Count == 0)" class="flex gap-16 flex-wrap ">
@@ -40,7 +44,12 @@
                                 </div>
                             </div>
                         </div>
-                        <p class="color-darkgrey mt-20 align-self-end">Tasks: @project.Tarefas.Count </p>
+                        <div class="flex justify-content-space-between align-items-center">
+                            <div class="statusBadge bg-color-purple color-white">
+                                Members: @project.ProjectUsers.Count
+                            </div>
+                            <p class="color-darkgrey mt-20 align-self-end">Tasks: @project.Tarefas.Count </p>
+                        </div>
                     </div>
                 }
             </div>
@@ -49,21 +58,37 @@
         <div class="flex flex-column gap-10">
             <div class="flex justify-content-space-between align-items-center">
                 <h3>Personal Tasks</h3>
-                <SfButton CssClass="e-primary">Add New +</SfButton>
+                <SfButton CssClass="e-primary" @onclick="ToggleCreateTarefaView" hidden="@(createTarefaView)">New Task
+                    +</SfButton>
             </div>
-            <SfGrid DataSource="@_tarefas" AllowPaging="true">
+            @* <SfGrid DataSource="@_tarefas" AllowPaging="true">
                 <GridPageSettings PageSize="10"></GridPageSettings>
                 <GridColumns>
                     <GridColumn Field=@nameof(TarefaDto.Name) HeaderText="Name"></GridColumn>
                     <GridColumn Field=@nameof(TarefaDto.Description) HeaderText="Description"></GridColumn>
                     <GridColumn Field=@nameof(TarefaDto.Status) HeaderText="Status"></GridColumn>
+                    <GridColumn Field=@nameof(TarefaDto.StatusDescription) HeaderText="StatusDescription"></GridColumn>
                 </GridColumns>
-            </SfGrid>
+            </SfGrid> *@
+            <SfKanban TValue="TarefaDto" KeyField="StatusDescription" DataSource="_tarefas">
+                <KanbanColumns>
+                    <KanbanColumn HeaderText="To Do" KeyField="@(new List<string>() { "Created" })"></KanbanColumn>
+                    <KanbanColumn HeaderText="In Progress" KeyField="@(new List<string>() { "InProgress" })">
+                    </KanbanColumn>
+                    <KanbanColumn HeaderText="On Hold" KeyField="@(new List<string>() { "OnHold" })"></KanbanColumn>
+                    <KanbanColumn HeaderText="Completed" KeyField="@(new List<string>() { "Completed" })">
+                    </KanbanColumn>
+                </KanbanColumns>
+                <KanbanCardSettings HeaderField="Name" ContentField="Description"></KanbanCardSettings>
+            </SfKanban>
         </div>
     </div>
-    <div class="w-50 p-16">
+    <div class="w-50 p-16" hidden="@(!createProjectView)">
+        <div class="flex justify-content-end align-items-center">
+            <SfButton CssClass="e-flat" @onclick="ToggleCreateProjectView">X</SfButton>
+        </div>
         <div class="cardStyle">
-            <h5>Created New</h5>
+            <h5>New Project</h5>
             <EditForm Model="ProjectModel" method="post" OnValidSubmit="CreateProject" FormName="ProjectForm"
                 class="w-100 flex flex-column gap-10">
                 <DataAnnotationsValidator />
@@ -78,33 +103,79 @@
                     FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Notes" id="ProjectModel.Notes">
                 </SfTextBox>
                 <SfButton Type="submit" CssClass="e-primary" class="w-100">Create</SfButton>
-                <ValidationSummary />
             </EditForm>
         </div>
     </div>
+    <div class="w-50 p-16" hidden="@(!createTarefaView)">
+        <div class="flex justify-content-end align-items-center">
+            <SfButton CssClass="e-flat" @onclick="ToggleCreateTarefaView">X</SfButton>
+        </div>
+        <div class="cardStyle">
+            <h5>New Personal Task</h5>
+            <EditForm Model="TarefaModel" method="post" OnValidSubmit="CreateTarefa" FormName="TarefaForm"
+                class="w-100 flex flex-column gap-10">
+                <DataAnnotationsValidator />
+                <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="TarefaModel.Name" id="TarefaModel.Name"
+                    FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+                <SfTextBox Placeholder='Description' Type="InputType.Text" CssClass="e-outline"
+                    FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Description"
+                    id="TarefaModel.Description">
+                </SfTextBox>
+                <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
+                    FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Notes" id="TarefaModel.Notes">
+                </SfTextBox>
+                <SfButton Type="submit" CssClass="e-primary" class="w-100">Create</SfButton>
+            </EditForm>
+        </div>
+    </div>
+    <SfToast ID="toast_default" @ref="ToastObj">
+        <ToastPosition X="Center"></ToastPosition>
+    </SfToast>
 
 </div>
 @code {
+    SfToast ToastObj;
     private List<ProjectDto> _personalProjects = new List<ProjectDto>();
     private List<TarefaDto> _tarefas = new List<TarefaDto>();
     private string userId;
+    private bool createProjectView = false;
+    private bool createTarefaView = false;
     private ProjectModel ProjectModel { get; set; } = new();
+    private TarefaModel TarefaModel { get; set; } = new();
     protected override async Task OnInitializedAsync()
     {
         await GetSessionUserId();
         await LoadProjects();
         await LoadTarefas();
-
     }
 
     public async Task CreateProject()
     {
+
         ProjectModel.ApplicationUserId = userId;
 
         var res = await ProjectsService.CreateAsync(ProjectModel);
         if (res != null)
         {
             await LoadProjects();
+            ProjectModel = new ProjectModel();
+            await UtilsService.ShowSuccessToast(ToastObj, "Project Created Successfully");
+
+        }
+
+    }
+    public async Task CreateTarefa()
+    {
+        TarefaModel.ApplicationUserId = userId;
+        TarefaModel.AssociatedUserId = userId;
+        var res = await TarefasService.CreateAsync(TarefaModel);
+        if (res != null)
+        {
+            await LoadTarefas();
+            TarefaModel = new TarefaModel();
+            await UtilsService.ShowSuccessToast(ToastObj, "Task Created Successfully");
+
         }
 
     }
@@ -124,6 +195,32 @@
     public async Task LoadProjects()
     {
         _personalProjects = await ProjectsService.GetByUserIdAsync(userId);
+
+    }
+
+    public void ToggleCreateProjectView()
+    {
+        createProjectView = !createProjectView;
+        if (!createProjectView)
+        {
+            ProjectModel = new ProjectModel();
+        }
+        else
+        {
+            createTarefaView = false;
+        }
+    }
+    public void ToggleCreateTarefaView()
+    {
+        createTarefaView = !createTarefaView;
+        if (!createTarefaView)
+        {
+            TarefaModel = new TarefaModel();
+        }
+        else
+        {
+            createProjectView = false;
+        }
     }
 
     private colorResult GetStatusClass(ProjectStatus status)

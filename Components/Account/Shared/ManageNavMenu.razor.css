@@ -11,7 +11,7 @@
 
 .nav-link.active {
     background-color: #f8f4fc; /* Optional subtle background for active */
-    border: 2px solid #6650a4; /* Purple border for selected item */
-    color: #6650a4; /* Purple text for selected item */
+    border: 2px solid #735EAB; /* Purple border for selected item */
+    color: #735EAB; /* Purple text for selected item */
     border-radius: 3px; /* Reduced border radius for selected item */
 }

@@ -65,7 +65,7 @@
     color: #d1b2ff;
 }
 .bg-purple{
-    color: #6650a4;
+    color: #735EAB;
 }
 
 /* Container dos cards */
@@ -173,7 +173,7 @@ transition: transform 0.3s ease-in-out;
 
 /* Para o ícone quando aberto */
 .accordion-button:not(.collapsed)::after {
-background-color: #6650a4; /* Fundo roxo quando aberto */
+background-color: #735EAB; /* Fundo roxo quando aberto */
 content: "\f077";
 font-family: "Font Awesome 5 Free";
 background-image: none;

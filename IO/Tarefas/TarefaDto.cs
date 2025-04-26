@@ -21,6 +21,11 @@ namespace FreelanceManager.IO.Tarefas
             StartDate = entity.StartDate;
             EndDate = entity.EndDate;
             Status = entity.Status;
+            ProjectId = entity.ProjectId;
+            ApplicationUserId = entity.ApplicationUserId;
+            AssociatedUserId = entity.AssociatedUserId;
+            HourlyRate = entity.HourlyRate;
+            StatusDescription = entity.Status.ToString();
 
         }
         public string Code { get; set; }
@@ -30,8 +35,11 @@ namespace FreelanceManager.IO.Tarefas
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public Guid? ProjectId { get; set; }
-        public Guid? ApplicationUserId { get; set; }
+        public string ApplicationUserId { get; set; }
+        public string AssociatedUserId { get; set; }
+        public decimal? HourlyRate { get; set; }
         public TarefaStatus Status { get; set; } = TarefaStatus.Created;
+        public string StatusDescription { get; set; }
 
     }
 }

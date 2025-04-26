@@ -465,7 +465,7 @@ h1:focus {
     width: min-content;
 }
 .color-purple{
-    color: #5f62b7;
+    color: #735EAB;
 }
 .color-black{
     color: #1f1f1f;
@@ -478,7 +478,7 @@ h1:focus {
 }
 
 .bg-color-purple{
-    background-color: #5f62b7;
+    background-color: #735EAB;
 }
 .bg-color-black{
     background-color: #1f1f1f;
@@ -529,11 +529,11 @@ h1:focus {
 }
 
 .text-color-purple {
-    color: #5f62b7 !important; /* Ensure the purple color is applied */
+    color: #735EAB !important; /* Ensure the purple color is applied */
 }
 
 .border-color-purple {
-    border-color: #5f62b7 !important; /* Ensure the purple border is applied */
+    border-color: #735EAB !important; /* Ensure the purple border is applied */
 }
 
 .signinup-card {
@@ -556,8 +556,8 @@ h1:focus {
 
 .manage-nav-menu .nav-link.active {
     background-color: #f8f4fc; /* Optional subtle background for active */
-    border: 2px solid #6650a4; /* Purple border for selected item */
-    color: #6650a4; /* Purple text for selected item */
+    border: 2px solid #735EAB; /* Purple border for selected item */
+    color: #735EAB; /* Purple text for selected item */
     border-radius: 3px; /* Reduced border radius for selected item */
 }
 

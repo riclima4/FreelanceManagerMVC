@@ -97,14 +97,14 @@
     }
 
 .nav-item ::deep a.active {
-    background-color: #5345921f;
-    border-left: 4px solid #534592;
-    color: #534592;
+    background-color: #735EAB1f;
+    border-left: 4px solid #735EAB;
+    color: #735EAB;
 }
 
 .nav-item ::deep .nav-link:hover {
     background-color: #937feb53;
-    color: #534592;
+    color: #735EAB;
 }
 
 .nav-scrollable {

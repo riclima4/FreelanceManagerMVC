@@ -30,6 +30,10 @@ namespace FreelanceManager.IO.Projects
                            .ToList()
                        ?? new List<TarefaDto>();
             ApplicationUserId = entity.ApplicationUserId;
+            ProjectUsers = entity.ProjectUsers
+                           ?.Select(t => new ProjectUserDto(t))
+                           .ToList()
+                       ?? new List<ProjectUserDto>();
         }
 
         public string Code { get; set; }
@@ -41,6 +45,7 @@ namespace FreelanceManager.IO.Projects
         public string ApplicationUserId { get; set; }
         public Client Client { get; set; }
         public List<TarefaDto> Tarefas { get; set; } = new();
+        public List<ProjectUserDto> ProjectUsers { get; set; } = new();
 
 
     }

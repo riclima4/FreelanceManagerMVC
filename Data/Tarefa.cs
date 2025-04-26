@@ -35,6 +35,7 @@ namespace FreelanceManager.Data
         public string AssociatedUserId { get; set; }
         public Guid? ProjectId { get; set; }
         public ApplicationUser ApplicationUser { get; set; }
+        public ApplicationUser AssociatedUser { get; set; }
         public Project Project { get; set; }
     }
 }
