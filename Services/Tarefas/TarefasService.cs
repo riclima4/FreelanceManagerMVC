@@ -12,10 +12,12 @@ namespace FreelanceManager.Services.Tarefas
     public class TarefasService : ITarefasService
     {
         private IUnitOfWork _unitOfWork;
+
         public TarefasService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
+
 
         public async Task<List<TarefaDto>> GetAllAsync() => await _unitOfWork.TarefasRepository.GetEntityAsNoTracking().Select(t => new TarefaDto(t)).ToListAsync();
 
@@ -44,6 +46,7 @@ namespace FreelanceManager.Services.Tarefas
             entity.Status = model.Status;
 
             await _unitOfWork.TarefasRepository.Edit(entity);
+            await _unitOfWork.CommitAsync();
 
             return await GetByIdAsync(id);
         }

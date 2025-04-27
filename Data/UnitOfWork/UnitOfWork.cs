@@ -55,10 +55,18 @@ namespace FreelanceManager.Data.UnitOfWork
 
         #endregion
 
-        public int Commit() => _databaseContext.SaveChanges();
-        public void Rollback() => _databaseContext.Dispose();
-        public async Task<int> CommitAsync() => await _databaseContext.SaveChangesAsync();
-        public async Task RollbackAsync() => await _databaseContext.DisposeAsync();
+        public int Commit()
+        {
+            var written = _databaseContext.SaveChanges();
+            _databaseContext.ChangeTracker.Clear();          
+            return written;
+        }        public void Rollback() => _databaseContext.Dispose();
+        public async Task<int> CommitAsync()
+        {
+            var written = await _databaseContext.SaveChangesAsync();
+            _databaseContext.ChangeTracker.Clear();         
+            return written;
+        }        public async Task RollbackAsync() => await _databaseContext.DisposeAsync();
 
         public void Dispose()
         {
