@@ -30,6 +30,7 @@ namespace FreelanceManager.Services.Tarefas
             int newNumber = await GetNextNumberAsync();
             model.Code = await GetNextCodeAsync();
             var entity = await _unitOfWork.TarefasRepository.CreateAsync(new Tarefa(model, newNumber));
+            await _unitOfWork.CommitAsync();
             return await GetByIdAsync(entity.Id);
         }
 
