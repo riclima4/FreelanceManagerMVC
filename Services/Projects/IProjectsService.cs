@@ -12,7 +12,6 @@ namespace FreelanceManager.Services.Projects
         Task<List<ProjectDto>> GetAllAsync();
         Task<ProjectDto> GetByIdAsync(Guid id);
         Task<List<ProjectDto>> GetByUserIdAsync(string userId);
-
         Task<ProjectDto> CreateAsync(ProjectModel model);
         Task<ProjectDto> UpdateAsync(Guid id, ProjectModel model);
         Task DeleteAsync(Guid id);

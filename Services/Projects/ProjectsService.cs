@@ -32,8 +32,8 @@ namespace FreelanceManager.Services.Projects
                 .Select(p => new ProjectDto(p))
                 .ToListAsync();
         }
-        public async Task<ProjectDto> GetByIdAsync(Guid id) => await _unitOfWork.ProjectsRepository.GetEntityAsNoTracking(v => v.Id == id).Select(a => new ProjectDto(a)).FirstAsync();
-
+        public async Task<ProjectDto> GetByIdAsync(Guid id) => await _unitOfWork.ProjectsRepository.GetEntityAsNoTracking(v => v.Id == id).Include(v => v.Tarefas).ThenInclude(u => u.AssociatedUser).Select(a => new ProjectDto(a)).FirstAsync();
+        
         public async Task<ProjectDto> CreateAsync(ProjectModel model)
         {
             int newNumber = await GetNextNumberAsync();
@@ -67,6 +67,7 @@ namespace FreelanceManager.Services.Projects
             entity.Notes = model.Notes;
             entity.ClientId = model.ClientId;
             entity.IsActive = model.IsActive;
+            
             await _unitOfWork.ProjectsRepository.Edit(entity);
 
             return await GetByIdAsync(id);

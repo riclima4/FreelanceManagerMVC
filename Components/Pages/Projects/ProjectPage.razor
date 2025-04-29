@@ -1,0 +1,134 @@
+﻿@page "/ProjectPage"
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IProjectsService ProjectsService
+@inject ITarefasService TarefasService
+@inject IUtilsService UtilsService
+
+@using System.Security.Claims
+@using FreelanceManager.Data
+@using FreelanceManager.Data.Enum
+@using FreelanceManager.IO.Tarefas
+@using FreelanceManager.Services.Projects
+@using FreelanceManager.Services.Utils
+@using FreelanceManager.Services.Tarefas;
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+<h3>ProjectPage</h3>
+
+<SfKanban @ref="KanbanObj" TValue="TarefaDto" KeyField="StatusDescription" DataSource="_tarefas">
+    <KanbanColumns>
+        <KanbanColumn HeaderText="To Do" KeyField="@(new List<string>() { "Created" })"></KanbanColumn>
+        <KanbanColumn HeaderText="In Progress" KeyField="@(new List<string>() { "InProgress" })">
+        </KanbanColumn>
+        <KanbanColumn HeaderText="On Hold" KeyField="@(new List<string>() { "OnHold" })"></KanbanColumn>
+        <KanbanColumn HeaderText="Completed" KeyField="@(new List<string>() { "Completed" })">
+        </KanbanColumn>
+    </KanbanColumns>
+    <KanbanCardSettings HeaderField="Name" ContentField="Description"></KanbanCardSettings>
+    <KanbanSwimlaneSettings KeyField="AssociatedUserId" TextField="AssociatedUser.FullName" AllowDragAndDrop="@_allowDragAndDrop" ShowEmptyRow="@_showEmptyRow"></KanbanSwimlaneSettings> 
+    <KanbanEvents TValue="TarefaDto"  ActionComplete="OnKanbanActionComplete">
+    </KanbanEvents>
+</SfKanban>
+
+<SfToast ID="ProjectPageId" @ref="ToastObj">
+    <ToastPosition X="Center"></ToastPosition>
+</SfToast>
+<p> @_allowDragAndDrop </p>
+
+@code {
+    SfToast ToastObj;
+    SfKanban<TarefaDto> KanbanObj;
+    private bool _allowDragAndDrop;
+    private List<TarefaDto> _tarefas = new List<TarefaDto>();
+    private string userId;
+    private bool _showEmptyRow = true;
+
+    [SupplyParameterFromQuery]
+    private Guid ProjectId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetSessionUserId();
+        await IsOwner();
+        await LoadProjects(ProjectId);
+    }
+
+    private async Task IsOwner()
+    {
+        var isOwner = await ProjectsService.GetByIdAsync(ProjectId);
+        if (userId.Equals(isOwner.ApplicationUserId))
+        {
+            _allowDragAndDrop = true;
+        }
+        else
+        {
+            _allowDragAndDrop = false;
+        }
+    }
+
+    private async Task GetSessionUserId()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        userId = user.FindFirst(ClaimTypes.NameIdentifier).Value;
+    }
+    private async Task LoadProjects(Guid ProjectId)
+    {
+        var result = await ProjectsService.GetByIdAsync(ProjectId);
+        if (result != null)
+        {
+            _tarefas = result.Tarefas;
+        }
+        else
+        {
+            await UtilsService.ShowErrorToast(ToastObj, "Error loading projects");
+        }
+    }
+
+    private async Task OnKanbanActionComplete(Syncfusion.Blazor.Kanban.ActionEventArgs<TarefaDto> args)
+    {
+        if (args.RequestType == "cardChange" && args.ChangedRecords?.Any() == true)
+        {
+            var changedRecord = args.ChangedRecords.First();
+            changedRecord.Status = changedRecord.StatusDescription switch
+            {
+                "Created" => TarefaStatus.Created,
+                "InProgress" => TarefaStatus.InProgress,
+                "OnHold" => TarefaStatus.OnHold,
+                "Completed" => TarefaStatus.Completed,
+                _ => changedRecord.Status
+            };
+            TarefaModel model = new TarefaModel();
+            
+            model.AssociatedUserId = changedRecord.AssociatedUserId;
+            
+            model.Code = changedRecord.Code;
+            model.Name = changedRecord.Name;
+            model.Description = changedRecord.Description;
+            model.StartDate = changedRecord.StartDate;
+            model.EndDate = changedRecord.EndDate;
+            model.Notes = changedRecord.Notes;
+            model.Status = changedRecord.Status;
+            
+
+            var result = await TarefasService.UpdateAsync(changedRecord.Id, model);
+            if (result != null)
+            {
+                await UtilsService.ShowSuccessToast(ToastObj, "Task updated successfully");
+            }
+            else
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Error updating task");
+            }
+
+            await LoadProjects(ProjectId);
+            await KanbanObj.RefreshAsync();
+
+        }
+    }
+
+}

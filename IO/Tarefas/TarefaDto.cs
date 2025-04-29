@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FreelanceManager.Data;
 using FreelanceManager.Data.Enum;
 using FreelanceManager.IO._shared;
+using FreelanceManager.IO.ApplicationUsers;
 
 namespace FreelanceManager.IO.Tarefas
 {
@@ -26,6 +27,8 @@ namespace FreelanceManager.IO.Tarefas
             AssociatedUserId = entity.AssociatedUserId;
             HourlyRate = entity.HourlyRate;
             StatusDescription = entity.Status.ToString();
+            AssociatedUser = entity.AssociatedUser != null ? new ApplicationUserDto(entity.AssociatedUser) : new ApplicationUserDto();
+
 
         }
         public string Code { get; set; }
@@ -40,6 +43,7 @@ namespace FreelanceManager.IO.Tarefas
         public decimal? HourlyRate { get; set; }
         public TarefaStatus Status { get; set; } = TarefaStatus.Created;
         public string StatusDescription { get; set; }
-
+        
+        public ApplicationUserDto AssociatedUser { get; set; } = new ApplicationUserDto();
     }
 }

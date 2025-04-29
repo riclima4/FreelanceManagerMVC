@@ -3,6 +3,8 @@
 @inject IProjectsService ProjectsService
 @inject ITarefasService TarefasService
 @inject IUtilsService UtilsService
+@inject NavigationManager NavigationManager
+
 @using System.Security.Claims;
 @using FreelanceManager.Services.Projects
 @using FreelanceManager.Services.Utils
@@ -33,13 +35,15 @@
                 @foreach (var project in _personalProjects)
                 {
 
-                    <div class="cardStyle addPointer h-180px w-300px flex flex-column">
+                    <div class="cardStyle addPointer h-180px w-300px flex flex-column"
+                         @onclick="() => GoToProjectPage(project.Id)">
+                        
                         <h5>@project.Name</h5>
                         <p class="color-darkgrey">Client: @(project.ClientId == null ? "N/A" : project.Client?.Name)</p>
                         <div class="flex gap-6 align-items-center">
-                            <div class="statusCircle @( GetStatusClass(project.Status).bgColor)"></div>
-                            <div class="statusBadge @( GetStatusClass(project.Status).bgColorOpacity)">
-                                <div class="@( GetStatusClass(project.Status).textColor) ">
+                            <div class="statusCircle @(GetStatusClass(project.Status).bgColor)"></div>
+                            <div class="statusBadge @(GetStatusClass(project.Status).bgColorOpacity)">
+                                <div class="@(GetStatusClass(project.Status).textColor) ">
                                     @project.Status
                                 </div>
                             </div>
@@ -316,5 +320,13 @@
             await KanbanObj.RefreshAsync();
             
         }
-    } 
+    }
+
+    private void GoToProjectPage(Guid projectId)
+    {
+        var uri = NavigationManager.GetUriWithQueryParameters("ProjectPage", new Dictionary<string, object> { ["ProjectId"] = projectId });
+        NavigationManager.NavigateTo(uri);
+
+    }
+
 }
