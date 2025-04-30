@@ -3,16 +3,14 @@
 @inject IProjectsService ProjectsService
 @inject ITarefasService TarefasService
 @inject IUtilsService UtilsService
-
 @using System.Security.Claims
-@using FreelanceManager.Data
 @using FreelanceManager.Data.Enum
+@using FreelanceManager.IO.Projects
 @using FreelanceManager.IO.Tarefas
 @using FreelanceManager.Services.Projects
 @using FreelanceManager.Services.Utils
 @using FreelanceManager.Services.Tarefas;
 @using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Identity
 
 @rendermode InteractiveServer
 @attribute [Authorize]
@@ -28,16 +26,22 @@
         <KanbanColumn HeaderText="Completed" KeyField="@(new List<string>() { "Completed" })">
         </KanbanColumn>
     </KanbanColumns>
-    <KanbanCardSettings HeaderField="Name" ContentField="Description"></KanbanCardSettings>
-    <KanbanSwimlaneSettings KeyField="AssociatedUserId" TextField="AssociatedUser.FullName" AllowDragAndDrop="@_allowDragAndDrop" ShowEmptyRow="@_showEmptyRow"></KanbanSwimlaneSettings> 
-    <KanbanEvents TValue="TarefaDto"  ActionComplete="OnKanbanActionComplete">
+    <KanbanCardSettings  HeaderField="Name" ContentField="Description" />   
+    <KanbanSwimlaneSettings KeyField="AssociatedUserId" TextField="AssociatedUser.FullName" AllowDragAndDrop="@_allowDragAndDrop" ShowEmptyRow="true"></KanbanSwimlaneSettings> 
+    <KanbanEvents TValue="TarefaDto"  ActionComplete="OnKanbanActionComplete" >
     </KanbanEvents>
 </SfKanban>
 
 <SfToast ID="ProjectPageId" @ref="ToastObj">
     <ToastPosition X="Center"></ToastPosition>
 </SfToast>
-<p> @_allowDragAndDrop </p>
+<p>
+    @foreach (var t in _tarefas)
+    {
+        <span>@_tarefas.Count</span><br />
+        <span>@t.AssociatedUserId</span><br />
+    }
+</p>
 
 @code {
     SfToast ToastObj;
@@ -45,7 +49,6 @@
     private bool _allowDragAndDrop;
     private List<TarefaDto> _tarefas = new List<TarefaDto>();
     private string userId;
-    private bool _showEmptyRow = true;
 
     [SupplyParameterFromQuery]
     private Guid ProjectId { get; set; }
@@ -54,9 +57,35 @@
     {
         await GetSessionUserId();
         await IsOwner();
-        await LoadProjects(ProjectId);
+        await LoadTarefasByProjectId(ProjectId);
+        // await LoadProjectUsers();
+
+
     }
 
+    private async Task LoadProjectUsers()
+    {
+        List<ProjectUserDto> projectUsers = await ProjectsService.GetProjectUsersAsync(ProjectId);
+        foreach (ProjectUserDto user in projectUsers)
+        {
+            TarefaDto tarefa = new TarefaDto
+            {
+                Id = Guid.NewGuid(),
+                Name = "",
+                Description = "",
+                AssociatedUserId = user.ApplicationUserId,
+                Status = TarefaStatus.Placeholder,
+                StatusDescription  = TarefaStatus.Placeholder.ToString(),
+                StartDate = DateTime.Now,
+                EndDate = DateTime.Now,
+                Notes = "",
+                AssociatedUser = user.ApplicationUser,
+                ApplicationUserId = user.ApplicationUserId,
+            };
+            
+            _tarefas.Add(tarefa);
+        }
+    }
     private async Task IsOwner()
     {
         var isOwner = await ProjectsService.GetByIdAsync(ProjectId);
@@ -76,17 +105,13 @@
         var user = authState.User;
         userId = user.FindFirst(ClaimTypes.NameIdentifier).Value;
     }
-    private async Task LoadProjects(Guid ProjectId)
+    private async Task LoadTarefasByProjectId(Guid ProjectId)
     {
-        var result = await ProjectsService.GetByIdAsync(ProjectId);
-        if (result != null)
-        {
-            _tarefas = result.Tarefas;
-        }
-        else
-        {
-            await UtilsService.ShowErrorToast(ToastObj, "Error loading projects");
-        }
+         var res= await ProjectsService.GetTarefasAsync(ProjectId);
+         Console.WriteLine(res);
+         _tarefas = res;
+         Console.WriteLine(_tarefas);
+
     }
 
     private async Task OnKanbanActionComplete(Syncfusion.Blazor.Kanban.ActionEventArgs<TarefaDto> args)
@@ -125,10 +150,11 @@
                 await UtilsService.ShowErrorToast(ToastObj, "Error updating task");
             }
 
-            await LoadProjects(ProjectId);
+            await LoadTarefasByProjectId(ProjectId);
             await KanbanObj.RefreshAsync();
 
         }
     }
+
 
 }

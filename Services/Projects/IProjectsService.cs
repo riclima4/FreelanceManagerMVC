@@ -19,6 +19,8 @@ namespace FreelanceManager.Services.Projects
         Task<string> GetNextCodeAsync();
 
         #region ProjectUsers
+
+        Task<List<ProjectUserDto>> GetProjectUsersAsync(Guid projectId);
         Task<ProjectUserDto> GetProjectUserByIdAsync(Guid id);
         Task<ProjectUserDto> CreateProjectUserAsync(ProjectUserModel model);
         Task DeleteProjectUserAsync(ProjectUserModel model);

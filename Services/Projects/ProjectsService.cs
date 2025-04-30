@@ -102,6 +102,17 @@ namespace FreelanceManager.Services.Projects
         }
 
         #region ProjectUsers
+        
+        public async Task<List<ProjectUserDto>> GetProjectUsersAsync(Guid projectId)
+        {
+            return await _unitOfWork.
+                ProjectUsersRepository.
+                GetEntityAsNoTracking(entity => entity.ProjectId == projectId).
+                Include(entity => entity.ApplicationUser).
+                Include(entity => entity.Project).
+                Select(entity => new ProjectUserDto(entity)).
+                ToListAsync();
+        }
         public async Task<ProjectUserDto> GetProjectUserByIdAsync(Guid id)
         {
             return await _unitOfWork.

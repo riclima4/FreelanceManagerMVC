@@ -43,7 +43,8 @@ namespace FreelanceManager.IO.Tarefas
         public decimal? HourlyRate { get; set; }
         public TarefaStatus Status { get; set; } = TarefaStatus.Created;
         public string StatusDescription { get; set; }
-        
         public ApplicationUserDto AssociatedUser { get; set; } = new ApplicationUserDto();
+        
+        
     }
 }

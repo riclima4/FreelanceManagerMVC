@@ -5,6 +5,7 @@ namespace FreelanceManager.Data.Enum
         Created,
         InProgress,
         OnHold,
-        Completed
+        Completed,
+        Placeholder
     }
 }
