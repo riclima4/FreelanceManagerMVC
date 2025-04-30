@@ -34,6 +34,7 @@ namespace FreelanceManager.IO.Clients
         [MaxLength(1000)]
         public string Notes { get; set; }
         public bool IsActive { get; set; }
+        public string ApplicationUserId { get; set; }
 
     }
 }

@@ -9,6 +9,7 @@ namespace FreelanceManager.Services.Clients
     public interface IClientsService
     {
         Task<List<ClientDto>> GetAllAsync();
+        Task<List<ClientDto>> GetAllByApplicationUserIdAsync(string userId);
         Task<ClientDto> GetByIdAsync(Guid id);
         Task<ClientDto> CreateAsync(ClientModel model);
         Task<ClientDto> UpdateAsync(Guid id, ClientModel model);

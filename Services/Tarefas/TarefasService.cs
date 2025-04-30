@@ -24,6 +24,7 @@ namespace FreelanceManager.Services.Tarefas
         public async Task<TarefaDto> GetByIdAsync(Guid id) => await _unitOfWork.TarefasRepository.GetEntityAsNoTracking(t => t.Id == id).Select(t => new TarefaDto(t)).FirstAsync();
 
         public async Task<List<TarefaDto>> GetAllByApplicationUserIdAsync(string id) => await _unitOfWork.TarefasRepository.GetEntityAsNoTracking(t => t.ApplicationUserId == id).Select(t => new TarefaDto(t)).ToListAsync();
+        public async Task<List<TarefaDto>> GetPersonalByApplicationUserIdAsync(string id) => await _unitOfWork.TarefasRepository.GetEntityAsNoTracking(t => t.ApplicationUserId == id && t.ProjectId == null).Select(t => new TarefaDto(t)).ToListAsync();
 
         public async Task<TarefaDto> CreateAsync(TarefaModel model)
         {

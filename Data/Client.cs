@@ -27,6 +27,7 @@ namespace FreelanceManager.Data
             Notes = model.Notes;
             InternalNumber = number;
             IsActive = model.IsActive;
+            ApplicationUserId = model.ApplicationUserId;
         }
 
         public string Code { get; set; }
@@ -41,6 +42,8 @@ namespace FreelanceManager.Data
         public string Email { get; set; }
         public string Phone { get; set; } = string.Empty;
         public string Notes { get; set; } = string.Empty;
+        public string ApplicationUserId { get; set; }
         public int InternalNumber { get; set; }
+        public ApplicationUser ApplicationUser { get; set; }
     }
 }

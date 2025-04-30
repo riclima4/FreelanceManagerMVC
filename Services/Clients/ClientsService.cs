@@ -18,6 +18,7 @@ namespace FreelanceManager.Services.Clients
             _unitOfWork = unitOfWork;
         }
         public async Task<List<ClientDto>> GetAllAsync() => await _unitOfWork.ClientsRepository.GetEntityAsNoTracking().Select(c => new ClientDto(c)).ToListAsync();
+        public async Task<List<ClientDto>> GetAllByApplicationUserIdAsync(string userId) => await _unitOfWork.ClientsRepository.GetEntityAsNoTracking(c => c.ApplicationUserId == userId).Select(c => new ClientDto(c)).ToListAsync();
 
         public async Task<ClientDto> GetByIdAsync(Guid id) => await _unitOfWork.ClientsRepository.GetEntityAsNoTracking(v => v.Id == id).Select(a => new ClientDto(a)).FirstAsync();
 

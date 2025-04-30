@@ -36,8 +36,8 @@
                 {
 
                     <div class="cardStyle addPointer h-180px w-300px flex flex-column"
-                         @onclick="() => GoToProjectPage(project.Id)">
-                        
+                        @onclick="() => GoToProjectPage(project.Id)">
+
                         <h5>@project.Name</h5>
                         <p class="color-darkgrey">Client: @(project.ClientId == null ? "N/A" : project.Client?.Name)</p>
                         <div class="flex gap-6 align-items-center">
@@ -97,17 +97,17 @@
         <div class="cardStyle">
             <h5>New Project</h5>
             <EditForm Model="ProjectModel" method="post" OnValidSubmit="CreateProject" FormName="ProjectForm"
-                      class="w-100 flex flex-column gap-10">
+                class="w-100 flex flex-column gap-10">
                 <DataAnnotationsValidator />
                 <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="ProjectModel.Name"
-                           id="ProjectModel.Name" FloatLabelType="FloatLabelType.Always">
+                    id="ProjectModel.Name" FloatLabelType="FloatLabelType.Always">
                 </SfTextBox>
                 <SfTextBox Placeholder='Description' Type="InputType.Text" CssClass="e-outline"
-                           FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Description"
-                           id="ProjectModel.Description">
+                    FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Description"
+                    id="ProjectModel.Description">
                 </SfTextBox>
                 <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
-                           FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Notes" id="ProjectModel.Notes">
+                    FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Notes" id="ProjectModel.Notes">
                 </SfTextBox>
                 <SfButton Type="submit" CssClass="e-primary" class="w-100">Create</SfButton>
             </EditForm>
@@ -120,17 +120,17 @@
         <div class="cardStyle">
             <h5>New Personal Task</h5>
             <EditForm Model="TarefaModel" method="post" OnValidSubmit="CreateTarefa" FormName="TarefaForm"
-                      class="w-100 flex flex-column gap-10">
+                class="w-100 flex flex-column gap-10">
                 <DataAnnotationsValidator />
                 <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="TarefaModel.Name" id="TarefaModel.Name"
-                           FloatLabelType="FloatLabelType.Always">
+                    FloatLabelType="FloatLabelType.Always">
                 </SfTextBox>
                 <SfTextBox Placeholder='Description' Type="InputType.Text" CssClass="e-outline"
-                           FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Description"
-                           id="TarefaModel.Description">
+                    FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Description"
+                    id="TarefaModel.Description">
                 </SfTextBox>
                 <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
-                           FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Notes" id="TarefaModel.Notes">
+                    FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Notes" id="TarefaModel.Notes">
                 </SfTextBox>
                 <SfButton Type="submit" CssClass="e-primary" class="w-100">Create</SfButton>
             </EditForm>
@@ -202,8 +202,7 @@
 
     public async Task LoadProjects()
     {
-        _personalProjects = await ProjectsService.GetByUserIdAsync(userId);
-
+        _personalProjects = await ProjectsService.GetProjectContainsInProjectUsersAsync(userId);
     }
 
     public void ToggleCreateProjectView()
@@ -241,7 +240,7 @@
                     bgColor = "bg-color-created",
                     textColor = "color-created",
                     bgColorOpacity =
-                        "bg-color-created-opacity"
+                "bg-color-created-opacity"
                 };
             case ProjectStatus.Completed:
                 return new colorResult
@@ -249,7 +248,7 @@
                     bgColor = "bg-color-completed",
                     textColor = "color-completed",
                     bgColorOpacity =
-                        "bg-color-completed-opacity"
+                "bg-color-completed-opacity"
                 };
             case ProjectStatus.InProgress:
                 return new colorResult
@@ -257,7 +256,7 @@
                     bgColor = "bg-color-inprogress",
                     textColor = "color-inprogress",
                     bgColorOpacity =
-                        "bg-color-inprogress-opacity"
+                "bg-color-inprogress-opacity"
                 };
             case ProjectStatus.OnHold:
                 return new colorResult
@@ -265,7 +264,7 @@
                     bgColor = "bg-color-onhold",
                     textColor = "color-onhold",
                     bgColorOpacity =
-                        "bg-color-onhold-opacity"
+                "bg-color-onhold-opacity"
                 };
             default:
                 return new colorResult { };
@@ -284,7 +283,7 @@
     {
         args.Cancel = true;
     }
-     private async Task OnKanbanActionComplete(Syncfusion.Blazor.Kanban.ActionEventArgs<TarefaDto> args)
+    private async Task OnKanbanActionComplete(Syncfusion.Blazor.Kanban.ActionEventArgs<TarefaDto> args)
     {
         if (args.RequestType == "cardChange" && args.ChangedRecords?.Any() == true)
         {
@@ -318,13 +317,17 @@
             }
             await LoadTarefas();
             await KanbanObj.RefreshAsync();
-            
+
         }
     }
 
     private void GoToProjectPage(Guid projectId)
     {
-        var uri = NavigationManager.GetUriWithQueryParameters("ProjectPage", new Dictionary<string, object> { ["ProjectId"] = projectId });
+        var uri = NavigationManager.GetUriWithQueryParameters("ProjectPage", new Dictionary<string, object>
+        {
+            ["ProjectId"] =
+        projectId
+        });
         NavigationManager.NavigateTo(uri);
 
     }

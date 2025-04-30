@@ -26,22 +26,27 @@
         <KanbanColumn HeaderText="Completed" KeyField="@(new List<string>() { "Completed" })">
         </KanbanColumn>
     </KanbanColumns>
-    <KanbanCardSettings  HeaderField="Name" ContentField="Description" />   
-    <KanbanSwimlaneSettings KeyField="AssociatedUserId" TextField="AssociatedUser.FullName" AllowDragAndDrop="@_allowDragAndDrop" ShowEmptyRow="true"></KanbanSwimlaneSettings> 
-    <KanbanEvents TValue="TarefaDto"  ActionComplete="OnKanbanActionComplete" >
+    <KanbanCardSettings HeaderField="Name" ContentField="Description" />
+    <KanbanSwimlaneSettings KeyField="AssociatedUserId" TextField="AssociatedUser.FullName"
+        AllowDragAndDrop="@_allowDragAndDrop" ShowEmptyRow="true"></KanbanSwimlaneSettings>
+    <KanbanEvents TValue="TarefaDto" ActionComplete="OnKanbanActionComplete" DragStart="@DragStartHandler">
     </KanbanEvents>
 </SfKanban>
 
 <SfToast ID="ProjectPageId" @ref="ToastObj">
     <ToastPosition X="Center"></ToastPosition>
 </SfToast>
-<p>
+@* <p>
     @foreach (var t in _tarefas)
     {
-        <span>@_tarefas.Count</span><br />
-        <span>@t.AssociatedUserId</span><br />
+        <span>@_tarefas.Count</span>
+
+        <br />
+        <span>@t.AssociatedUserId</span>
+
+        <br />
     }
-</p>
+</p> *@
 
 @code {
     SfToast ToastObj;
@@ -52,15 +57,31 @@
 
     [SupplyParameterFromQuery]
     private Guid ProjectId { get; set; }
+    private bool _isInitialized = false;
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync() => Task.CompletedTask;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await GetSessionUserId();
-        await IsOwner();
-        await LoadTarefasByProjectId(ProjectId);
-        // await LoadProjectUsers();
+        if (firstRender && !_isInitialized)
+        {
+            _isInitialized = true;
+            await GetSessionUserId();
+            await IsOwner();
+            await LoadTarefasByProjectId(ProjectId);
 
+            StateHasChanged();
+        }
+    }
 
+    public void DragStartHandler(DragEventArgs<TarefaDto> args)
+    {
+        var data = args.Data[0];
+        if (!userId.Equals(data.AssociatedUserId) && !userId.Equals(data.ApplicationUserId))
+        {
+            args.Cancel = true;
+            UtilsService.ShowErrorToast(ToastObj, "You can only drag your own tasks.");
+        }
     }
 
     private async Task LoadProjectUsers()
@@ -75,14 +96,14 @@
                 Description = "",
                 AssociatedUserId = user.ApplicationUserId,
                 Status = TarefaStatus.Placeholder,
-                StatusDescription  = TarefaStatus.Placeholder.ToString(),
+                StatusDescription = TarefaStatus.Placeholder.ToString(),
                 StartDate = DateTime.Now,
                 EndDate = DateTime.Now,
                 Notes = "",
                 AssociatedUser = user.ApplicationUser,
                 ApplicationUserId = user.ApplicationUserId,
             };
-            
+
             _tarefas.Add(tarefa);
         }
     }
@@ -98,7 +119,6 @@
             _allowDragAndDrop = false;
         }
     }
-
     private async Task GetSessionUserId()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
@@ -107,13 +127,10 @@
     }
     private async Task LoadTarefasByProjectId(Guid ProjectId)
     {
-         var res= await ProjectsService.GetTarefasAsync(ProjectId);
-         Console.WriteLine(res);
-         _tarefas = res;
-         Console.WriteLine(_tarefas);
-
+        var res = await ProjectsService.GetTarefasAsync(ProjectId);
+        _tarefas = res;
+        await LoadProjectUsers();
     }
-
     private async Task OnKanbanActionComplete(Syncfusion.Blazor.Kanban.ActionEventArgs<TarefaDto> args)
     {
         if (args.RequestType == "cardChange" && args.ChangedRecords?.Any() == true)
@@ -128,9 +145,7 @@
                 _ => changedRecord.Status
             };
             TarefaModel model = new TarefaModel();
-            
             model.AssociatedUserId = changedRecord.AssociatedUserId;
-            
             model.Code = changedRecord.Code;
             model.Name = changedRecord.Name;
             model.Description = changedRecord.Description;
@@ -138,7 +153,6 @@
             model.EndDate = changedRecord.EndDate;
             model.Notes = changedRecord.Notes;
             model.Status = changedRecord.Status;
-            
 
             var result = await TarefasService.UpdateAsync(changedRecord.Id, model);
             if (result != null)
@@ -151,6 +165,7 @@
             }
 
             await LoadTarefasByProjectId(ProjectId);
+
             await KanbanObj.RefreshAsync();
 
         }

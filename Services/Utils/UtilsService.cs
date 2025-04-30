@@ -18,18 +18,18 @@ namespace FreelanceManager.Services.Utils
                 Title = "Success",
             });
         }
-        
+
         public async Task ShowErrorToast(SfToast ToastObj, string message)
         {
             await ToastObj.ShowAsync(new ToastModel
             {
                 Content = message,
-                CssClass = "e-toast-error",
+                CssClass = "e-toast-danger",
                 Timeout = 3000,
                 Title = "Error",
             });
         }
     }
-    
+
 
 }
