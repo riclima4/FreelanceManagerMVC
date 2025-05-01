@@ -522,7 +522,7 @@ h1:focus {
     color: #25AE29;
 }
 .color-onhold{
-    color: #ecd449;
+    color: #988506;
 }
 .color-white{
     color: white;
@@ -566,4 +566,9 @@ h1:focus {
     border-radius: 5px;
     border: 1px solid #c8c8c8;
     background-color: white;
+}
+
+.cardStyle2:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }

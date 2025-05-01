@@ -3,7 +3,9 @@
 @inject IProjectsService ProjectsService
 @inject ITarefasService TarefasService
 @inject IUtilsService UtilsService
+@inject IClientsService ClientsService
 @inject NavigationManager NavigationManager
+@inject SfDialogService DialogService
 
 @using System.Security.Claims;
 @using FreelanceManager.Services.Projects
@@ -12,11 +14,14 @@
 @using FreelanceManager.Data.Enum;
 @using FreelanceManager.IO.Projects
 @using FreelanceManager.IO.Tarefas;
-@using Syncfusion.Blazor.Inputs
-@using System.ComponentModel.DataAnnotations
+
+@using FreelanceManager.IO.Clients
+@using FreelanceManager.Services.Clients
 @rendermode InteractiveServer
 
 @using Microsoft.AspNetCore.Authorization
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.DropDowns
 
 @attribute [Authorize]
 
@@ -35,10 +40,15 @@
                 @foreach (var project in _personalProjects)
                 {
 
-                    <div class="cardStyle addPointer h-180px w-300px flex flex-column"
+                    <div class="cardStyle cardStyle2 addPointer h-180px w-300px flex flex-column"
                         @onclick="() => GoToProjectPage(project.Id)">
-
-                        <h5>@project.Name</h5>
+                        <div class="flex justify-content-space-between align-items-center">
+                            <h5 class="m-0">@project.Name</h5>
+                            @if (project.ApplicationUserId == userId)
+                            {
+                                <i class="fa-solid fa-certificate"></i>
+                            }
+                        </div>
                         <p class="color-darkgrey">Client: @(project.ClientId == null ? "N/A" : project.Client?.Name)</p>
                         <div class="flex gap-6 align-items-center">
                             <div class="statusCircle @(GetStatusClass(project.Status).bgColor)"></div>
@@ -74,7 +84,7 @@
                     <GridColumn Field=@nameof(TarefaDto.StatusDescription) HeaderText="StatusDescription"></GridColumn>
                 </GridColumns>
             </SfGrid> *@
-            <SfKanban @ref="KanbanObj" TValue="TarefaDto" KeyField="StatusDescription" DataSource="_tarefas">
+            <SfKanban @ref="KanbanObj" TValue="TarefaDto" KeyField="StatusDescription" DataSource="_tarefas" AllowDragAndDrop="true">
                 <KanbanColumns>
                     <KanbanColumn HeaderText="To Do" KeyField="@(new List<string>() { "Created" })"></KanbanColumn>
                     <KanbanColumn HeaderText="In Progress" KeyField="@(new List<string>() { "InProgress" })">
@@ -83,7 +93,22 @@
                     <KanbanColumn HeaderText="Completed" KeyField="@(new List<string>() { "Completed" })">
                     </KanbanColumn>
                 </KanbanColumns>
-                <KanbanCardSettings HeaderField="Name" ContentField="Description"></KanbanCardSettings>
+                <KanbanCardSettings HeaderField="Name" ContentField="Description">
+                    <Template>
+                        @{
+                            var data = (context as TarefaDto);
+                            <div class="kanban-card">
+                                <div class="card-header "> @data.Name</div>
+                                <div class="card-content">@data.Description</div>
+                                <div class="card-actions">
+                                    <button class="delete-button" @onclick="() => DeleteTask(data.Id)" @onclick:stopPropagation="true">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </Template>
+                </KanbanCardSettings>                         
                 @* <KanbanSwimlaneSettings KeyField="Assignee"></KanbanSwimlaneSettings> *@
                 <KanbanEvents TValue="TarefaDto" DialogOpen="@OnDialogOpen" ActionComplete="OnKanbanActionComplete">
                 </KanbanEvents>
@@ -94,7 +119,7 @@
         <div class="flex justify-content-end align-items-center">
             <SfButton CssClass="e-flat" @onclick="ToggleCreateProjectView">X</SfButton>
         </div>
-        <div class="cardStyle">
+        <div class="cardStyle ">
             <h5>New Project</h5>
             <EditForm Model="ProjectModel" method="post" OnValidSubmit="CreateProject" FormName="ProjectForm"
                 class="w-100 flex flex-column gap-10">
@@ -103,9 +128,13 @@
                     id="ProjectModel.Name" FloatLabelType="FloatLabelType.Always">
                 </SfTextBox>
                 <SfTextBox Placeholder='Description' Type="InputType.Text" CssClass="e-outline"
-                    FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Description"
-                    id="ProjectModel.Description">
+                           FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Description"
+                           id="ProjectModel.Description">
                 </SfTextBox>
+                <SfComboBox TValue="Guid?" TItem="ClientDto" Placeholder="Client" CssClass="e-outline"
+                            DataSource="@_clients"  @bind-Value="ProjectModel.ClientId"> 
+                    <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                </SfComboBox>
                 <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
                     FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Notes" id="ProjectModel.Notes">
                 </SfTextBox>
@@ -130,8 +159,12 @@
                     id="TarefaModel.Description">
                 </SfTextBox>
                 <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
-                    FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Notes" id="TarefaModel.Notes">
+                           FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Notes" id="TarefaModel.Notes">
                 </SfTextBox>
+                <SfNumericTextBox  CssClass="e-outline" Format="c2"  Min="0" Placeholder="Hourly Rate"
+                                   Decimals="2" ValidateDecimalOnType="true"
+                                   FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.HourlyRate" id="TarefaModel.HourlyRate">
+                </SfNumericTextBox>
                 <SfButton Type="submit" CssClass="e-primary" class="w-100">Create</SfButton>
             </EditForm>
         </div>
@@ -139,13 +172,14 @@
     <SfToast ID="toast_default" @ref="ToastObj">
         <ToastPosition X="Center"></ToastPosition>
     </SfToast>
-
+    <SfDialogProvider />
 </div>
 @code {
     SfToast ToastObj;
     SfKanban<TarefaDto> KanbanObj;
     private List<ProjectDto> _personalProjects = new List<ProjectDto>();
     private List<TarefaDto> _tarefas = new List<TarefaDto>();
+    private List<ClientDto> _clients = new();
     private string userId;
     private bool createProjectView = false;
     private bool createTarefaView = false;
@@ -156,13 +190,16 @@
         await GetSessionUserId();
         await LoadProjects();
         await LoadTarefas();
+        await LoadClients();
+        StateHasChanged();
+
     }
 
     public async Task CreateProject()
     {
 
         ProjectModel.ApplicationUserId = userId;
-
+        
         var res = await ProjectsService.CreateAsync(ProjectModel);
         if (res != null)
         {
@@ -197,9 +234,12 @@
 
     public async Task LoadTarefas()
     {
-        _tarefas = await TarefasService.GetAllByApplicationUserIdAsync(userId);
+        _tarefas = await TarefasService.GetPersonalByApplicationUserIdAsync(userId);
     }
-
+    private async Task LoadClients()
+    {
+        _clients = await ClientsService.GetAllByApplicationUserIdAsync(userId);
+    }
     public async Task LoadProjects()
     {
         _personalProjects = await ProjectsService.GetProjectContainsInProjectUsersAsync(userId);
@@ -331,5 +371,24 @@
         NavigationManager.NavigateTo(uri);
 
     }
+
+    private async Task DeleteTask(Guid taskId)
+    {
+        bool isConfirmed = await DialogService.ConfirmAsync(
+            "Are you sure you want to delete this task?",
+            "Delete",
+            new DialogOptions
+            {
+                PrimaryButtonOptions = new DialogButtonOptions { Content = "Delete" },
+                CancelButtonOptions = new DialogButtonOptions { Content = "Cancel" }
+            });
+
+        if (isConfirmed) {
+            await TarefasService.DeleteAsync(taskId);
+            await LoadTarefas();
+            await UtilsService.ShowSuccessToast(ToastObj, "Task deleted");
+        }
+
+        }
 
 }

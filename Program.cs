@@ -58,6 +58,8 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddSyncfusionBlazor();
+builder.Services.AddScoped<Syncfusion.Blazor.Popups.SfDialogService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

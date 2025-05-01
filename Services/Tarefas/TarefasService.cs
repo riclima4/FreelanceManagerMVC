@@ -63,7 +63,7 @@ namespace FreelanceManager.Services.Tarefas
         private async Task<int> GetNextNumberAsync()
         {
             List<int> lastInternalNumber = await _unitOfWork.
-                ClientsRepository.
+                TarefasRepository.
                 GetEntityAsNoTracking().
                 Select(entity => entity.InternalNumber).
                 ToListAsync();

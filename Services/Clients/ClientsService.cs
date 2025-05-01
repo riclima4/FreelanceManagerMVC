@@ -25,6 +25,7 @@ namespace FreelanceManager.Services.Clients
         public async Task<ClientDto> CreateAsync(ClientModel model)
         {
             int newNumber = await GetNextNumberAsync();
+            model.Code = await GetNextCodeAsync();
             var entity = await _unitOfWork.ClientsRepository.CreateAsync(new Client(model, newNumber));
             return await GetByIdAsync(entity.Id);
         }

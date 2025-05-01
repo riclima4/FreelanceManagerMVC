@@ -7,3 +7,44 @@
     padding: 0px 8px;
     border-radius: 50px;
 }
+
+.kanban-card {
+    position: relative;
+    padding-bottom: 8px !important;
+}
+
+.card-header {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 4px 4px 2px 14px;
+    margin-bottom: 2px;
+}
+
+.card-content {
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 2px 14px 6px 14px;
+}
+
+.card-actions {
+    position: absolute;
+    bottom: 4px;
+    right: 5px;
+}
+
+.delete-button {
+    background: none;
+    border: none;
+    color: #393939;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+}
+
+.delete-button:hover {
+    color: #ff0000;
+}
+
+.fa-certificate{
+    color: #735EAB;
+}
