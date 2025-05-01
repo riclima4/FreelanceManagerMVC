@@ -1,4 +1,4 @@
-﻿@page "/Account/Login"
+@page "/Account/Login"
 @layout FreelanceManager.Components.Layout.LoginLayout
 
 @using System.ComponentModel.DataAnnotations
@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.Identity
 @using FreelanceManager.Data
 @using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Buttons
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Login> Logger
@@ -14,36 +15,219 @@
 
 <PageTitle>Log in</PageTitle>
 
-<div class="bg-color-black flex justify-content-center align-items-center w-100 h100vh">
-    <div class="signinup-card">
-        <div class="text-center mb-16">
-            <img src="assets/logo.png" alt="logo freelance manager" class="w-100  border-radius-5" />
+<div class="bg-color-black d-flex flex-column min-vh-100">
+    <!-- Header com botão de retorno -->
+    <header class="container py-3">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="/" class="back-link d-flex align-items-center text-decoration-none">
+                <i class="fas fa-arrow-left me-2"></i>
+                <span>Back to Home</span>
+            </a>
         </div>
-        <div class="fs-18 fb-bold color-darkgrey text-center mb-16">Login Now!</div>
-        <StatusMessage Message="@errorMessage" />
-        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login"
-            class="w-100 flex flex-column gap-10">
-            <DataAnnotationsValidator />
-            <SfTextBox Placeholder='Username' CssClass="e-outline" @bind-Value="Input.UserName" id="Input.Username"
-                FloatLabelType="FloatLabelType.Always">
-            </SfTextBox>
-            <SfTextBox Placeholder='Password' Type="InputType.Password" CssClass="e-outline"
-                FloatLabelType="FloatLabelType.Always" @bind-Value="Input.Password" id="Input.Password">
-            </SfTextBox>
-            <SfButton Type="submit" CssClass="e-primary" class="w-100">Sign In</SfButton>
-            <div class="fs-14">
-                <a href="@(NavigationManager.GetUriWithQueryParameters("Account/ForgotPassword", new Dictionary<string, object> { ["ReturnUrl"] = ReturnUrl }))"
-                    class="fs-14 color-darkgrey fb-bold text-decoration-none">
-                    Forgot your password?
-                </a>
+    </header>
+
+    <!-- Conteúdo principal centralizado -->
+    <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+        <div class="login-card" style="max-width: 450px; width: 100%;">
+            <div class="card-body d-flex flex-column align-items-center p-4">
+                <div class="text-center mb-4">
+                    <img src="assets/logo.svg" alt="logo freelance manager" class="w-75 mb-4" />
+                </div>
+                
+                <p class="text-secondary mb-4 text-center">Sign in to access your workspace and continue your projects</p>
+                
+                <div class="w-100 mb-3">
+                    <StatusMessage Message="@errorMessage" />
+                </div>
+                
+                <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login"
+                    class="w-100 d-flex flex-column gap-3">
+                    <DataAnnotationsValidator />
+                    
+                    <!-- Inputs sem ícones para evitar problemas de sobreposição -->
+                    <SfTextBox Placeholder='Username' CssClass="login-input" @bind-Value="Input.UserName" id="Input.Username"
+                        FloatLabelType="FloatLabelType.Always">
+                    </SfTextBox>
+                    
+                    <SfTextBox Placeholder='Password' Type="InputType.Password" CssClass="login-input"
+                        FloatLabelType="FloatLabelType.Always" @bind-Value="Input.Password" id="Input.Password">
+                    </SfTextBox>
+                    
+                    <button type="submit" class="login-button mt-4">
+                        <i class="fas fa-sign-in-alt me-2"></i> Sign In
+                    </button>
+                    
+                    <div class="text-center mt-3">
+                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/ForgotPassword", new Dictionary<string, object> { ["ReturnUrl"] = ReturnUrl }))"
+                            class="link-custom text-secondary">
+                            <i class="fas fa-question-circle me-1"></i> Forgot your password?
+                        </a>
+                    </div>
+                </EditForm>
+                
+                <div class="text-center mt-4 account-toggle">
+                    <p class="text-secondary">
+                        Don't have an account? 
+                        <a class="link-custom" href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object> { ["ReturnUrl"] = ReturnUrl }))">
+                            Sign Up <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </p>
+                </div>
             </div>
-        </EditForm>
-        <div class="fs-14 mt-16 text-center">
-            Don't have an account? <a class="color-purple fb-bold text-decoration-none"
-                href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object> { ["ReturnUrl"] = ReturnUrl }))">SignUp</a>
         </div>
     </div>
+    
+    <!-- Footer simples -->
+    <footer class="container text-center py-3">
+        <p class="text-secondary small mb-0"> 2025 FreelanceManager. All rights reserved.</p>
+    </footer>
 </div>
+
+<style>
+    /* Estilos do card */
+    .login-card {
+        border-radius: 15px;
+        padding: 30px;
+        color: #e0e0e0;
+        text-align: left;
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        border: none;
+        background: linear-gradient(135deg, #252525, #312f41);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 15px 35px rgba(0, 0, 0, 0.4);
+    }
+    
+    /* Link para voltar */
+    .back-link {
+        color: rgba(255, 255, 255, 0.7);
+        transition: color 0.3s;
+        font-size: 15px;
+    }
+    
+    .back-link:hover {
+        color: #8257E5;
+    }
+    
+    /* Estilo de input simplificado */
+    ::deep .login-input {
+        background-color: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: white;
+        margin-bottom: 10px;
+        height: 48px;
+    }
+    
+    /* Força a cor roxa em TODOS os elementos do input */
+    ::deep .login-input input.e-input,
+    ::deep .login-input input,
+    ::deep .e-input-group input.e-input,
+    ::deep .e-input-group input,
+    ::deep .e-float-input input.e-input,
+    ::deep .e-float-input input {
+        color: #8257E5 !important;
+        font-weight: 500 !important;
+        caret-color: #8257E5 !important;
+    }
+    
+    /* Força a cor da borda quando o input está em foco */
+    ::deep .login-input.e-input-focus,
+    ::deep .login-input.e-input-focus:hover,
+    ::deep .login-input.e-input-focus:focus,
+    ::deep .e-input-group.e-input-focus,
+    ::deep .e-input-group.e-input-focus:hover,
+    ::deep .e-input-group.e-input-focus:focus,
+    ::deep .e-float-input.e-input-focus,
+    ::deep .e-float-input.e-input-focus:hover,
+    ::deep .e-float-input.e-input-focus:focus {
+        border-color: #8257E5 !important;
+        box-shadow: 0 0 0 2px rgba(130, 87, 229, 0.25) !important;
+    }
+    
+    /* Força a cor da linha abaixo do input */
+    ::deep .login-input:after,
+    ::deep .login-input:before,
+    ::deep .e-input-group:after,
+    ::deep .e-input-group:before,
+    ::deep .e-float-input:after,
+    ::deep .e-float-input:before {
+        background: #8257E5 !important;
+    }
+    
+    /* Estilos do label */
+    ::deep .e-float-input label,
+    ::deep .e-float-input.e-control-wrapper label {
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 500;
+    }
+    
+    /* Cores quando o label está em foco */
+    ::deep .e-float-input.e-input-focus label,
+    ::deep .e-float-input.e-control-wrapper.e-input-focus label,
+    ::deep .e-input-focus .e-float-text,
+    ::deep .e-input-focus.e-float-input .e-float-text,
+    ::deep .e-float-input.e-input-focus:not(.e-success):not(.e-warning):not(.e-error) label {
+        color: #8257E5 !important;
+    }
+    
+    /* Botão personalizado */
+    .login-button {
+        background-color: #8257E5;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        padding: 12px;
+        font-weight: bold;
+        transition: background-color 0.3s;
+        width: 100%;
+    }
+    
+    .login-button:hover {
+        background-color: #9466FF;
+    }
+    
+    /* Customizando as alertas que o StatusMessage gera */
+    ::deep .alert {
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-bottom: 0;
+    }
+    
+    ::deep .alert-danger {
+        background-color: rgba(220, 53, 69, 0.15);
+        border-color: rgba(220, 53, 69, 0.3);
+        color: #ff6b6b;
+    }
+    
+    ::deep .alert-success {
+        background-color: rgba(40, 167, 69, 0.15);
+        border-color: rgba(40, 167, 69, 0.3);
+        color: #51cf66;
+    }
+    
+    .account-toggle {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding-top: 20px;
+        margin-top: 10px;
+    }
+    
+    /* Estilos do link personalizado */
+    .link-custom {
+        color: #8257E5;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s;
+    }
+    
+    .link-custom:hover {
+        color: #9466FF;
+        text-decoration: underline;
+    }
+</style>
 
 @code {
     private string errorMessage;
