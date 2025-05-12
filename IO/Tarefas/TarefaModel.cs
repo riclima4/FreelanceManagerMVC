@@ -15,7 +15,7 @@ namespace FreelanceManager.IO.Tarefas
         public string Name { get; set; }
         [Required, MaxLength(100)]
         public string Description { get; set; }
-        public decimal? HourlyRate { get; set; }
+        public decimal? HourlyRate { get; set; } = 0;
         [MaxLength(100)]
         public string Notes { get; set; }
         public Guid? ProjectId { get; set; }

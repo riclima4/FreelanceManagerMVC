@@ -47,6 +47,8 @@ namespace FreelanceManager.Services.Tarefas
             entity.Notes = model.Notes;
             entity.Status = model.Status;
             entity.AssociatedUserId = model.AssociatedUserId;
+            entity.ProjectId = model.ProjectId;
+            entity.HourlyRate = model.HourlyRate;
             await _unitOfWork.TarefasRepository.Edit(entity);
             await _unitOfWork.CommitAsync();
 

@@ -11,139 +11,99 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-<h3>Clients</h3>
-
-<div class="cardStyle">
-    <h5>New Client</h5>
-    <EditForm Model="ClientModel"
-              Method="post"
-              OnValidSubmit="CreateClient"
-
-              FormName="ClientForm"
-              class="w-100 flex flex-column gap-10">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
-
-
-        <SfTextBox Placeholder="Name"
-                   CssClass="e-outline"
-                   @bind-Value="ClientModel.Name"
-                   id="ClientModel.Name"
-                   FloatLabelType="FloatLabelType.Always">
-        </SfTextBox>
-
-        <SfTextBox Placeholder="Fiscal Number"
-                   CssClass="e-outline"
-                   @bind-Value="ClientModel.FiscalNumber"
-                   id="ClientModel.FiscalNumber"
-                   FloatLabelType="FloatLabelType.Always">
-        </SfTextBox>
-
-        <SfTextBox Placeholder="Street"
-                   CssClass="e-outline"
-                   @bind-Value="ClientModel.Street"
-                   id="ClientModel.Street"
-                   FloatLabelType="FloatLabelType.Always">
-        </SfTextBox>
-
-        <SfTextBox Placeholder="Address"
-                   CssClass="e-outline"
-                   @bind-Value="ClientModel.Address"
-                   id="ClientModel.Address"
-                   FloatLabelType="FloatLabelType.Always">
-        </SfTextBox>
-
-        <SfTextBox Placeholder="Zip Code"
-                   CssClass="e-outline"
-                   @bind-Value="ClientModel.ZipCode"
-                   id="ClientModel.ZipCode"
-                   FloatLabelType="FloatLabelType.Always">
-        </SfTextBox>
-
-        <SfTextBox Placeholder="City"
-                   CssClass="e-outline"
-                   @bind-Value="ClientModel.City"
-                   id="ClientModel.City"
-                   FloatLabelType="FloatLabelType.Always">
-        </SfTextBox>
-
-        <SfTextBox Placeholder="Country"
-                   CssClass="e-outline"
-                   @bind-Value="ClientModel.Country"
-                   id="ClientModel.Country"
-                   FloatLabelType="FloatLabelType.Always">
-        </SfTextBox>
-
-        <SfTextBox Placeholder="Website"
-                   CssClass="e-outline"
-                   @bind-Value="ClientModel.Website"
-                   id="ClientModel.Website"
-                   FloatLabelType="FloatLabelType.Always">
-        </SfTextBox>
-
-        <SfTextBox Placeholder="Email"
-                   CssClass="e-outline"
-                   @bind-Value="ClientModel.Email"
-                   id="ClientModel.Email"
-                   FloatLabelType="FloatLabelType.Always">
-        </SfTextBox>
-
-        <SfTextBox Placeholder="Phone"
-                   CssClass="e-outline"
-                   @bind-Value="ClientModel.Phone"
-                   id="ClientModel.Phone"
-                   FloatLabelType="FloatLabelType.Always">
-        </SfTextBox>
-
-        <SfButton Type="submit"
-                  CssClass="e-primary"
-                  class="w-100">
-            Create
-        </SfButton>
-    </EditForm>
+<div class="flex flex-column gap-10">
+    <div class="flex justify-content-space-between align-items-center">
+        <h3>Clients</h3>
+        <SfButton CssClass="e-primary" @onclick="openCreateNewClient">New Client +</SfButton>
+    </div>
 </div>
-
 <SfToast ID="toast_1" @ref="ToastObj">
     <ToastPosition X="Center"></ToastPosition>
 </SfToast>
 
 <div class="col-lg-12 control-section">
     <div class="content-wrapper">
-        <SfGrid DataSource="@clients"
-                AllowPaging="true"
-                PageSettings="new GridPageSettings() { PageSize = 20 }"
-                AllowSorting="true"
-                EnableVirtualization="true"
-                Height="500">
+        <SfGrid DataSource="@clients" AllowPaging="true" PageSettings="new GridPageSettings() { PageSize = 20 }"
+            AllowSorting="true" EnableVirtualization="true" Height="500">
             <GridColumns>
-                <GridColumn Field="@nameof(ClientDto.Name)"
-                            HeaderText="Name"
-                            Width="200"
-                            ClipMode="ClipMode.EllipsisWithTooltip" />
-                <GridColumn Field="@nameof(ClientDto.Email)"
-                            HeaderText="Email"
-                            Width="250"
-                            ClipMode="ClipMode.EllipsisWithTooltip" />
-                <GridColumn Field="@nameof(ClientDto.City)"
-                            HeaderText="City"
-                            Width="150"
-                            ClipMode="ClipMode.EllipsisWithTooltip" />
-                <GridColumn Field="@nameof(ClientDto.Country)"
-                            HeaderText="Country"
-                            Width="150"
-                            ClipMode="ClipMode.EllipsisWithTooltip" />
+                <GridColumn Field="@nameof(ClientDto.Name)" HeaderText="Name" Width="200"
+                    ClipMode="ClipMode.EllipsisWithTooltip" />
+                <GridColumn Field="@nameof(ClientDto.Email)" HeaderText="Email" Width="250"
+                    ClipMode="ClipMode.EllipsisWithTooltip" />
+                <GridColumn Field="@nameof(ClientDto.City)" HeaderText="City" Width="150"
+                    ClipMode="ClipMode.EllipsisWithTooltip" />
+                <GridColumn Field="@nameof(ClientDto.Country)" HeaderText="Country" Width="150"
+                    ClipMode="ClipMode.EllipsisWithTooltip" />
             </GridColumns>
+            <GridEvents OnRecordClick="RecordClickHandler" TValue="ClientDto"></GridEvents>
         </SfGrid>
     </div>
 </div>
+<SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="clientDialogVisibility" IsModal="true">
+    <DialogTemplates>
+        <Header> Create Client </Header>
+        <Content>
+            <EditForm Model="ClientModel" Method="post" OnValidSubmit="CreateClient" FormName="ClientForm"
+                class="w-100 flex flex-column gap-10" style="margin-top: 5px; !important">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <SfTextBox Placeholder="Name" CssClass="e-outline" @bind-Value="ClientModel.Name" id="ClientModel.Name"
+                    FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+
+                <SfTextBox Placeholder="Fiscal Number" CssClass="e-outline" @bind-Value="ClientModel.FiscalNumber"
+                    id="ClientModel.FiscalNumber" FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+
+                <SfTextBox Placeholder="Street" CssClass="e-outline" @bind-Value="ClientModel.Street"
+                    id="ClientModel.Street" FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+
+                <SfTextBox Placeholder="Address" CssClass="e-outline" @bind-Value="ClientModel.Address"
+                    id="ClientModel.Address" FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+
+                <SfTextBox Placeholder="Zip Code" CssClass="e-outline" @bind-Value="ClientModel.ZipCode"
+                    id="ClientModel.ZipCode" FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+
+                <SfTextBox Placeholder="City" CssClass="e-outline" @bind-Value="ClientModel.City" id="ClientModel.City"
+                    FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+
+                <SfTextBox Placeholder="Country" CssClass="e-outline" @bind-Value="ClientModel.Country"
+                    id="ClientModel.Country" FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+
+                <SfTextBox Placeholder="Website" CssClass="e-outline" @bind-Value="ClientModel.Website"
+                    id="ClientModel.Website" FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+
+                <SfTextBox Placeholder="Email" CssClass="e-outline" @bind-Value="ClientModel.Email"
+                    id="ClientModel.Email" FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+
+                <SfTextBox Placeholder="Phone" CssClass="e-outline" @bind-Value="ClientModel.Phone"
+                    id="ClientModel.Phone" FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+
+                <SfButton Type="submit" CssClass="e-primary" class="w-100">@(ClientModel.Id == null ? "Create" :
+                                        "Update")
+                </SfButton>
+
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
 @code {
     SfToast ToastObj;
     private ClientModel ClientModel = new ClientModel();
     private string userId;
     private List<ClientDto> clients = new List<ClientDto>();
+    private bool clientDialogVisibility = false;
 
-    
-    protected override async Task OnInitializedAsync(){
+    protected override async Task OnInitializedAsync()
+    {
         await GetSessionUserId();
         await LoadClients();
         StateHasChanged();
@@ -162,16 +122,57 @@
         userId = user.FindFirst(ClaimTypes.NameIdentifier).Value;
     }
 
-    private async Task CreateClient( )
+    private async Task CreateClient()
     {
-        
-        ClientModel.ApplicationUserId = userId;
-        var res = await ClientsService.CreateAsync(ClientModel);
+        var res = new ClientDto();
+        if (ClientModel.Id != null)
+        {
+            res = await ClientsService.UpdateAsync(ClientModel.Id.Value, ClientModel);
+        }
+        else
+        {
+            res = await ClientsService.CreateAsync(ClientModel);
+
+        }
+        res = await ClientsService.CreateAsync(ClientModel);
         if (res != null)
         {
-            await UtilsService.ShowSuccessToast(ToastObj, "Client created successfully.");
-            ClientModel = new ClientModel();
             await LoadClients();
+            ClientModel = new ClientModel();
+            await UtilsService.ShowSuccessToast(ToastObj, "Client created successfully.");
+            this.clientDialogVisibility = false;
+        }
+    }
+
+    private void openCreateNewClient()
+    {
+        ClientModel = new ClientModel();
+        ClientModel.ApplicationUserId = userId;
+        this.clientDialogVisibility = true;
+    }
+
+    public void RecordClickHandler(RecordClickEventArgs<ClientDto> args)
+    {
+        var data = args.RowData;
+        if (data != null)
+        {
+            var client = new ClientModel
+            {
+                Id = data.Id,
+                Name = data.Name,
+                FiscalNumber = data.FiscalNumber,
+                Street = data.Street,
+                Address = data.Address,
+                ZipCode = data.ZipCode,
+                City = data.City,
+                Country = data.Country,
+                Website = data.Website,
+                Email = data.Email,
+                Phone = data.Phone,
+
+            };
+            ClientModel = client;
+            this.clientDialogVisibility = true;
         }
     }
 

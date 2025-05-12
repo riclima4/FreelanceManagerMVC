@@ -32,7 +32,7 @@ namespace FreelanceManager.Services.Projects
                 .Select(p => new ProjectDto(p))
                 .ToListAsync();
         }
-        public async Task<ProjectDto> GetByIdAsync(Guid id) => await _unitOfWork.ProjectsRepository.GetEntityAsNoTracking(v => v.Id == id).Include(v => v.Tarefas).ThenInclude(u => u.AssociatedUser).Select(a => new ProjectDto(a)).FirstAsync();
+        public async Task<ProjectDto> GetByIdAsync(Guid id) => await _unitOfWork.ProjectsRepository.GetEntityAsNoTracking(v => v.Id == id).Include(c => c.Client).Include(v => v.Tarefas).ThenInclude(u => u.AssociatedUser).Include(pu => pu.ProjectUsers).ThenInclude(u => u.ApplicationUser).Select(a => new ProjectDto(a)).FirstAsync();
 
         public async Task<List<ProjectDto>> GetProjectContainsInProjectUsersAsync(string userId)
         {

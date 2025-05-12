@@ -31,7 +31,7 @@
         <div class="flex flex-column gap-10">
             <div class="flex justify-content-space-between align-items-center">
                 <h3>Projects</h3>
-                <SfButton CssClass="e-primary" @onclick="ToggleCreateProjectView" hidden="@(createProjectView)">New
+                <SfButton CssClass="e-primary" @onclick="openCreateNewProject">New
                     Project
                     +</SfButton>
             </div>
@@ -72,18 +72,9 @@
         <div class="flex flex-column gap-10">
             <div class="flex justify-content-space-between align-items-center">
                 <h3>Personal Tasks</h3>
-                <SfButton CssClass="e-primary" @onclick="ToggleCreateTarefaView" hidden="@(createTarefaView)">New Task
+                <SfButton CssClass="e-primary" @onclick="openCreateNewTask">New Task
                     +</SfButton>
             </div>
-            @* <SfGrid DataSource="@_tarefas" AllowPaging="true">
-                <GridPageSettings PageSize="10"></GridPageSettings>
-                <GridColumns>
-                    <GridColumn Field=@nameof(TarefaDto.Name) HeaderText="Name"></GridColumn>
-                    <GridColumn Field=@nameof(TarefaDto.Description) HeaderText="Description"></GridColumn>
-                    <GridColumn Field=@nameof(TarefaDto.Status) HeaderText="Status"></GridColumn>
-                    <GridColumn Field=@nameof(TarefaDto.StatusDescription) HeaderText="StatusDescription"></GridColumn>
-                </GridColumns>
-            </SfGrid> *@
             <SfKanban @ref="KanbanObj" TValue="TarefaDto" KeyField="StatusDescription" DataSource="_tarefas" AllowDragAndDrop="true">
                 <KanbanColumns>
                     <KanbanColumn HeaderText="To Do" KeyField="@(new List<string>() { "Created" })"></KanbanColumn>
@@ -109,20 +100,21 @@
                         }
                     </Template>
                 </KanbanCardSettings>                         
-                @* <KanbanSwimlaneSettings KeyField="Assignee"></KanbanSwimlaneSettings> *@
-                <KanbanEvents TValue="TarefaDto" DialogOpen="@OnDialogOpen" ActionComplete="OnKanbanActionComplete">
+                <KanbanEvents TValue="TarefaDto" DialogOpen="@OnDialogOpen" CardClick="@CardClickHandler" ActionComplete="OnKanbanActionComplete">
                 </KanbanEvents>
             </SfKanban>
         </div>
     </div>
-    <div class="w-50 p-16" hidden="@(!createProjectView)">
-        <div class="flex justify-content-end align-items-center">
-            <SfButton CssClass="e-flat" @onclick="ToggleCreateProjectView">X</SfButton>
-        </div>
-        <div class="cardStyle ">
-            <h5>New Project</h5>
+    <SfToast ID="toast_default" @ref="ToastObj">
+        <ToastPosition X="Center"></ToastPosition>
+    </SfToast>
+    <SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="projectDialogVisibility" 
+    IsModal="true">
+    <DialogTemplates>
+        <Header> Create Project </Header>
+        <Content>
             <EditForm Model="ProjectModel" method="post" OnValidSubmit="CreateProject" FormName="ProjectForm"
-                class="w-100 flex flex-column gap-10">
+                class="w-100 flex flex-column gap-10" style="margin-top: 5px; !important">
                 <DataAnnotationsValidator />
                 <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="ProjectModel.Name"
                     id="ProjectModel.Name" FloatLabelType="FloatLabelType.Always">
@@ -138,18 +130,18 @@
                 <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
                     FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Notes" id="ProjectModel.Notes">
                 </SfTextBox>
-                <SfButton Type="submit" CssClass="e-primary" class="w-100">Create</SfButton>
+                <SfButton Type="submit" CssClass="e-primary" class="w-100">@(ProjectModel.Id == null ? "Create":"Update")</SfButton>
             </EditForm>
-        </div>
-    </div>
-    <div class="w-50 p-16" hidden="@(!createTarefaView)">
-        <div class="flex justify-content-end align-items-center">
-            <SfButton CssClass="e-flat" @onclick="ToggleCreateTarefaView">X</SfButton>
-        </div>
-        <div class="cardStyle">
-            <h5>New Personal Task</h5>
+        </Content>
+    </DialogTemplates>
+    </SfDialog>
+    <SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="tarefaDialogVisibility" 
+    IsModal="true">
+    <DialogTemplates>
+        <Header> Create Task </Header>
+        <Content>
             <EditForm Model="TarefaModel" method="post" OnValidSubmit="CreateTarefa" FormName="TarefaForm"
-                class="w-100 flex flex-column gap-10">
+                class="w-100 flex flex-column gap-10" style="margin-top: 5px; !important"> 
                 <DataAnnotationsValidator />
                 <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="TarefaModel.Name" id="TarefaModel.Name"
                     FloatLabelType="FloatLabelType.Always">
@@ -165,14 +157,11 @@
                                    Decimals="2" ValidateDecimalOnType="true"
                                    FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.HourlyRate" id="TarefaModel.HourlyRate">
                 </SfNumericTextBox>
-                <SfButton Type="submit" CssClass="e-primary" class="w-100">Create</SfButton>
+                <SfButton Type="submit" CssClass="e-primary" class="w-100">@(TarefaModel.Id == null ? "Create":"Update")</SfButton>
             </EditForm>
-        </div>
-    </div>
-    <SfToast ID="toast_default" @ref="ToastObj">
-        <ToastPosition X="Center"></ToastPosition>
-    </SfToast>
-    <SfDialogProvider />
+        </Content>
+    </DialogTemplates>
+    </SfDialog>
 </div>
 @code {
     SfToast ToastObj;
@@ -185,41 +174,52 @@
     private bool createTarefaView = false;
     private ProjectModel ProjectModel { get; set; } = new();
     private TarefaModel TarefaModel { get; set; } = new();
+    private bool tarefaDialogVisibility = false;
+    private bool projectDialogVisibility = false;
     protected override async Task OnInitializedAsync()
     {
         await GetSessionUserId();
         await LoadProjects();
         await LoadTarefas();
         await LoadClients();
-        StateHasChanged();
+        @* StateHasChanged(); *@
 
     }
 
     public async Task CreateProject()
-    {
+    {       
+          var res = new ProjectDto();
+        if(ProjectModel.Id != null ){
+        res = await ProjectsService.UpdateAsync(ProjectModel.Id.Value, ProjectModel);
+        }else{
+        res = await ProjectsService.CreateAsync(ProjectModel);
 
-        ProjectModel.ApplicationUserId = userId;
-        
-        var res = await ProjectsService.CreateAsync(ProjectModel);
+        } 
         if (res != null)
         {
             await LoadProjects();
             ProjectModel = new ProjectModel();
-            await UtilsService.ShowSuccessToast(ToastObj, "Project Created Successfully");
+            await UtilsService.ShowSuccessToast(ToastObj, res != null ? "Project Updated Successfully" : "Project Created Successfully");
+            this.projectDialogVisibility = false;
 
         }
-
     }
     public async Task CreateTarefa()
     {
-        TarefaModel.ApplicationUserId = userId;
-        TarefaModel.AssociatedUserId = userId;
-        var res = await TarefasService.CreateAsync(TarefaModel);
+         var res = new TarefaDto();
+        if(TarefaModel.Id != null ){
+        res = await TarefasService.UpdateAsync(TarefaModel.Id.Value, TarefaModel);
+        }else{
+        res = await TarefasService.CreateAsync(TarefaModel);
+
+        }
         if (res != null)
         {
             await LoadTarefas();
+            await this.KanbanObj.RefreshAsync();
             TarefaModel = new TarefaModel();
-            await UtilsService.ShowSuccessToast(ToastObj, "Task Created Successfully");
+            await UtilsService.ShowSuccessToast(ToastObj, res != null ? "Task Updated Successfully" : "Task Created Successfully");
+            this.tarefaDialogVisibility = false;
 
         }
 
@@ -243,31 +243,6 @@
     public async Task LoadProjects()
     {
         _personalProjects = await ProjectsService.GetProjectContainsInProjectUsersAsync(userId);
-    }
-
-    public void ToggleCreateProjectView()
-    {
-        createProjectView = !createProjectView;
-        if (!createProjectView)
-        {
-            ProjectModel = new ProjectModel();
-        }
-        else
-        {
-            createTarefaView = false;
-        }
-    }
-    public void ToggleCreateTarefaView()
-    {
-        createTarefaView = !createTarefaView;
-        if (!createTarefaView)
-        {
-            TarefaModel = new TarefaModel();
-        }
-        else
-        {
-            createProjectView = false;
-        }
     }
 
     private colorResult GetStatusClass(ProjectStatus status)
@@ -328,6 +303,10 @@
         if (args.RequestType == "cardChange" && args.ChangedRecords?.Any() == true)
         {
             var changedRecord = args.ChangedRecords.First();
+            if(changedRecord.StatusDescription == changedRecord.Status.ToString())
+            {
+                return;
+            }
             changedRecord.Status = changedRecord.StatusDescription switch
             {
                 "Created" => TarefaStatus.Created,
@@ -391,4 +370,40 @@
 
         }
 
+        private void openCreateNewTask()
+    {
+        TarefaModel = new TarefaModel();
+        TarefaModel.ApplicationUserId = userId;
+        TarefaModel.AssociatedUserId = userId;
+        this.tarefaDialogVisibility = true;
+    }
+        private void openCreateNewProject()
+    {
+        ProjectModel = new ProjectModel();
+        ProjectModel.ApplicationUserId = userId;
+        this.projectDialogVisibility = true;
+    }
+
+public void CardClickHandler(CardClickEventArgs<TarefaDto> args)
+    {
+        var data = args.Data;
+        if (data != null)
+        {
+            var tarefa = new TarefaModel
+            {
+                Id = data.Id,
+                Name = data.Name,
+                Description = data.Description,
+                AssociatedUserId = data.AssociatedUserId,
+                Status = data.Status,
+                StartDate = data.StartDate,
+                EndDate = data.EndDate,
+                Notes = data.Notes,
+                ApplicationUserId = data.ApplicationUserId,
+                HourlyRate = data.HourlyRate,
+            };
+            TarefaModel = tarefa;
+            this.tarefaDialogVisibility = true;
+        }
+    }
 }

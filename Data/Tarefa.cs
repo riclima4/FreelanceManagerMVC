@@ -20,6 +20,8 @@ namespace FreelanceManager.Data
             Notes = model.Notes;
             InternalNumber = number;
             ApplicationUserId = model.ApplicationUserId?.ToString();
+            AssociatedUserId = model.AssociatedUserId?.ToString();
+            ProjectId = model.ProjectId;
 
         }
         public string Code { get; set; }

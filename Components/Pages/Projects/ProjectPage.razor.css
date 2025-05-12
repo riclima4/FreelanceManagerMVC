@@ -1,1 +1,12 @@
-﻿
+﻿.puBadge{
+    padding: 2px 5px;
+    background-color: rgb(235, 235, 235);
+    border: 1px solid rgb(48, 48, 48);
+    border-radius: 5px;
+}
+.countStyle{
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    padding: 2px 5px;
+}

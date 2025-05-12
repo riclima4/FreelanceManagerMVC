@@ -24,6 +24,7 @@ namespace FreelanceManager.IO.Projects
             JoinedAt = entity.JoinedAt;
             RemovedAt = entity.RemovedAt;
             ApplicationUser = entity.ApplicationUser != null ? new ApplicationUserDto(entity.ApplicationUser) : new ApplicationUserDto();
+            ApplicationUserName = entity.ApplicationUser != null ? new ApplicationUserDto(entity.ApplicationUser).FullName : string.Empty;
         }
         public Guid ProjectId { get; set; }
         public string ApplicationUserId { get; set; }
@@ -31,6 +32,7 @@ namespace FreelanceManager.IO.Projects
         public DateTime? JoinedAt { get; set; }
         public DateTime? RemovedAt { get; set; }
         public ApplicationUserDto ApplicationUser { get; set; }
+        public string ApplicationUserName { get; set; }
 
     }
 }

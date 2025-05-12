@@ -9,13 +9,56 @@
 @using FreelanceManager.IO.Tarefas
 @using FreelanceManager.Services.Projects
 @using FreelanceManager.Services.Utils
-@using FreelanceManager.Services.Tarefas;
+@using FreelanceManager.Services.Tarefas
 @using Microsoft.AspNetCore.Authorization
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.DropDowns
+
 
 @rendermode InteractiveServer
 @attribute [Authorize]
+<PageTitle>ProjectPage</PageTitle>
 
-<h3>ProjectPage</h3>
+<div class="flex flex-column gap-10 mb-16">
+
+    <div class="flex justify-content-space-between align-items-center">
+        <div class="flex gap-10 align-items-center">
+            <div class="fs-24 fb-bold">@_project?.Name</div>
+            <div class="statusBadge @(GetStatusClass(_project.Status).bgColorOpacity)">
+                <div class="@(GetStatusClass(_project.Status).textColor) ">
+                    @_project.Status
+                </div>
+            </div>
+        </div>
+        <SfButton CssClass="e-primary" @onclick="openCreateNewTask">New Task
+            +</SfButton>
+    </div>
+    <div class="flex flex-column">
+        <div class="fs-16"><span class="fb-bold">Client: </span>@(_project.ClientId == null ? "N/A" :
+                        _project.Client?.Name)
+        </div>
+        <div class="fs-16"><span class="fb-bold">Description: </span>@_project?.Description</div>
+    </div>
+    <div class="flex flex-column gap-10">
+        <div class="flex gap-10 align-items-center">
+            <div class="fs-24 fb-bold">Members</div>
+            <div class="countStyle bg-color-purple color-white fs-14">
+                @_project.ProjectUsers.Count
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-10">
+            @if (_project.ProjectUsers != null)
+            {
+                foreach (var projectUser in _project.ProjectUsers)
+                {
+                    <div class="puBadge">
+                        @projectUser.ApplicationUser.FullName
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>
 
 <SfKanban @ref="KanbanObj" TValue="TarefaDto" KeyField="StatusDescription" DataSource="_tarefas">
     <KanbanColumns>
@@ -29,24 +72,44 @@
     <KanbanCardSettings HeaderField="Name" ContentField="Description" />
     <KanbanSwimlaneSettings KeyField="AssociatedUserId" TextField="AssociatedUser.FullName"
         AllowDragAndDrop="@_allowDragAndDrop" ShowEmptyRow="true"></KanbanSwimlaneSettings>
-    <KanbanEvents TValue="TarefaDto" ActionComplete="OnKanbanActionComplete" DragStart="@DragStartHandler">
+    <KanbanEvents TValue="TarefaDto" CardClick="@CardClickHandler" DialogOpen="@OnDialogOpen" ActionComplete="OnKanbanActionComplete" DragStart="@DragStartHandler">
     </KanbanEvents>
 </SfKanban>
+<SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="Visibility" 
+    IsModal="true">
+    <DialogTemplates>
+        <Header> Create Task </Header>
+        <Content>
+            <EditForm Model="TarefaModel" method="post" OnValidSubmit="CreateTarefa" FormName="TarefaForm"
+                class="w-100 flex flex-column gap-10" style="margin-top: 5px; !important"> 
+                <DataAnnotationsValidator />
+                <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="TarefaModel.Name" id="TarefaModel.Name"
+                    FloatLabelType="FloatLabelType.Always">
+                </SfTextBox>
+                <SfTextBox Placeholder='Description' Type="InputType.Text" CssClass="e-outline"
+                    FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Description"
+                    id="TarefaModel.Description">
+                </SfTextBox>
+                <SfComboBox TValue="string" TItem="ProjectUserDto" Placeholder="Associate To" CssClass="e-outline" FloatLabelType="FloatLabelType.Always"
+                            DataSource="@_project.ProjectUsers"  @bind-Value="TarefaModel.AssociatedUserId"> 
+                    <ComboBoxFieldSettings Value="ApplicationUserId" Text="ApplicationUserName"></ComboBoxFieldSettings>
+                </SfComboBox>
+                <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
+                           FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Notes" id="TarefaModel.Notes">
+                </SfTextBox>
+                <SfNumericTextBox  CssClass="e-outline" Format="c2"  Min="0" Placeholder="Hourly Rate"
+                                   Decimals="2" ValidateDecimalOnType="true"
+                                   FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.HourlyRate" id="TarefaModel.HourlyRate">
+                </SfNumericTextBox>
+                <SfButton Type="submit" CssClass="e-primary" class="w-100">@(TarefaModel.Id == null ? "Create":"Update")</SfButton>
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
 
 <SfToast ID="ProjectPageId" @ref="ToastObj">
     <ToastPosition X="Center"></ToastPosition>
 </SfToast>
-@* <p>
-    @foreach (var t in _tarefas)
-    {
-        <span>@_tarefas.Count</span>
-
-        <br />
-        <span>@t.AssociatedUserId</span>
-
-        <br />
-    }
-</p> *@
 
 @code {
     SfToast ToastObj;
@@ -58,6 +121,18 @@
     [SupplyParameterFromQuery]
     private Guid ProjectId { get; set; }
     private bool _isInitialized = false;
+    private ProjectDto _project = new ProjectDto();
+    private TarefaModel TarefaModel { get; set; } = new();
+    private bool createTarefaView = false;
+    public class colorResult
+    {
+        public string bgColor { get; set; }
+        public string textColor { get; set; }
+        public string bgColorOpacity { get; set; }
+
+    }
+    private bool Visibility { get; set; } = false;
+
 
     protected override Task OnInitializedAsync() => Task.CompletedTask;
 
@@ -68,13 +143,22 @@
             _isInitialized = true;
             await GetSessionUserId();
             await IsOwner();
+            await LoadProjectById();
             await LoadTarefasByProjectId(ProjectId);
 
             StateHasChanged();
         }
     }
+    private void openCreateNewTask()
+    {
+        TarefaModel = new TarefaModel();
+        TarefaModel.ApplicationUserId = userId;
+        TarefaModel.AssociatedUserId = userId;
+        TarefaModel.ProjectId = ProjectId;
+        this.Visibility = true;
+    }
 
-    public void DragStartHandler(DragEventArgs<TarefaDto> args)
+    public void DragStartHandler(Syncfusion.Blazor.Kanban.DragEventArgs<TarefaDto> args)
     {
         var data = args.Data[0];
         if (!userId.Equals(data.AssociatedUserId) && !userId.Equals(data.ApplicationUserId))
@@ -84,6 +168,23 @@
         }
     }
 
+    private async Task LoadProjectById()
+    {
+        _project = await ProjectsService.GetByIdAsync(ProjectId);
+        if (_project == null)
+        {
+            await UtilsService.ShowErrorToast(ToastObj, "Project not found");
+            return;
+        }
+    }
+    public void ToggleCreateTarefaView()
+    {
+        createTarefaView = !createTarefaView;
+        if (!createTarefaView)
+        {
+            TarefaModel = new TarefaModel();
+        }
+    }
     private async Task LoadProjectUsers()
     {
         List<ProjectUserDto> projectUsers = await ProjectsService.GetProjectUsersAsync(ProjectId);
@@ -106,6 +207,28 @@
 
             _tarefas.Add(tarefa);
         }
+    }
+
+    public async Task CreateTarefa()
+    {
+        
+        
+        var res = new TarefaDto();
+        if(TarefaModel.Id != null ){
+        res = await TarefasService.UpdateAsync(TarefaModel.Id.Value, TarefaModel);
+        }else{
+        res = await TarefasService.CreateAsync(TarefaModel);
+
+        }
+        if (res != null)
+        {
+            await LoadTarefasByProjectId(ProjectId);
+            await KanbanObj.RefreshAsync();
+            TarefaModel = new TarefaModel();
+            await UtilsService.ShowSuccessToast(ToastObj, res != null ? "Task Updated Successfully" : "Task Created Successfully");
+            this.Visibility = false;
+        }
+
     }
     private async Task IsOwner()
     {
@@ -136,6 +259,10 @@
         if (args.RequestType == "cardChange" && args.ChangedRecords?.Any() == true)
         {
             var changedRecord = args.ChangedRecords.First();
+             if(changedRecord.StatusDescription == changedRecord.Status.ToString())
+            {
+                return;
+            }
             changedRecord.Status = changedRecord.StatusDescription switch
             {
                 "Created" => TarefaStatus.Created,
@@ -171,5 +298,72 @@
         }
     }
 
+    private colorResult GetStatusClass(ProjectStatus status)
+    {
+        switch (status)
+        {
+            case ProjectStatus.Created:
+                return new colorResult
+                {
+                    bgColor = "bg-color-created",
+                    textColor = "color-created",
+                    bgColorOpacity =
+                "bg-color-created-opacity"
+                };
+            case ProjectStatus.Completed:
+                return new colorResult
+                {
+                    bgColor = "bg-color-completed",
+                    textColor = "color-completed",
+                    bgColorOpacity =
+                "bg-color-completed-opacity"
+                };
+            case ProjectStatus.InProgress:
+                return new colorResult
+                {
+                    bgColor = "bg-color-inprogress",
+                    textColor = "color-inprogress",
+                    bgColorOpacity =
+                "bg-color-inprogress-opacity"
+                };
+            case ProjectStatus.OnHold:
+                return new colorResult
+                {
+                    bgColor = "bg-color-onhold",
+                    textColor = "color-onhold",
+                    bgColorOpacity =
+                "bg-color-onhold-opacity"
+                };
+            default:
+                return new colorResult { };
+        }
 
+    }
+
+    public void CardClickHandler(CardClickEventArgs<TarefaDto> args)
+    {
+        var data = args.Data;
+        if (data != null)
+        {
+            var tarefa = new TarefaModel
+            {
+                Id = data.Id,
+                Name = data.Name,
+                Description = data.Description,
+                AssociatedUserId = data.AssociatedUserId,
+                Status = data.Status,
+                StartDate = data.StartDate,
+                EndDate = data.EndDate,
+                Notes = data.Notes,
+                ApplicationUserId = data.ApplicationUserId,
+                HourlyRate = data.HourlyRate,
+            };
+            TarefaModel = tarefa;
+            this.Visibility = true;
+        }
+    }
+      private void OnDialogOpen(DialogOpenEventArgs<TarefaDto> args)
+    {
+        args.Cancel = true;
+    }
 }
