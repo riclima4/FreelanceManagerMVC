@@ -20,7 +20,6 @@
 @rendermode InteractiveServer
 
 @using Microsoft.AspNetCore.Authorization
-@using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.DropDowns
 
 @attribute [Authorize]
@@ -41,7 +40,7 @@
                 {
 
                     <div class="cardStyle cardStyle2 addPointer h-180px w-300px flex flex-column"
-                        @onclick="() => GoToProjectPage(project.Id)">
+                         @onclick="() => GoToProjectPage(project.Id)">
                         <div class="flex justify-content-space-between align-items-center">
                             <h5 class="m-0">@project.Name</h5>
                             @if (project.ApplicationUserId == userId)
@@ -109,60 +108,62 @@
         <ToastPosition X="Center"></ToastPosition>
     </SfToast>
     <SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="projectDialogVisibility" 
-    IsModal="true">
-    <DialogTemplates>
-        <Header> Create Project </Header>
-        <Content>
-            <EditForm Model="ProjectModel" method="post" OnValidSubmit="CreateProject" FormName="ProjectForm"
-                class="w-100 flex flex-column gap-10" style="margin-top: 5px; !important">
-                <DataAnnotationsValidator />
-                <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="ProjectModel.Name"
-                    id="ProjectModel.Name" FloatLabelType="FloatLabelType.Always">
-                </SfTextBox>
-                <SfTextBox Placeholder='Description' Type="InputType.Text" CssClass="e-outline"
-                           FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Description"
-                           id="ProjectModel.Description">
-                </SfTextBox>
-                <SfComboBox TValue="Guid?" TItem="ClientDto" Placeholder="Client" CssClass="e-outline"
-                            DataSource="@_clients"  @bind-Value="ProjectModel.ClientId"> 
-                    <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
-                </SfComboBox>
-                <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
-                    FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Notes" id="ProjectModel.Notes">
-                </SfTextBox>
-                <SfButton Type="submit" CssClass="e-primary" class="w-100">@(ProjectModel.Id == null ? "Create":"Update")</SfButton>
-            </EditForm>
-        </Content>
-    </DialogTemplates>
+              IsModal="true">
+        <DialogTemplates>
+            <Header> Create Project </Header>
+            <Content>
+                <EditForm Model="ProjectModel" method="post" OnValidSubmit="CreateProject" FormName="ProjectForm"
+                          class="w-100 flex flex-column gap-10" style="margin-top: 5px; !important">
+                    <DataAnnotationsValidator />
+                    <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="ProjectModel.Name"
+                               id="ProjectModel.Name" FloatLabelType="FloatLabelType.Always">
+                    </SfTextBox>
+                    <SfTextBox Placeholder='Description' Type="InputType.Text" CssClass="e-outline"
+                               FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Description"
+                               id="ProjectModel.Description">
+                    </SfTextBox>
+                    <SfComboBox TValue="Guid?" TItem="ClientDto" Placeholder="Client" CssClass="e-outline"
+                                DataSource="@_clients"  @bind-Value="ProjectModel.ClientId"> 
+                        <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                    </SfComboBox>
+                    <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
+                               FloatLabelType="FloatLabelType.Always" @bind-Value="ProjectModel.Notes" id="ProjectModel.Notes">
+                    </SfTextBox>
+                    <SfButton Type="submit" CssClass="e-primary" class="w-100">@(ProjectModel.Id == null ? "Create":"Update")</SfButton>
+                </EditForm>
+            </Content>
+        </DialogTemplates>
     </SfDialog>
     <SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="tarefaDialogVisibility" 
-    IsModal="true">
-    <DialogTemplates>
-        <Header> Create Task </Header>
-        <Content>
-            <EditForm Model="TarefaModel" method="post" OnValidSubmit="CreateTarefa" FormName="TarefaForm"
-                class="w-100 flex flex-column gap-10" style="margin-top: 5px; !important"> 
-                <DataAnnotationsValidator />
-                <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="TarefaModel.Name" id="TarefaModel.Name"
-                    FloatLabelType="FloatLabelType.Always">
-                </SfTextBox>
-                <SfTextBox Placeholder='Description' Type="InputType.Text" CssClass="e-outline"
-                    FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Description"
-                    id="TarefaModel.Description">
-                </SfTextBox>
-                <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
-                           FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Notes" id="TarefaModel.Notes">
-                </SfTextBox>
-                <SfNumericTextBox  CssClass="e-outline" Format="c2"  Min="0" Placeholder="Hourly Rate"
-                                   Decimals="2" ValidateDecimalOnType="true"
-                                   FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.HourlyRate" id="TarefaModel.HourlyRate">
-                </SfNumericTextBox>
-                <SfButton Type="submit" CssClass="e-primary" class="w-100">@(TarefaModel.Id == null ? "Create":"Update")</SfButton>
-            </EditForm>
-        </Content>
-    </DialogTemplates>
+              IsModal="true">
+        <DialogTemplates>
+            <Header> Create Task </Header>
+            <Content>
+                <EditForm Model="TarefaModel" method="post" OnValidSubmit="CreateTarefa" FormName="TarefaForm"
+                          class="w-100 flex flex-column gap-10" style="margin-top: 5px; !important"> 
+                    <DataAnnotationsValidator />
+                    <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="TarefaModel.Name" id="TarefaModel.Name"
+                               FloatLabelType="FloatLabelType.Always">
+                    </SfTextBox>
+                    <SfTextBox Placeholder='Description' Type="InputType.Text" CssClass="e-outline"
+                               FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Description"
+                               id="TarefaModel.Description">
+                    </SfTextBox>
+                    <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
+                               FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Notes" id="TarefaModel.Notes">
+                    </SfTextBox>
+                    <SfNumericTextBox  CssClass="e-outline" Format="c2"  Min="0" Placeholder="Hourly Rate"
+                                       Decimals="2" ValidateDecimalOnType="true"
+                                       FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.HourlyRate" id="TarefaModel.HourlyRate">
+                    </SfNumericTextBox>
+                    <SfButton Type="submit" CssClass="e-primary" class="w-100">@(TarefaModel.Id == null ? "Create":"Update")</SfButton>
+                </EditForm>
+            </Content>
+        </DialogTemplates>
     </SfDialog>
 </div>
+<SfDialogProvider />
+
 @code {
     SfToast ToastObj;
     SfKanban<TarefaDto> KanbanObj;

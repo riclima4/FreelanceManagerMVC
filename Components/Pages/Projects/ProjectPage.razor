@@ -3,6 +3,8 @@
 @inject IProjectsService ProjectsService
 @inject ITarefasService TarefasService
 @inject IUtilsService UtilsService
+@inject SfDialogService DialogService
+
 @using System.Security.Claims
 @using FreelanceManager.Data.Enum
 @using FreelanceManager.IO.Projects
@@ -60,7 +62,7 @@
     </div>
 </div>
 
-<SfKanban @ref="KanbanObj" TValue="TarefaDto" KeyField="StatusDescription" DataSource="_tarefas">
+<SfKanban @ref="KanbanObj" TValue="TarefaDto" KeyField="StatusDescription" DataSource="_tarefas" AllowDragAndDrop="true">
     <KanbanColumns>
         <KanbanColumn HeaderText="To Do" KeyField="@(new List<string>() { "Created" })"></KanbanColumn>
         <KanbanColumn HeaderText="In Progress" KeyField="@(new List<string>() { "InProgress" })">
@@ -69,9 +71,29 @@
         <KanbanColumn HeaderText="Completed" KeyField="@(new List<string>() { "Completed" })">
         </KanbanColumn>
     </KanbanColumns>
-    <KanbanCardSettings HeaderField="Name" ContentField="Description" />
+    <KanbanCardSettings HeaderField="Name" ContentField="Description">
+        <Template>
+            @{
+                var data = (context as TarefaDto);
+                <div class="kanban-card">
+                    <div class="card-header "> @data.Name</div>
+                    <div class="card-content">@data.Description</div>
+                    @if (isOwner)
+                    {
+                        <div class="card-actions">
+                            <button class="delete-button" @onclick="() => DeleteTask(data.Id)" @onclick:stopPropagation="true">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </div>
+                    }
+                </div>
+            }
+        </Template>
+    </KanbanCardSettings>
     <KanbanSwimlaneSettings KeyField="AssociatedUserId" TextField="AssociatedUser.FullName"
-        AllowDragAndDrop="@_allowDragAndDrop" ShowEmptyRow="true"></KanbanSwimlaneSettings>
+                            AllowDragAndDrop="@_allowDragAndDrop" ShowEmptyRow="true">
+
+    </KanbanSwimlaneSettings>
     <KanbanEvents TValue="TarefaDto" CardClick="@CardClickHandler" DialogOpen="@OnDialogOpen" ActionComplete="OnKanbanActionComplete" DragStart="@DragStartHandler">
     </KanbanEvents>
 </SfKanban>
@@ -111,12 +133,15 @@
     <ToastPosition X="Center"></ToastPosition>
 </SfToast>
 
+<SfDialogProvider />
+
 @code {
     SfToast ToastObj;
     SfKanban<TarefaDto> KanbanObj;
     private bool _allowDragAndDrop;
     private List<TarefaDto> _tarefas = new List<TarefaDto>();
     private string userId;
+    private bool isOwner;
 
     [SupplyParameterFromQuery]
     private Guid ProjectId { get; set; }
@@ -235,10 +260,12 @@
         var isOwner = await ProjectsService.GetByIdAsync(ProjectId);
         if (userId.Equals(isOwner.ApplicationUserId))
         {
+            this.isOwner = true;
             _allowDragAndDrop = true;
         }
         else
         {
+            this.isOwner = false;
             _allowDragAndDrop = false;
         }
     }
@@ -365,5 +392,23 @@
       private void OnDialogOpen(DialogOpenEventArgs<TarefaDto> args)
     {
         args.Cancel = true;
+    }
+    private async Task DeleteTask(Guid taskId)
+    {
+        bool isConfirmed = await DialogService.ConfirmAsync(
+            "Are you sure you want to delete this task?",
+            "Delete",
+            new DialogOptions
+            {
+                PrimaryButtonOptions = new DialogButtonOptions { Content = "Delete" },
+                CancelButtonOptions = new DialogButtonOptions { Content = "Cancel" }
+            });
+
+        if (isConfirmed) {
+            await TarefasService.DeleteAsync(taskId);
+            await LoadTarefasByProjectId(ProjectId);
+            await UtilsService.ShowSuccessToast(ToastObj, "Task deleted");
+        }
+
     }
 }
