@@ -160,7 +160,19 @@ namespace FreelanceManager.Services.Projects
                 await _unitOfWork.ProjectUsersRepository.Delete(entity);
             }
         }
+        public async Task<bool> DeleteProjectUserByUserIdAndProjectId(string id, Guid projectId)
+        {
+            var entity = await _unitOfWork.
+                ProjectUsersRepository.
+                GetEntity(entity => entity.ApplicationUserId == id && entity.ProjectId == projectId).
+                FirstAsync();
 
+            if (entity is not null)
+            {
+                await _unitOfWork.ProjectUsersRepository.Delete(entity);
+            }
+            return true;
+        }
         public async Task<bool> CanSaveProjectUserAsync(ProjectUserModel model)
         {
             var existUser = await _unitOfWork.
@@ -176,6 +188,14 @@ namespace FreelanceManager.Services.Projects
         #endregion
         #region Tarefas
 
+        public async Task<List<TarefaDto>> GetTarefasByProjectIdAndAssociatedUserIdAsync(Guid projectId, string AssociatedUserId)
+        {
+            return await _unitOfWork.
+                TarefasRepository.
+                GetEntityAsNoTracking(entity => entity.ProjectId == projectId && entity.AssociatedUserId == AssociatedUserId).
+                Select(entity => new TarefaDto(entity)).
+                ToListAsync();
+        }
         public async Task<List<TarefaDto>> GetTarefasAsync(Guid projectId)
         {
             return await _unitOfWork.
@@ -205,8 +225,18 @@ namespace FreelanceManager.Services.Projects
             var entity = await _unitOfWork.
                 ProjectInvitesRepository.
                 CreateAsync(new ProjectInvite(model));
-
+            await _unitOfWork.CommitAsync();
             return await GetProjectInviteByIdAsync(entity.Id);
+        }
+        public async Task<List<ProjectInviteDto>> GetProjectInvitesByUserIdAsync(string userId)
+        {
+            return await _unitOfWork.
+                ProjectInvitesRepository.
+                GetEntityAsNoTracking(entity => entity.InvitedApplicationUserId == userId).
+                Include(entity => entity.Project).
+                Include(entity => entity.SenderApplicationUser).
+                Select(entity => new ProjectInviteDto(entity)).
+                ToListAsync();
         }
         public async Task<ProjectInviteDto> GetProjectInviteByIdAsync(Guid id)
         {
@@ -240,8 +270,19 @@ namespace FreelanceManager.Services.Projects
 
             entity.Status = model.Status;
             entity.Description = model.Description;
-            await _unitOfWork.ProjectInvitesRepository.Edit(entity);
 
+
+            await _unitOfWork.ProjectInvitesRepository.Edit(entity);
+            
+            if(entity.Status == ProjectInviteStatus.Accepted){
+                var projectUser = new ProjectUserModel{
+                    ApplicationUserId = entity.InvitedApplicationUserId,
+                    ProjectId = entity.ProjectId,
+                    Role = ApplicationUserType.Normal,
+                    JoinedAt = DateTime.Now,
+                };
+                await CreateProjectUserAsync(projectUser);
+            }
             return await GetProjectInviteByIdAsync(id);
         }
 

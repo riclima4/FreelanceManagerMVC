@@ -120,8 +120,7 @@ namespace FreelanceManager.Data.Repositories
         {
             if (entity is not null)
             {
-                //EntitySet.Remove(entity);
-                entity.IsDeleted = true;
+                EntitySet.Remove(entity);
                 await _context.SaveChangesAsync();
             }
 

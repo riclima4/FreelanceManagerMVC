@@ -20,6 +20,8 @@ namespace FreelanceManager.IO.Projects
             Status = entity.Status;
             InvitedAt = entity.InvitedAt;
             Description = entity.Description;
+            Project = entity.Project;
+            SenderApplicationUser = entity.SenderApplicationUser;
 
         }
         public Guid ProjectId { get; set; }
@@ -28,6 +30,8 @@ namespace FreelanceManager.IO.Projects
         public string Description { get; set; }
         public DateTime InvitedAt { get; set; }
         public ProjectInviteStatus Status { get; set; }
+        public Project Project { get; set; }
+        public ApplicationUser SenderApplicationUser { get; set; }
 
 
     }

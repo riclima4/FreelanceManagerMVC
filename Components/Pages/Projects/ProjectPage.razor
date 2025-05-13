@@ -1,8 +1,10 @@
 ﻿@page "/ProjectPage"
+
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IProjectsService ProjectsService
 @inject ITarefasService TarefasService
 @inject IUtilsService UtilsService
+@inject UserManager<ApplicationUser> UserManager
 @inject SfDialogService DialogService
 
 @using System.Security.Claims
@@ -15,7 +17,10 @@
 @using Microsoft.AspNetCore.Authorization
 @using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.DropDowns
-
+@using Syncfusion.Blazor.Kanban
+@using Microsoft.AspNetCore.Identity
+@using FreelanceManager.Data
+@using Microsoft.EntityFrameworkCore
 
 @rendermode InteractiveServer
 @attribute [Authorize]
@@ -32,8 +37,13 @@
                 </div>
             </div>
         </div>
-        <SfButton CssClass="e-primary" @onclick="openCreateNewTask">New Task
-            +</SfButton>
+        @if (isOwner)
+        {
+            <div class="flex gap-10">
+                <SfButton CssClass="e-primary" @onclick="openInviteDialog">Invite User</SfButton>
+                <SfButton CssClass="e-primary" @onclick="openCreateNewTask">New Task +</SfButton>
+            </div>
+        }
     </div>
     <div class="flex flex-column">
         <div class="fs-16"><span class="fb-bold">Client: </span>@(_project.ClientId == null ? "N/A" :
@@ -53,9 +63,15 @@
             {
                 foreach (var projectUser in _project.ProjectUsers)
                 {
-                    <div class="puBadge">
-                        @projectUser.ApplicationUser.FullName
-                    </div>
+                <div class="puBadge">
+                    <span>@projectUser.ApplicationUser.FullName</span>
+                    @if (isOwner && projectUser.ApplicationUserId != userId)
+                    {
+                        <button class="remove-member-btn" @onclick="() => RemoveMember(projectUser.ApplicationUserId)" @onclick:stopPropagation>
+                            <i class="fa fa-times"></i>
+                        </button>
+                    }
+                </div>
                 }
             }
         </div>
@@ -129,10 +145,27 @@
     </DialogTemplates>
 </SfDialog>
 
-<SfToast ID="ProjectPageId" @ref="ToastObj">
-    <ToastPosition X="Center"></ToastPosition>
-</SfToast>
+<SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="InviteDialogVisibility" IsModal="true">
+    <DialogTemplates>
+        <Header>Invite User</Header>
+        <Content>
+            <div class="w-100 flex flex-column gap-10" style="margin-top: 5px;">
+                <SfComboBox TValue="string" TItem="ApplicationUser" Placeholder="Select User" 
+                           CssClass="e-outline" FloatLabelType="FloatLabelType.Always"
+                           DataSource="@_availableUsers" @bind-Value="@selectedUserId">
+                    <ComboBoxFieldSettings Value="Id" Text="FullName"></ComboBoxFieldSettings>
+                </SfComboBox>
+                <SfButton CssClass="e-primary" @onclick="InviteUser">Invite</SfButton>
+            </div>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
 
+    <div>
+        <SfToast ID="ProjectPageId" @ref="ToastObj">
+            <ToastPosition X="Center"></ToastPosition>
+        </SfToast>
+    </div>
 <SfDialogProvider />
 
 @code {
@@ -142,13 +175,24 @@
     private List<TarefaDto> _tarefas = new List<TarefaDto>();
     private string userId;
     private bool isOwner;
+    private string OldAssociatedUserId;
 
+    private List<ApplicationUser> _availableUsers = new();
     [SupplyParameterFromQuery]
     private Guid ProjectId { get; set; }
     private bool _isInitialized = false;
     private ProjectDto _project = new ProjectDto();
     private TarefaModel TarefaModel { get; set; } = new();
     private bool createTarefaView = false;
+    private bool InviteDialogVisibility { get; set; } = false;
+    private string selectedUserId;
+
+
+    private async Task getUsers()
+    {
+        _availableUsers = await UserManager.Users.ToListAsync();
+        _availableUsers.RemoveAll(user => user.Id == userId);
+    }
     public class colorResult
     {
         public string bgColor { get; set; }
@@ -170,7 +214,7 @@
             await IsOwner();
             await LoadProjectById();
             await LoadTarefasByProjectId(ProjectId);
-
+            await getUsers();             
             StateHasChanged();
         }
     }
@@ -186,6 +230,10 @@
     public void DragStartHandler(Syncfusion.Blazor.Kanban.DragEventArgs<TarefaDto> args)
     {
         var data = args.Data[0];
+        {
+            OldAssociatedUserId = data.AssociatedUserId;
+        };
+
         if (!userId.Equals(data.AssociatedUserId) && !userId.Equals(data.ApplicationUserId))
         {
             args.Cancel = true;
@@ -286,7 +334,7 @@
         if (args.RequestType == "cardChange" && args.ChangedRecords?.Any() == true)
         {
             var changedRecord = args.ChangedRecords.First();
-             if(changedRecord.StatusDescription == changedRecord.Status.ToString())
+            if(changedRecord.StatusDescription == changedRecord.Status.ToString() && changedRecord.AssociatedUserId == OldAssociatedUserId)
             {
                 return;
             }
@@ -299,6 +347,7 @@
                 _ => changedRecord.Status
             };
             TarefaModel model = new TarefaModel();
+            model.Id = changedRecord.Id;
             model.AssociatedUserId = changedRecord.AssociatedUserId;
             model.Code = changedRecord.Code;
             model.Name = changedRecord.Name;
@@ -307,6 +356,9 @@
             model.EndDate = changedRecord.EndDate;
             model.Notes = changedRecord.Notes;
             model.Status = changedRecord.Status;
+            model.ProjectId = ProjectId;
+            model.ApplicationUserId = changedRecord.ApplicationUserId;
+            model.HourlyRate = changedRecord.HourlyRate;
 
             var result = await TarefasService.UpdateAsync(changedRecord.Id, model);
             if (result != null)
@@ -319,9 +371,7 @@
             }
 
             await LoadTarefasByProjectId(ProjectId);
-
             await KanbanObj.RefreshAsync();
-
         }
     }
 
@@ -410,5 +460,61 @@
             await UtilsService.ShowSuccessToast(ToastObj, "Task deleted");
         }
 
+    }
+
+    private void openInviteDialog()
+    {
+        InviteDialogVisibility = true;
+    }
+
+    private async Task InviteUser()
+    {
+        if (string.IsNullOrEmpty(selectedUserId))
+        {
+            await UtilsService.ShowErrorToast(ToastObj, "Please select a user");
+            return;
+        }
+        ProjectInviteModel projectInviteModel = new ProjectInviteModel();
+        projectInviteModel.ProjectId = ProjectId;
+        projectInviteModel.InvitedApplicationUserId = selectedUserId;
+        projectInviteModel.SenderApplicationUserId = userId;
+
+        var result = await ProjectsService.CreateProjectInviteAsync(projectInviteModel);
+    
+        if (result != null)
+        {
+            await LoadProjectById();
+            InviteDialogVisibility = false;
+            selectedUserId = null;
+            await UtilsService.ShowSuccessToast(ToastObj, "Invitation sent successfully");
+        }
+        else
+        {
+            await UtilsService.ShowErrorToast(ToastObj, "Failed to send invitation");
+        }
+    }
+
+    private async Task RemoveMember(string memberId)
+    {
+            bool isConfirmed = await DialogService.ConfirmAsync(
+            "Are you sure you want to remove this member?",
+            "Remove",
+            new DialogOptions
+            {
+                PrimaryButtonOptions = new DialogButtonOptions { Content = "Remove" },
+                CancelButtonOptions = new DialogButtonOptions { Content = "Cancel" }
+            });
+            var tarefas = await ProjectsService.GetTarefasByProjectIdAndAssociatedUserIdAsync(ProjectId, memberId);
+            if (isConfirmed) {
+                if(tarefas.Count > 0){
+                    await UtilsService.ShowErrorToast(ToastObj, "Member has tasks assigned.");
+                    return;
+                }
+            else{
+                await ProjectsService.DeleteProjectUserByUserIdAndProjectId(memberId,ProjectId);
+                await LoadTarefasByProjectId(ProjectId);
+                await UtilsService.ShowSuccessToast(ToastObj, "Member Removed");
+            }
+        }
     }
 }

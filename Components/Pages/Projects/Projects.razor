@@ -104,9 +104,12 @@
             </SfKanban>
         </div>
     </div>
+    <div>
     <SfToast ID="toast_default" @ref="ToastObj">
         <ToastPosition X="Center"></ToastPosition>
     </SfToast>
+    </div>
+
     <SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="projectDialogVisibility" 
               IsModal="true">
         <DialogTemplates>
@@ -244,6 +247,7 @@
     public async Task LoadProjects()
     {
         _personalProjects = await ProjectsService.GetProjectContainsInProjectUsersAsync(userId);
+        
     }
 
     private colorResult GetStatusClass(ProjectStatus status)

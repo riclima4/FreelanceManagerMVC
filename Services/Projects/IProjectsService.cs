@@ -25,9 +25,11 @@ namespace FreelanceManager.Services.Projects
         Task<ProjectUserDto> GetProjectUserByIdAsync(Guid id);
         Task<ProjectUserDto> CreateProjectUserAsync(ProjectUserModel model);
         Task DeleteProjectUserAsync(ProjectUserModel model);
+        Task<bool> DeleteProjectUserByUserIdAndProjectId(string id, Guid projectId);
         Task<bool> CanSaveProjectUserAsync(ProjectUserModel model);
         #endregion
         #region Tarefas
+        Task<List<TarefaDto>> GetTarefasByProjectIdAndAssociatedUserIdAsync(Guid projectId, string AssociatedUserId);
         Task<List<TarefaDto>> GetTarefasAsync(Guid projectId);
         #endregion
         #region ProjectInvites
@@ -36,7 +38,7 @@ namespace FreelanceManager.Services.Projects
         Task DeleteProjectInviteAsync(ProjectInviteModel model);
         Task<ProjectInviteDto> UpdateProjectInviteAsync(Guid id, ProjectInviteModel model);
         Task<ProjectInviteDto> GetProjectInviteByIdAsync(Guid id);
-
+        Task<List<ProjectInviteDto>> GetProjectInvitesByUserIdAsync(string userId);
         #endregion
     }
 }
