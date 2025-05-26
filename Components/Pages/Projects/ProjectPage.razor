@@ -22,9 +22,11 @@
 @using Microsoft.AspNetCore.Identity
 @using FreelanceManager.Data
 @using Microsoft.EntityFrameworkCore
+@using System.Globalization
 
 @rendermode InteractiveServer
 @attribute [Authorize]
+
 <PageTitle>ProjectPage</PageTitle>
 
 <div class="flex flex-column gap-10 mb-16">
@@ -36,9 +38,10 @@
                 <div class="@(GetStatusClass(_project.Status).textColor) ">
                     @_project.Status
                 </div>
-            </div>        </div>
+            </div>        
+            </div>
         <div class="flex gap-10">
-            <SfButton CssClass="e-info" @onclick="openTimesheetDialog">Fill Timesheet</SfButton>
+            <SfButton CssClass="e-primary" @onclick="openTimesheetDialog">Fill Timesheet</SfButton>
             @if (isOwner)
             {
                 <SfButton CssClass="e-primary" @onclick="openInviteDialog">Invite User</SfButton>
@@ -158,23 +161,23 @@
                 </SfComboBox>
                 <SfButton CssClass="e-primary" @onclick="InviteUser">Invite</SfButton>
             </div>
-        </Content>    </DialogTemplates>
+        </Content>    
+    </DialogTemplates>
 </SfDialog>
 
-<!-- Timesheet Dialog -->
 <SfDialog Target="#target" Width="500px" ShowCloseIcon="true" @bind-Visible="TimesheetDialogVisibility" IsModal="true">
     <DialogTemplates>
-        <Header>Fill Timesheet - @DateTime.Today.ToString("MMMM dd, yyyy")</Header>
+        <Header>Log Time Entry - @DateTime.Today.ToString("MMMM dd, yyyy", new CultureInfo("en-US"))</Header>
         <Content>
             <div class="w-100 flex flex-column gap-15" style="margin-top: 10px;">
                 <div class="flex flex-column gap-10">
-                    <h5>Select Task and Enter Hours</h5>
                     <SfComboBox TValue="Guid?" TItem="TarefaDto" 
                                Placeholder="Select Task" CssClass="e-outline"
                                DataSource="@_userTasks" @bind-Value="selectedTaskId"
                                FloatLabelType="FloatLabelType.Always">
                         <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
-                    </SfComboBox>                    <SfTextBox @bind-Value="workedHours" 
+                    </SfComboBox>                    
+                    <SfTextBox @bind-Value="workedHours" 
                               Placeholder="Hours Worked (e.g., 2.5)" CssClass="e-outline"
                               FloatLabelType="FloatLabelType.Always">
                     </SfTextBox>
@@ -185,7 +188,7 @@
                     </SfTextBox>
                 </div>
                 
-                <div class="flex gap-10 mt-15">
+                <div class="flex gap-10" style="margin-top: 10px;">
                     <SfButton CssClass="e-primary w-50" @onclick="SaveTimesheetEntry">Save Entry</SfButton>
                     <SfButton CssClass="e-outline w-50" @onclick="CloseTimesheetDialog">Cancel</SfButton>
                 </div>
@@ -215,9 +218,10 @@
     private Guid ProjectId { get; set; }
     private bool _isInitialized = false;
     private ProjectDto _project = new ProjectDto();
-    private TarefaModel TarefaModel { get; set; } = new();    private bool createTarefaView = false;
+    private TarefaModel TarefaModel { get; set; } = new();    
+    private bool createTarefaView = false;
     private bool InviteDialogVisibility { get; set; } = false;
-    private string selectedUserId;    // Timesheet properties
+    private string selectedUserId;    
     private bool TimesheetDialogVisibility { get; set; } = false;
     private Guid? selectedTaskId;
     private string workedHours = "";
@@ -264,19 +268,19 @@
         this.Visibility = true;
     }
 
-    public void DragStartHandler(Syncfusion.Blazor.Kanban.DragEventArgs<TarefaDto> args)
+    public async Task DragStartHandler(Syncfusion.Blazor.Kanban.DragEventArgs<TarefaDto> args)
     {
         var data = args.Data[0];
-        {
-            OldAssociatedUserId = data.AssociatedUserId;
-        };
+        OldAssociatedUserId = data.AssociatedUserId;
 
         if (!userId.Equals(data.AssociatedUserId) && !userId.Equals(data.ApplicationUserId))
         {
             args.Cancel = true;
-            UtilsService.ShowErrorToast(ToastObj, "You can only drag your own tasks.");
+            await UtilsService.ShowErrorToast(ToastObj, "You can only drag your own tasks.");
+            return;
         }
     }
+
 
     private async Task LoadProjectById()
     {
@@ -325,9 +329,12 @@
         
         var res = new TarefaDto();
         if(TarefaModel.Id != null ){
+
         res = await TarefasService.UpdateAsync(TarefaModel.Id.Value, TarefaModel);
         }else{
+
         res = await TarefasService.CreateAsync(TarefaModel);
+        await UpdateProjectStatus();
 
         }
         if (res != null)
@@ -408,6 +415,8 @@
             }
 
             await LoadTarefasByProjectId(ProjectId);
+            await UpdateProjectStatus();
+
             await KanbanObj.RefreshAsync();
         }
     }
@@ -495,6 +504,7 @@
             await TarefasService.DeleteAsync(taskId);
             await LoadTarefasByProjectId(ProjectId);
             await UtilsService.ShowSuccessToast(ToastObj, "Task deleted");
+            await UpdateProjectStatus();
         }
 
     }
@@ -548,22 +558,25 @@
                     return;
                 }
             else{
-                await ProjectsService.DeleteProjectUserByUserIdAndProjectId(memberId,ProjectId);                await LoadTarefasByProjectId(ProjectId);
+                await ProjectsService.DeleteProjectUserByUserIdAndProjectId(memberId,ProjectId);                
+                await LoadTarefasByProjectId(ProjectId);
                 await UtilsService.ShowSuccessToast(ToastObj, "Member Removed");
             }
         }
     }
 
-    private async Task openTimesheetDialog()
+    private void openTimesheetDialog()
     {
-        await LoadUserTasks();
+        LoadUserTasks();
         selectedTaskId = null;
         workedHours = null;
         timesheetNotes = "";
         TimesheetDialogVisibility = true;
-    }    private Task LoadUserTasks()
+    }   
+
+     private void LoadUserTasks()
     {
-        _userTasks = _tarefas.Where(t => t.AssociatedUserId == userId).ToList();
+    _userTasks = _tarefas.Where(t => t.AssociatedUserId == userId && t.Status != TarefaStatus.Placeholder).ToList();
     }
 
     private async Task SaveTimesheetEntry()
@@ -595,7 +608,32 @@
                 Hours = workedHours,
                 Notes = timesheetNotes ?? ""
             };
+            var res = await TimesheetService.GetByProjectIdAsyncAndUserId(ProjectId, userId);
+            if (res != null && res.Any(t => t.TarefaId == selectedTaskId.Value && t.Date.Date == DateTime.Today))
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Timesheet entry for this task already exists for today");
+                return;
+            }
 
+            double totalHoursToday = 0;
+            if (res != null)
+            {
+                totalHoursToday = res
+                    .Where(t => t.Date.Date == DateTime.Today)
+                    .Sum(t =>
+                    {
+                        double.TryParse(t.Hours, out double h);
+                        return h;
+                    });
+            }
+            if (double.TryParse(timesheetModel.Hours, out double newEntryHours))
+            {
+                if (totalHoursToday + newEntryHours > 24)
+                {
+                    await UtilsService.ShowErrorToast(ToastObj, "Total hours logged for today cannot exceed 24.");
+                    return;
+                }
+            }
             var result = await TimesheetService.CreateAsync(timesheetModel);
 
             if (result != null)
@@ -621,4 +659,32 @@
         workedHours = "";
         timesheetNotes = "";
     }
-}
+
+    private async Task UpdateProjectStatus()
+    {
+       var res = _tarefas.Where(t => t.Status != TarefaStatus.Placeholder).ToList();
+
+        if (res.Count == 0 || res.All(t => t.Status == TarefaStatus.Created))
+        {
+            _project.Status = ProjectStatus.Created;
+        }
+        else if (res.All(t => t.Status == TarefaStatus.Completed))
+        {
+            _project.Status = ProjectStatus.Completed;
+        }
+        else if (res.Any(t => t.Status == TarefaStatus.InProgress))
+        {
+            _project.Status = ProjectStatus.InProgress;
+        }
+        else if (res.All(t => t.Status == TarefaStatus.OnHold))
+        {
+            _project.Status = ProjectStatus.OnHold;
+        }
+        else
+        {
+            _project.Status = ProjectStatus.InProgress; -
+        }
+        
+        await ProjectsService.UpdateProjectStatusAsync(_project.Id, _project.Status);
+    }
+    }

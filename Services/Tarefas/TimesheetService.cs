@@ -18,6 +18,14 @@ public class TimesheetService : ITimesheetService
     public async Task<List<TimesheetDto>> GetAllAsync() => await _unitOfWork.TimesheetsRepository.GetEntityAsNoTracking().Select(t => new TimesheetDto(t)).ToListAsync();
     public async Task<TimesheetDto> GetByIdAsync(Guid id) => await _unitOfWork.TimesheetsRepository.GetEntityAsNoTracking(t => t.Id == id).Select(t => new TimesheetDto(t)).FirstAsync();
 
+    public async Task<List<TimesheetDto>> GetByProjectIdAsyncAndUserId(Guid projectId,string userId)
+    {
+        return await _unitOfWork.TimesheetsRepository
+            .GetEntityAsNoTracking(t => t.Tarefa.ProjectId == projectId && t.Tarefa.AssociatedUser.Id == userId)
+            .Select(t => new TimesheetDto(t))
+            .ToListAsync();
+    }
+
     public async Task<TimesheetDto> CreateAsync(TimesheetModel model)
     {
         int newNumber = await GetNextNumberAsync();

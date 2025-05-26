@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FreelanceManager.IO.Projects;
 using FreelanceManager.IO.Tarefas;
-
+using FreelanceManager.Data.Enum;
 namespace FreelanceManager.Services.Projects
 {
     public interface IProjectsService
@@ -18,7 +18,7 @@ namespace FreelanceManager.Services.Projects
         Task<bool> CanDeleteAsync(Guid id);
         Task<string> GetNextCodeAsync();
         Task<List<ProjectDto>> GetProjectContainsInProjectUsersAsync(string userId);
-
+        Task<ProjectDto> UpdateProjectStatusAsync(Guid id, ProjectStatus status);
 
         #region ProjectUsers
         Task<List<ProjectUserDto>> GetProjectUsersAsync(Guid projectId);

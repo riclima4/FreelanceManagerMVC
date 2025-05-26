@@ -65,6 +65,20 @@ namespace FreelanceManager.Services.Projects
             return await GetByIdAsync(entity.Id);
         }
 
+        public async Task<ProjectDto> UpdateProjectStatusAsync(Guid id, ProjectStatus status)
+        {
+            var entity = await _unitOfWork.
+                ProjectsRepository.
+                GetEntityAsNoTracking(p => p.Id == id).
+                FirstAsync();
+
+            entity.Status = status;
+
+            await _unitOfWork.ProjectsRepository.Edit(entity);
+
+            return await GetByIdAsync(id);
+        }
+
         public async Task<ProjectDto> UpdateAsync(Guid id, ProjectModel model)
         {
             var entity = await _unitOfWork.

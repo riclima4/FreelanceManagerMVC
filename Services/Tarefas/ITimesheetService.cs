@@ -13,6 +13,6 @@ namespace FreelanceManager.Services.Tarefas
         Task DeleteAsync(Guid id);
         Task<bool> CanDeleteAsync(Guid id);
         Task<string> GetNextCodeAsync();
-
+        Task<List<TimesheetDto>> GetByProjectIdAsyncAndUserId(Guid projectId, string userId);
     }
 }
