@@ -3,6 +3,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IProjectsService ProjectsService
 @inject ITarefasService TarefasService
+@inject ITimesheetService TimesheetService
 @inject IUtilsService UtilsService
 @inject UserManager<ApplicationUser> UserManager
 @inject SfDialogService DialogService
@@ -35,15 +36,15 @@
                 <div class="@(GetStatusClass(_project.Status).textColor) ">
                     @_project.Status
                 </div>
-            </div>
-        </div>
-        @if (isOwner)
-        {
-            <div class="flex gap-10">
+            </div>        </div>
+        <div class="flex gap-10">
+            <SfButton CssClass="e-info" @onclick="openTimesheetDialog">Fill Timesheet</SfButton>
+            @if (isOwner)
+            {
                 <SfButton CssClass="e-primary" @onclick="openInviteDialog">Invite User</SfButton>
                 <SfButton CssClass="e-primary" @onclick="openCreateNewTask">New Task +</SfButton>
-            </div>
-        }
+            }
+        </div>
     </div>
     <div class="flex flex-column">
         <div class="fs-16"><span class="fb-bold">Client: </span>@(_project.ClientId == null ? "N/A" :
@@ -157,6 +158,38 @@
                 </SfComboBox>
                 <SfButton CssClass="e-primary" @onclick="InviteUser">Invite</SfButton>
             </div>
+        </Content>    </DialogTemplates>
+</SfDialog>
+
+<!-- Timesheet Dialog -->
+<SfDialog Target="#target" Width="500px" ShowCloseIcon="true" @bind-Visible="TimesheetDialogVisibility" IsModal="true">
+    <DialogTemplates>
+        <Header>Fill Timesheet - @DateTime.Today.ToString("MMMM dd, yyyy")</Header>
+        <Content>
+            <div class="w-100 flex flex-column gap-15" style="margin-top: 10px;">
+                <div class="flex flex-column gap-10">
+                    <h5>Select Task and Enter Hours</h5>
+                    <SfComboBox TValue="Guid?" TItem="TarefaDto" 
+                               Placeholder="Select Task" CssClass="e-outline"
+                               DataSource="@_userTasks" @bind-Value="selectedTaskId"
+                               FloatLabelType="FloatLabelType.Always">
+                        <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                    </SfComboBox>                    <SfTextBox @bind-Value="workedHours" 
+                              Placeholder="Hours Worked (e.g., 2.5)" CssClass="e-outline"
+                              FloatLabelType="FloatLabelType.Always">
+                    </SfTextBox>
+                    <SfTextBox @bind-Value="timesheetNotes" 
+                              Placeholder="Notes (optional)" CssClass="e-outline"
+                              FloatLabelType="FloatLabelType.Always"
+                              Multiline="true" RowCount="3">
+                    </SfTextBox>
+                </div>
+                
+                <div class="flex gap-10 mt-15">
+                    <SfButton CssClass="e-primary w-50" @onclick="SaveTimesheetEntry">Save Entry</SfButton>
+                    <SfButton CssClass="e-outline w-50" @onclick="CloseTimesheetDialog">Cancel</SfButton>
+                </div>
+            </div>
         </Content>
     </DialogTemplates>
 </SfDialog>
@@ -182,10 +215,14 @@
     private Guid ProjectId { get; set; }
     private bool _isInitialized = false;
     private ProjectDto _project = new ProjectDto();
-    private TarefaModel TarefaModel { get; set; } = new();
-    private bool createTarefaView = false;
+    private TarefaModel TarefaModel { get; set; } = new();    private bool createTarefaView = false;
     private bool InviteDialogVisibility { get; set; } = false;
-    private string selectedUserId;
+    private string selectedUserId;    // Timesheet properties
+    private bool TimesheetDialogVisibility { get; set; } = false;
+    private Guid? selectedTaskId;
+    private string workedHours = "";
+    private string timesheetNotes = "";
+    private List<TarefaDto> _userTasks = new List<TarefaDto>();
 
 
     private async Task getUsers()
@@ -511,10 +548,77 @@
                     return;
                 }
             else{
-                await ProjectsService.DeleteProjectUserByUserIdAndProjectId(memberId,ProjectId);
-                await LoadTarefasByProjectId(ProjectId);
+                await ProjectsService.DeleteProjectUserByUserIdAndProjectId(memberId,ProjectId);                await LoadTarefasByProjectId(ProjectId);
                 await UtilsService.ShowSuccessToast(ToastObj, "Member Removed");
             }
         }
+    }
+
+    private async Task openTimesheetDialog()
+    {
+        await LoadUserTasks();
+        selectedTaskId = null;
+        workedHours = null;
+        timesheetNotes = "";
+        TimesheetDialogVisibility = true;
+    }    private Task LoadUserTasks()
+    {
+        _userTasks = _tarefas.Where(t => t.AssociatedUserId == userId).ToList();
+    }
+
+    private async Task SaveTimesheetEntry()
+    {
+        if (!selectedTaskId.HasValue)
+        {
+            await UtilsService.ShowErrorToast(ToastObj, "Please select a task");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(workedHours))
+        {
+            await UtilsService.ShowErrorToast(ToastObj, "Please enter hours worked");
+            return;
+        }
+
+        if (!double.TryParse(workedHours, out double hoursValue) || hoursValue <= 0)
+        {
+            await UtilsService.ShowErrorToast(ToastObj, "Please enter valid hours worked (e.g., 2.5)");
+            return;
+        }
+
+        try
+        {
+            var timesheetModel = new TimesheetModel
+            {
+                TarefaId = selectedTaskId.Value,
+                Date = DateTime.Today,
+                Hours = workedHours,
+                Notes = timesheetNotes ?? ""
+            };
+
+            var result = await TimesheetService.CreateAsync(timesheetModel);
+
+            if (result != null)
+            {
+                await UtilsService.ShowSuccessToast(ToastObj, "Timesheet saved successfully");
+                CloseTimesheetDialog();
+            }
+            else
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Failed to save timesheet");
+            }
+        }
+        catch (Exception ex)
+        {
+            await UtilsService.ShowErrorToast(ToastObj, "Error saving timesheet entry: " + ex.Message);
+        }
+    }
+
+    private void CloseTimesheetDialog()
+    {
+        TimesheetDialogVisibility = false;
+        selectedTaskId = null;
+        workedHours = "";
+        timesheetNotes = "";
     }
 }
