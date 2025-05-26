@@ -30,11 +30,18 @@
             class="w-100 flex flex-column gap-10">
             <DataAnnotationsValidator />
             <SfTextBox Placeholder='Username' CssClass="e-outline" @bind-Value="Input.Username" id="Input.Username"
-                FloatLabelType="FloatLabelType.Always">
+                       FloatLabelType="FloatLabelType.Always">
+            </SfTextBox>
+            <SfTextBox Placeholder='Fullname' CssClass="e-outline" @bind-Value="Input.Fullname" id="Input.fullname"
+                       FloatLabelType="FloatLabelType.Always">
             </SfTextBox>
             <SfTextBox Placeholder='Email' CssClass="e-outline" @bind-Value="Input.Email" id="Input.Email"
-                FloatLabelType="FloatLabelType.Always">
+                       FloatLabelType="FloatLabelType.Always">
             </SfTextBox>
+            <SfTextBox Placeholder='Daily Work Hours' CssClass="e-outline" @bind-Value="Input.DailyHours" id="Input.dailyhours"
+                       FloatLabelType="FloatLabelType.Always">
+            </SfTextBox>
+            <ValidationMessage For="@(() => Input.DailyHours)" class="text-danger" />
             <SfTextBox Placeholder='Password' Type="InputType.Password" CssClass="e-outline"
                 FloatLabelType="FloatLabelType.Always" @bind-Value="Input.Password" id="Input.Password">
             </SfTextBox>
@@ -65,7 +72,17 @@
 
     public async Task RegisterUser(EditContext editContext)
     {
-        var user = CreateUser();
+        var user = new ApplicationUser
+        {
+            UserName = Input.Username,
+            Email = Input.Email,
+            FullName = Input.Fullname,
+            DailyHours = Input.DailyHours,
+            EmailConfirmed = true,
+            CreatedAt = DateTime.Now,
+            CreatedBy = Input.Username,
+            LockoutEnabled = false
+        };
 
         await UserStore.SetUserNameAsync(user, Input.Username, CancellationToken.None);
         var emailStore = GetEmailStore();
@@ -123,7 +140,16 @@
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; } = "";
-
+        
+        [Required]
+        [Display(Name = "Fullname")]
+        public string Fullname { get; set; } = "";
+        
+        [Required]
+        [Display(Name = "Daily Hours")]
+        [RegularExpression(@"^([0-9]|1[0-9]|2[0-4])$", ErrorMessage = "Daily hours must be between 0 and 24")]
+        public string DailyHours { get; set; } = "";
+        
         [Required]
         [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
         [DataType(DataType.Password)]

@@ -15,6 +15,7 @@ namespace FreelanceManager.Data
             UserName = model.UserName;
             FullName = model.FullName;
             PhoneNumber = model.PhoneNumber;
+            DailyHours = model.DailyHours;
             SecurityStamp = Guid.NewGuid().ToString();
             LockoutEnabled = false;
             EmailConfirmed = true;
@@ -22,6 +23,7 @@ namespace FreelanceManager.Data
         }
 
         public string FullName { get; set; } = string.Empty;
+        public string DailyHours { get; set; } = string.Empty;
         public DateTime? CreatedAt { get; set; }
         public string CreatedBy { get; set; } = "unknown";
         public DateTime? UpdatedAt { get; set; }

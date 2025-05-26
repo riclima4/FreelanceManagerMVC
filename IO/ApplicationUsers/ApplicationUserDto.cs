@@ -17,6 +17,7 @@ namespace FreelanceManager.IO.ApplicationUsers
             Id = entity.Id;
             UserName = entity.UserName;
             FullName = entity.FullName;
+            DailyHours = entity.DailyHours;
             Email = entity.Email;
             PhoneNumber = entity.PhoneNumber;
             LockoutEnabled = entity.LockoutEnabled;
@@ -35,6 +36,7 @@ namespace FreelanceManager.IO.ApplicationUsers
         public string Id { get; set; }
         public string UserName { get; set; }
         public string FullName { get; set; }
+        public string DailyHours { get; set; } = "8";
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public bool LockoutEnabled { get; set; }
