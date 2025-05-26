@@ -682,7 +682,7 @@
         }
         else
         {
-            _project.Status = ProjectStatus.InProgress; -
+            _project.Status = ProjectStatus.InProgress;
         }
         
         await ProjectsService.UpdateProjectStatusAsync(_project.Id, _project.Status);
