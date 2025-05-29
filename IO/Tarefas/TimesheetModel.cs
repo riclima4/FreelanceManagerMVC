@@ -13,6 +13,7 @@ namespace FreelanceManager.IO.Tarefas
                 public string Hours { get; set; }
                 [MaxLength(500)]
                 public string Notes { get; set; }
+                public string UserId { get; set; }
 
         }
 }

@@ -18,6 +18,7 @@ namespace FreelanceManager.IO.Tarefas
             Date = entity.Date ?? DateTime.Now;
             Hours = entity.Hours;
             Notes = entity.Notes;
+            UserId = entity.UserId;
 
         }
 
@@ -25,6 +26,6 @@ namespace FreelanceManager.IO.Tarefas
         public string Hours { get; set; }
         public string Notes { get; set; }
         public Guid TarefaId { get; set; }
-        public Guid ApplicationUserId { get; set; }
+        public string UserId { get; set; }
     }
 }

@@ -7,6 +7,7 @@
 @inject IUtilsService UtilsService
 @inject UserManager<ApplicationUser> UserManager
 @inject SfDialogService DialogService
+@inject NavigationManager Navigation
 
 @using System.Security.Claims
 @using FreelanceManager.Data.Enum
@@ -39,13 +40,14 @@
                     @_project.Status
                 </div>
             </div>        
-            </div>
-        <div class="flex gap-10">
+            </div>        
+            <div class="flex gap-10">
             <SfButton CssClass="e-primary" @onclick="openTimesheetDialog">Fill Timesheet</SfButton>
             @if (isOwner)
             {
                 <SfButton CssClass="e-primary" @onclick="openInviteDialog">Invite User</SfButton>
                 <SfButton CssClass="e-primary" @onclick="openCreateNewTask">New Task +</SfButton>
+                <SfButton CssClass="e-warning" @onclick="NavigateToAdminPage">Admin Settings</SfButton>
             }
         </div>
     </div>
@@ -606,7 +608,8 @@
                 TarefaId = selectedTaskId.Value,
                 Date = DateTime.Today,
                 Hours = workedHours,
-                Notes = timesheetNotes ?? ""
+                Notes = timesheetNotes ?? "",
+                UserId = userId
             };
             var res = await TimesheetService.GetByProjectIdAsyncAndUserId(ProjectId, userId);
             if (res != null && res.Any(t => t.TarefaId == selectedTaskId.Value && t.Date.Date == DateTime.Today))
@@ -686,5 +689,10 @@
         }
         
         await ProjectsService.UpdateProjectStatusAsync(_project.Id, _project.Status);
+    }
+
+    private void NavigateToAdminPage()
+    {
+        Navigation.NavigateTo($"/ProjectAdmin?ProjectId={ProjectId}");
     }
     }

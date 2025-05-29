@@ -17,7 +17,9 @@ namespace FreelanceManager.Data
             Notes = model.Notes;
             Hours = model.Hours;
             InternalNumber = number;
-            Date = model.Date ?? DateTime.Now; // Set to current date if null
+            Date = model.Date ?? DateTime.Now;
+            UserId = model.UserId;
+
         }
 
         public Guid TarefaId { get; set; }
@@ -26,5 +28,6 @@ namespace FreelanceManager.Data
         public int InternalNumber { get; set; }
         public DateTime? Date { get; set; }
         public Tarefa Tarefa { get; set; }
+        public string UserId { get; set; }
     }
 }

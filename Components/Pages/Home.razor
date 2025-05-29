@@ -3,6 +3,7 @@
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IUtilsService UtilsService
 @inject SfDialogService DialogService
+@inject ITimesheetService TimesheetService
 
 @page "/home"
 @using System.Globalization
@@ -53,11 +54,8 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </div>
             <div class="stat-details">
-                <div class="stat-title">Horas Registadas</div>
+                <div class="stat-title">Hours Worked this Month</div>
                 <div class="stat-value">@hoursTracked</div>
-                <div class="stat-trend positive">
-                    <span class="trend-arrow">↑</span> 12 em relação ao mês passado
-                </div>
             </div>
         </div>
 
@@ -227,13 +225,14 @@
     private List<ProjectDto> projects = new List<ProjectDto>();
     private List<TarefaDto> inProgressTasks = new List<TarefaDto>();
     private List<ProjectInviteDto> _projectInvites = new();
-    
+    private List<TimesheetDto> _userTimeSheet = new List<TimesheetDto>();
     protected override async Task OnInitializedAsync()
     {
         await GetSessionUserId();
         await GetUserProjects();
         await GetInProgressTasks();
         await LoadProjectInvites();
+        await GetUserTimeSheet();
         UpdateDashboardStats();
     }
     
@@ -245,6 +244,10 @@
         nome = user.FindFirst(ClaimTypes.Name).Value;
     }
     
+    private async Task GetUserTimeSheet()
+    {
+        _userTimeSheet = await TimesheetService.GetByUserIdAsync(userId);
+    }
     private async Task GetUserProjects()
     {
         projects = await ProjectsService.GetByUserIdAsync(userId);
@@ -261,6 +264,15 @@
     {
         activeProjects = projects.Count(p => p.Status == ProjectStatus.InProgress);
         
+        if (_userTimeSheet != null && _userTimeSheet.Any())
+        {
+            hoursTracked = (int)_userTimeSheet.Sum(ts => int.Parse(ts.Hours));        
+            }
+        else
+        {
+            hoursTracked = 0;
+        }
+        
     }
 
     private async Task LoadProjectInvites()
@@ -269,9 +281,8 @@
         _projectInvites = allInvites.Where(i => i.Status == ProjectInviteStatus.Pending).ToList();
     }
 
-    // Dashboard data
     private int activeProjects = 0;
-    private int hoursTracked = 87;
+    private int hoursTracked ;
     private int pendingInvoices = 3;
     private decimal totalEarnings = 5280.50m;
 

@@ -2,9 +2,7 @@
 using FreelanceManager.IO.Tarefas;
 
 namespace FreelanceManager.Services.Tarefas
-{
-
-    public interface ITimesheetService
+{    public interface ITimesheetService
     {
         Task<List<TimesheetDto>> GetAllAsync();
         Task<TimesheetDto> GetByIdAsync(Guid id);
@@ -14,5 +12,7 @@ namespace FreelanceManager.Services.Tarefas
         Task<bool> CanDeleteAsync(Guid id);
         Task<string> GetNextCodeAsync();
         Task<List<TimesheetDto>> GetByProjectIdAsyncAndUserId(Guid projectId, string userId);
+        Task<List<TimesheetDto>> GetByUserIdAsync(string userId);
+        Task<List<TimesheetDto>> GetByProjectIdAsync(Guid projectId);
     }
 }
