@@ -1,4 +1,6 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
+
+@inject NavigationManager NavigationManager
 
 <div class="page">
     <div class="sidebar">
@@ -6,12 +8,25 @@
     </div>
 
     <main>
-        <div class="top-row px-4">
-            <AuthorizeView>
-                <div class="color-white">
-                    @context.User.Identity?.Name
+        <div class="top-row">
+            <div class="navbar-container">
+                <div class="page-title">
+                    <h1>@GetPageTitle()</h1>
                 </div>
-            </AuthorizeView>
+                
+                <div class="navbar-actions">
+                    <AuthorizeView>
+                        <div class="user-profile">
+                            <div class="user-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="user-info">
+                                <span class="user-name">@context.User.Identity?.Name</span>
+                            </div>
+                        </div>
+                    </AuthorizeView>
+                </div>
+            </div>
         </div>
 
         <article class="content p-16">
@@ -25,3 +40,20 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private string GetPageTitle()
+    {
+        // Extrai o título da página com base no caminho da URL atual
+        var path = NavigationManager.Uri.Split('/').LastOrDefault();
+        
+        if (string.IsNullOrEmpty(path) || path.Equals(NavigationManager.BaseUri.TrimEnd('/').Split('/').LastOrDefault()))
+            return "Dashboard";
+        
+        // Converte a primeira letra para maiúscula
+        if (!string.IsNullOrEmpty(path))
+            return char.ToUpper(path[0]) + path.Substring(1);
+        
+        return "Dashboard";
+    }
+}

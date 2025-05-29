@@ -244,6 +244,65 @@ h1:focus {
     margin-right: 7px;
 }
 
+/* Animações globais */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Estilos personalizados para os inputs Syncfusion com classe login-input */
+.login-input.e-input-group,
+.login-input .e-input-group {
+    /* Estilo base para o grupo de input */
+    color: #8257E5;
+}
+
+/* Estilo para o texto digitado */
+.login-input.e-float-input input,
+.login-input .e-float-input input,
+.login-input .e-input-value,
+.login-input input {
+    color: #8257E5 !important;
+    caret-color: #8257E5 !important; /* Cor do cursor/caret */
+}
+
+/* Cor do placeholder - usando a cor original */
+/* Comentado para manter a cor padrão do Syncfusion para os labels */
+/* .login-input.e-float-input .e-float-text,
+.login-input .e-float-input .e-float-text {
+    color: rgba(255, 255, 255, 0.7);
+} */
+
+/* Linha inferior normal */
+.login-input.e-float-input::before, 
+.login-input.e-float-input::after,
+.login-input .e-float-input::before,
+.login-input .e-float-input::after,
+.login-input .e-float-line::before,
+.login-input .e-float-line::after {
+    background-color: #8257E5 !important;
+}
+
+/* Linha inferior ao fazer hover */
+.login-input.e-input-group:hover:not(.e-disabled):not(.e-float-icon-left),
+.login-input .e-input-group:hover:not(.e-disabled):not(.e-float-icon-left) {
+    border-color: #8257E5 !important;
+}
+
+/* Linha inferior ao focar */
+.login-input.e-input-group.e-input-focus:not(.e-disabled):not(.e-float-icon-left),
+.login-input .e-input-group.e-input-focus:not(.e-disabled):not(.e-float-icon-left) {
+    border-color: #8257E5 !important;
+}
+
+/* Garantir que a linha inferior fique roxa ao focar e hover */
+.login-input.e-float-input.e-input-focus .e-float-line::before,
+.login-input.e-float-input.e-input-focus .e-float-line::after,
+.login-input .e-float-input.e-input-focus .e-float-line::before,
+.login-input .e-float-input.e-input-focus .e-float-line::after {
+    background-color: #8257E5 !important;
+}
+
 .mil-5 {
     margin-inline: 5px;
 }

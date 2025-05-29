@@ -1,4 +1,4 @@
-﻿@page "/projects"
+@page "/projects"
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IProjectsService ProjectsService
 @inject ITarefasService TarefasService
@@ -87,11 +87,21 @@
                     <Template>
                         @{
                             var data = (context as TarefaDto);
-                            <div class="kanban-card">
-                                <div class="card-header "> @data.Name</div>
-                                <div class="card-content">@data.Description</div>
-                                <div class="card-actions">
-                                    <button class="delete-button" @onclick="() => DeleteTask(data.Id)" @onclick:stopPropagation="true">
+                            var statusText = data.Status.ToString();
+                            var statusClass = GetStatusClass(statusText);
+                            <div class="custom-kanban-card status-@statusText">
+                                <div class="status-indicator @statusClass.bgColor"></div>
+                                <div class="card-title">@data.Name</div>
+                                <div class="card-desc">@data.Description</div>
+                                @if (!string.IsNullOrEmpty(data.Notes))
+                                {
+                                    <div class="card-notes">@data.Notes</div>
+                                }
+                                <div class="card-footer">
+                                    <span class="hourly-rate">@(data.HourlyRate.HasValue ? $"€{data.HourlyRate:F2}/h" : "")</span>
+                                </div>
+                                <div class="task-delete-actions">
+                                    <button class="task-delete-button" @onclick="() => DeleteTask(data.Id)" @onclick:stopPropagation="true">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </div>
@@ -259,32 +269,66 @@
                 {
                     bgColor = "bg-color-created",
                     textColor = "color-created",
-                    bgColorOpacity =
-                "bg-color-created-opacity"
+                    bgColorOpacity = "bg-color-created-opacity"
                 };
             case ProjectStatus.Completed:
                 return new colorResult
                 {
                     bgColor = "bg-color-completed",
                     textColor = "color-completed",
-                    bgColorOpacity =
-                "bg-color-completed-opacity"
+                    bgColorOpacity = "bg-color-completed-opacity"
                 };
             case ProjectStatus.InProgress:
                 return new colorResult
                 {
                     bgColor = "bg-color-inprogress",
                     textColor = "color-inprogress",
-                    bgColorOpacity =
-                "bg-color-inprogress-opacity"
+                    bgColorOpacity = "bg-color-inprogress-opacity"
                 };
             case ProjectStatus.OnHold:
                 return new colorResult
                 {
                     bgColor = "bg-color-onhold",
                     textColor = "color-onhold",
-                    bgColorOpacity =
-                "bg-color-onhold-opacity"
+                    bgColorOpacity = "bg-color-onhold-opacity"
+                };
+            default:
+                return new colorResult { };
+        }
+    }
+    
+    // Sobrecarga para aceitar uma string como status (para TarefaStatus)
+    private colorResult GetStatusClass(string statusStr)
+    {
+        switch (statusStr)
+        {
+            case "Created":
+                return new colorResult
+                {
+                    bgColor = "bg-color-created",
+                    textColor = "color-created",
+                    bgColorOpacity = "bg-color-created-opacity"
+                };
+            case "Completed":
+                return new colorResult
+                {
+                    bgColor = "bg-color-completed",
+                    textColor = "color-completed",
+                    bgColorOpacity = "bg-color-completed-opacity"
+                };
+            case "InProgress":
+                return new colorResult
+                {
+                    bgColor = "bg-color-inprogress",
+                    textColor = "color-inprogress",
+                    bgColorOpacity = "bg-color-inprogress-opacity"
+                };
+            case "OnHold":
+                return new colorResult
+                {
+                    bgColor = "bg-color-onhold",
+                    textColor = "color-onhold",
+                    bgColorOpacity = "bg-color-onhold-opacity"
                 };
             default:
                 return new colorResult { };

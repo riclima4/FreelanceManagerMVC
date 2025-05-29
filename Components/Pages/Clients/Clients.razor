@@ -1,4 +1,4 @@
-﻿@page "/Clients"
+@page "/Clients"
 @inject IClientsService ClientsService
 @inject IUtilsService UtilsService
 @inject AuthenticationStateProvider AuthStateProvider
@@ -11,34 +11,87 @@
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-<div class="flex flex-column gap-10">
-    <div class="flex justify-content-space-between align-items-center">
+<div class="clients-container">
+    <div class="page-header">
         <h3>Clients</h3>
         <SfButton CssClass="e-primary" @onclick="openCreateNewClient">New Client +</SfButton>
     </div>
+    
+    <div class="search-container">
+        <div class="search-input">
+            <i class="fa fa-search"></i>
+            <SfTextBox @bind-Value="searchText" CssClass="e-outline search-box" Placeholder="Search clients..." Input="OnSearch"></SfTextBox>
+        </div>
+    </div>
+    
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+        </div>
+    }
+    else if (filteredClients.Count == 0)
+    {
+        <div class="empty-state">
+            <i class="fa fa-users"></i>
+            <h4>No clients found</h4>
+            <p>Add your first client or try a different search term</p>
+        </div>
+    }
+    else
+    {
+        <div class="clients-grid">
+            @foreach (var client in filteredClients)
+            {
+                <div class="client-card" @onclick="() => EditClient(client)">
+                    <div class="client-header">
+                        <div class="client-avatar">
+                            @(client.Name?.Length > 0 ? client.Name[0].ToString().ToUpper() : "C")
+                        </div>
+                        <h4 class="client-name">@client.Name</h4>
+                    </div>
+                    
+                    @if (!string.IsNullOrEmpty(client.Email))
+                    {
+                        <div class="client-detail">
+                            <i class="fa fa-envelope"></i>
+                            <span>@client.Email</span>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(client.Phone))
+                    {
+                        <div class="client-detail">
+                            <i class="fa fa-phone"></i>
+                            <span>@client.Phone</span>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(client.City) || !string.IsNullOrEmpty(client.Country))
+                    {
+                        <div class="client-detail">
+                            <i class="fa fa-map-marker"></i>
+                            <span>@(!string.IsNullOrEmpty(client.City) ? client.City + ", " : "")@client.Country</span>
+                        </div>
+                    }
+                    
+                    <div class="client-actions">
+                        <button class="client-action-button edit" @onclick:stopPropagation="true" @onclick="() => EditClient(client)">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                        <button class="client-action-button delete" @onclick:stopPropagation="true" @onclick="() => DeleteClient(client.Id)">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
 </div>
+
 <SfToast ID="toast_1" @ref="ToastObj">
     <ToastPosition X="Center"></ToastPosition>
 </SfToast>
-
-<div class="col-lg-12 control-section">
-    <div class="content-wrapper">
-        <SfGrid DataSource="@clients" AllowPaging="true" PageSettings="new GridPageSettings() { PageSize = 20 }"
-            AllowSorting="true" EnableVirtualization="true" Height="500">
-            <GridColumns>
-                <GridColumn Field="@nameof(ClientDto.Name)" HeaderText="Name" Width="200"
-                    ClipMode="ClipMode.EllipsisWithTooltip" />
-                <GridColumn Field="@nameof(ClientDto.Email)" HeaderText="Email" Width="250"
-                    ClipMode="ClipMode.EllipsisWithTooltip" />
-                <GridColumn Field="@nameof(ClientDto.City)" HeaderText="City" Width="150"
-                    ClipMode="ClipMode.EllipsisWithTooltip" />
-                <GridColumn Field="@nameof(ClientDto.Country)" HeaderText="Country" Width="150"
-                    ClipMode="ClipMode.EllipsisWithTooltip" />
-            </GridColumns>
-            <GridEvents OnRecordClick="RecordClickHandler" TValue="ClientDto"></GridEvents>
-        </SfGrid>
-    </div>
-</div>
 <SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="clientDialogVisibility" IsModal="true">
     <DialogTemplates>
         <Header> Create Client </Header>
@@ -99,83 +152,148 @@
     SfToast ToastObj;
     private ClientModel ClientModel = new ClientModel();
     private string userId;
-    private List<ClientDto> clients = new List<ClientDto>();
     private bool clientDialogVisibility = false;
+    private List<ClientDto> clients = new List<ClientDto>();
+    private List<ClientDto> filteredClients = new List<ClientDto>();
+    private string searchText = "";
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
         await GetSessionUserId();
         await LoadClients();
-        StateHasChanged();
-    }
-
-    private async Task LoadClients()
-    {
-        clients = await ClientsService.GetAllByApplicationUserIdAsync(userId);
-
+        isLoading = false;
     }
 
     private async Task GetSessionUserId()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        userId = user.FindFirst(ClaimTypes.NameIdentifier).Value;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            userId = user.FindFirst(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+        }
     }
 
-    private async Task CreateClient()
+    private async Task LoadClients()
     {
-        var res = new ClientDto();
-        if (ClientModel.Id != null)
+        isLoading = true;
+        clients = await ClientsService.GetAllByApplicationUserIdAsync(userId);
+        
+        // Depuração para verificar se os clientes estão sendo carregados
+        Console.WriteLine($"Loaded {clients.Count} clients for user {userId}");
+        
+        // Se não estiver carregando clientes, tente com GetAllAsync
+        if (clients == null || clients.Count == 0)
         {
-            res = await ClientsService.UpdateAsync(ClientModel.Id.Value, ClientModel);
-            await UtilsService.ShowSuccessToast(ToastObj, "Client updated successfully.");
-
+            Console.WriteLine("No clients found for user, trying to load all clients");
+            clients = await ClientsService.GetAllAsync();
         }
-        else
-        {
-            res = await ClientsService.CreateAsync(ClientModel);
-            await UtilsService.ShowSuccessToast(ToastObj, "Client created successfully.");
-
-
-        }
-        if (res != null)
-        {
-            await LoadClients();
-            ClientModel = new ClientModel();
-            this.clientDialogVisibility = false;
-        }
+        
+        ApplyFilter();
+        isLoading = false;
+        
+        // Força a atualização da UI
+        StateHasChanged();
     }
 
     private void openCreateNewClient()
     {
         ClientModel = new ClientModel();
-        ClientModel.ApplicationUserId = userId;
-        this.clientDialogVisibility = true;
+        ClientModel.ApplicationUserId = userId;  // Definindo o ApplicationUserId do usuário atual
+        clientDialogVisibility = true;
     }
 
-    public void RecordClickHandler(RecordClickEventArgs<ClientDto> args)
+    private async Task CreateClient()
     {
-        var data = args.RowData;
-        if (data != null)
+        if (ClientModel.Id == null)
         {
-            var client = new ClientModel
+            var response = await ClientsService.CreateAsync(ClientModel);
+            if (response != null)
             {
-                Id = data.Id,
-                Name = data.Name,
-                FiscalNumber = data.FiscalNumber,
-                Street = data.Street,
-                Address = data.Address,
-                ZipCode = data.ZipCode,
-                City = data.City,
-                Country = data.Country,
-                Website = data.Website,
-                Email = data.Email,
-                Phone = data.Phone,
+                await UtilsService.ShowSuccessToast(ToastObj, "Client created successfully");
+            }
+            else
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Error creating client");
+            }
+        }
+        else
+        {
+            var response = await ClientsService.UpdateAsync(ClientModel.Id.Value, ClientModel);
+            if (response != null)
+            {
+                await UtilsService.ShowSuccessToast(ToastObj, "Client updated successfully");
+            }
+            else
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Error updating client");
+            }
+        }
 
-            };
-            ClientModel = client;
-            this.clientDialogVisibility = true;
+        await LoadClients();
+        clientDialogVisibility = false;
+    }
+
+    private void RecordClickHandler(RecordClickEventArgs<ClientDto> args)
+    {
+        EditClient(args.RowData);
+    }
+    
+    private void EditClient(ClientDto client)
+    {
+        ClientModel.Id = client.Id;
+        ClientModel.Name = client.Name;
+        ClientModel.FiscalNumber = client.FiscalNumber;
+        ClientModel.Street = client.Street;
+        ClientModel.Address = client.Address;
+        ClientModel.ZipCode = client.ZipCode;
+        ClientModel.City = client.City;
+        ClientModel.Country = client.Country;
+        ClientModel.Website = client.Website;
+        ClientModel.Email = client.Email;
+        ClientModel.Phone = client.Phone;
+        clientDialogVisibility = true;
+    }
+    
+    private async Task DeleteClient(Guid clientId)
+    {
+        try
+        {
+            // Implementação direta da exclusão sem confirmação por dialog
+            // Uma confirmação por dialog poderia ser adicionada ao IUtilsService no futuro
+            await ClientsService.DeleteAsync(clientId);
+            await UtilsService.ShowSuccessToast(ToastObj, "Client deleted successfully");
+            await LoadClients();
+        }
+        catch (Exception ex)
+        {
+            await UtilsService.ShowErrorToast(ToastObj, "Error deleting client");
         }
     }
-
+    
+    private void OnSearch(InputEventArgs args)
+    {
+        ApplyFilter();
+    }
+    
+    private void ApplyFilter()
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            filteredClients = clients.ToList();
+        }
+        else
+        {
+            filteredClients = clients
+                .Where(c => 
+                    (c.Name?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (c.Email?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (c.Phone?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (c.City?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (c.Country?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false))
+                .ToList();
+        }
+    }
 }
