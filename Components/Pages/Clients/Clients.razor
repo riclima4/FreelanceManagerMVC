@@ -128,18 +128,20 @@
         if (ClientModel.Id != null)
         {
             res = await ClientsService.UpdateAsync(ClientModel.Id.Value, ClientModel);
+            await UtilsService.ShowSuccessToast(ToastObj, "Client updated successfully.");
+
         }
         else
         {
             res = await ClientsService.CreateAsync(ClientModel);
+            await UtilsService.ShowSuccessToast(ToastObj, "Client created successfully.");
+
 
         }
-        res = await ClientsService.CreateAsync(ClientModel);
         if (res != null)
         {
             await LoadClients();
             ClientModel = new ClientModel();
-            await UtilsService.ShowSuccessToast(ToastObj, "Client created successfully.");
             this.clientDialogVisibility = false;
         }
     }
