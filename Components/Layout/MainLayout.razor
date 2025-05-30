@@ -46,7 +46,8 @@
     {
         // Extrai o título da página com base no caminho da URL atual
         var path = NavigationManager.Uri.Split('/').LastOrDefault();
-        
+  if (path.Equals("ProjectPage", StringComparison.OrdinalIgnoreCase))
+            return "Project Details";            return "Project Details";
         if (string.IsNullOrEmpty(path) || path.Equals(NavigationManager.BaseUri.TrimEnd('/').Split('/').LastOrDefault()))
             return "Dashboard";
         
