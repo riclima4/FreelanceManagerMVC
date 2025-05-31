@@ -55,8 +55,7 @@
                         <div class="password-container">
                             <SfTextBox Placeholder='Password' Type="InputType.Password" CssClass="login-input"
                                 FloatLabelType="FloatLabelType.Always" @bind-Value="Input.Password" id="Input.Password">
-                            </SfTextBox>
-                            <button type="button" class="password-toggle" @onclick="TogglePasswordVisibilityJS">
+                            </SfTextBox>                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility()">
                                 <i id="passwordIcon" class="fas fa-eye"></i>
                             </button>
                         </div>
@@ -223,8 +222,7 @@
         padding-top: 20px;
         margin-top: 10px;
     }
-    
-    /* Estilos do link personalizado */
+      /* Estilos do link personalizado */
     .link-custom {
         color: #8257E5;
         text-decoration: none;
@@ -235,6 +233,37 @@
     .link-custom:hover {
         color: #9466FF;
         text-decoration: underline;
+    }
+
+    /* Estilos para o container de senha e botão toggle */
+    .password-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.7);
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        transition: color 0.3s ease;
+        z-index: 10;
+    }
+
+    .password-toggle:hover {
+        color: #8257E5;
+    }
+
+    .password-toggle:focus {
+        outline: none;
+        color: #8257E5;
     }
 </style>
 
@@ -248,9 +277,8 @@
     private InputModel Input { get; set; } = new();
 
     [SupplyParameterFromQuery]
-    private string ReturnUrl { get; set; }
-
-    protected override async Task OnInitializedAsync()
+    private string ReturnUrl { get; set; }   
+     protected override async Task OnInitializedAsync()
     {
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {

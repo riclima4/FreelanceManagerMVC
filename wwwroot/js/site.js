@@ -1,7 +1,7 @@
 // Função para alternar a visibilidade da senha
 function togglePasswordVisibility() {
-    // Selecionando o input de senha e o ícone
-    const passwordInput = document.getElementById('passwordInput');
+    // Selecionando o input de senha e o ícone usando os IDs corretos do Login.razor
+    const passwordInput = document.getElementById('Input.Password');
     const passwordIcon = document.getElementById('passwordIcon');
     
     if (!passwordInput) {
