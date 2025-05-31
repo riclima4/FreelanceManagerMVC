@@ -36,12 +36,12 @@
         <div class="flex gap-10 align-items-center">
             <div class="fs-24 fb-bold">@_project?.Name</div>
             <div class="statusBadge @(GetStatusClass(_project.Status).bgColorOpacity)">
-                <div class="@(GetStatusClass(_project.Status).textColor) ">
+                <div class="@(GetStatusClass(_project.Status).textColor)">
                     @_project.Status
                 </div>
-            </div>        
-            </div>        
-            <div class="flex gap-10">
+            </div>
+        </div>
+        <div class="flex gap-10">
             <SfButton CssClass="e-primary" @onclick="openTimesheetDialog">Fill Timesheet</SfButton>
             @if (isOwner)
             {
@@ -51,12 +51,16 @@
             }
         </div>
     </div>
+
     <div class="flex flex-column">
-        <div class="fs-16"><span class="fb-bold">Client: </span>@(_project.ClientId == null ? "N/A" :
-                        _project.Client?.Name)
+        <div class="fs-16">
+            <span class="fb-bold">Client: </span>@(_project.ClientId == null ? "N/A" : _project.Client?.Name)
         </div>
-        <div class="fs-16"><span class="fb-bold">Description: </span>@_project?.Description</div>
+        <div class="fs-16">
+            <span class="fb-bold">Description: </span>@_project?.Description
+        </div>
     </div>
+
     <div class="flex flex-column gap-10">
         <div class="flex gap-10 align-items-center">
             <div class="fs-24 fb-bold">Members</div>
@@ -69,127 +73,202 @@
             {
                 foreach (var projectUser in _project.ProjectUsers)
                 {
-                <div class="puBadge">
-                    <span>@projectUser.ApplicationUser.FullName</span>
-                    @if (isOwner && projectUser.ApplicationUserId != userId)
-                    {
-                        <button class="remove-member-btn" @onclick="() => RemoveMember(projectUser.ApplicationUserId)" @onclick:stopPropagation>
-                            <i class="fa fa-times"></i>
-                        </button>
-                    }
-                </div>
+                    <div class="puBadge">
+                        <span>@projectUser.ApplicationUser.FullName</span>
+                        @if (isOwner && projectUser.ApplicationUserId != userId)
+                        {
+                            <button class="remove-member-btn"
+                                    @onclick="() => RemoveMember(projectUser.ApplicationUserId)"
+                                    @onclick:stopPropagation>
+                                <i class="fa fa-times"></i>
+                            </button>
+                        }
+                    </div>
                 }
             }
         </div>
     </div>
 </div>
 
-<SfKanban @ref="KanbanObj" TValue="TarefaDto" KeyField="StatusDescription" DataSource="_tarefas" AllowDragAndDrop="true">
+<SfKanban @ref="KanbanObj"
+          TValue="TarefaDto"
+          KeyField="StatusDescription"
+          DataSource="_tarefas"
+          AllowDragAndDrop="true">
     <KanbanColumns>
-        <KanbanColumn HeaderText="To Do" KeyField="@(new List<string>() { "Created" })"></KanbanColumn>
-        <KanbanColumn HeaderText="In Progress" KeyField="@(new List<string>() { "InProgress" })">
-        </KanbanColumn>
-        <KanbanColumn HeaderText="On Hold" KeyField="@(new List<string>() { "OnHold" })"></KanbanColumn>
-        <KanbanColumn HeaderText="Completed" KeyField="@(new List<string>() { "Completed" })">
-        </KanbanColumn>
+        <KanbanColumn HeaderText="To Do"       KeyField="@(new List<string>() { "Created" })" />
+        <KanbanColumn HeaderText="In Progress" KeyField="@(new List<string>() { "InProgress" })" />
+        <KanbanColumn HeaderText="On Hold"     KeyField="@(new List<string>() { "OnHold" })" />
+        <KanbanColumn HeaderText="Completed"   KeyField="@(new List<string>() { "Completed" })" />
     </KanbanColumns>
+
     <KanbanCardSettings HeaderField="Name" ContentField="Description">
         <Template>
             @{
                 var data = (context as TarefaDto);
-                <div class="kanban-card">
-                    <div class="card-header "> @data.Name</div>
-                    <div class="card-content">@data.Description</div>
-                    @if (isOwner)
-                    {
-                        <div class="card-actions">
-                            <button class="delete-button" @onclick="() => DeleteTask(data.Id)" @onclick:stopPropagation="true">
-                                <i class="fa fa-trash"></i>
-                            </button>
-                        </div>
-                    }
-                </div>
+                var statusText = data.Status.ToString();
+                var statusClass = GetStatusClass(statusText);
             }
+            <div class="custom-kanban-card status-@statusText">
+                <div class="status-indicator @statusClass.bgColor"></div>
+                <div class="card-title">@data.Name</div>
+                <div class="card-desc">@data.Description</div>
+                @if (!string.IsNullOrEmpty(data.Notes))
+                {
+                    <div class="card-notes">@data.Notes</div>
+                }
+                <div class="card-footer">
+                    <span class="hourly-rate">
+                        @(data.HourlyRate.HasValue ? $"€{data.HourlyRate:F2}/h" : "")
+                    </span>
+                </div>
+                @if (isOwner)
+                {
+                    <div class="task-delete-actions">
+                        <button class="task-delete-button"
+                                @onclick="() => DeleteTask(data.Id)"
+                                @onclick:stopPropagation="true">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
+                }
+            </div>
         </Template>
     </KanbanCardSettings>
-    <KanbanSwimlaneSettings KeyField="AssociatedUserId" TextField="AssociatedUser.FullName"
-                            AllowDragAndDrop="@_allowDragAndDrop" ShowEmptyRow="true">
 
+    <KanbanSwimlaneSettings KeyField="AssociatedUserId"
+                            TextField="AssociatedUser.FullName"
+                            AllowDragAndDrop="@_allowDragAndDrop"
+                            ShowEmptyRow="true">
     </KanbanSwimlaneSettings>
-    <KanbanEvents TValue="TarefaDto" CardClick="@CardClickHandler" DialogOpen="@OnDialogOpen" ActionComplete="OnKanbanActionComplete" DragStart="@DragStartHandler">
+
+    <KanbanEvents TValue="TarefaDto"
+                  CardClick="@CardClickHandler"
+                  DialogOpen="@OnDialogOpen"
+                  ActionComplete="OnKanbanActionComplete"
+                  DragStart="@DragStartHandler">
     </KanbanEvents>
 </SfKanban>
-<SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="Visibility" 
-    IsModal="true">
+
+<SfDialog Target="#target"
+          Width="400px"
+          ShowCloseIcon="true"
+          @bind-Visible="Visibility"
+          IsModal="true">
     <DialogTemplates>
         <Header> Create Task </Header>
         <Content>
-            <EditForm Model="TarefaModel" method="post" OnValidSubmit="CreateTarefa" FormName="TarefaForm"
-                class="w-100 flex flex-column gap-10" style="margin-top: 5px; !important"> 
+            <EditForm Model="TarefaModel"
+                      method="post"
+                      OnValidSubmit="CreateTarefa"
+                      FormName="TarefaForm"
+                      class="w-100 flex flex-column gap-10"
+                      style="margin-top: 5px; !important">
                 <DataAnnotationsValidator />
-                <SfTextBox Placeholder='Name' CssClass="e-outline" @bind-Value="TarefaModel.Name" id="TarefaModel.Name"
-                    FloatLabelType="FloatLabelType.Always">
-                </SfTextBox>
-                <SfTextBox Placeholder='Description' Type="InputType.Text" CssClass="e-outline"
-                    FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Description"
-                    id="TarefaModel.Description">
-                </SfTextBox>
-                <SfComboBox TValue="string" TItem="ProjectUserDto" Placeholder="Associate To" CssClass="e-outline" FloatLabelType="FloatLabelType.Always"
-                            DataSource="@_project.ProjectUsers"  @bind-Value="TarefaModel.AssociatedUserId"> 
-                    <ComboBoxFieldSettings Value="ApplicationUserId" Text="ApplicationUserName"></ComboBoxFieldSettings>
+                <SfTextBox Placeholder="Name"
+                           CssClass="e-outline"
+                           @bind-Value="TarefaModel.Name"
+                           id="TarefaModel.Name"
+                           FloatLabelType="FloatLabelType.Always" />
+                <SfTextBox Placeholder="Description"
+                           Type="InputType.Text"
+                           CssClass="e-outline"
+                           FloatLabelType="FloatLabelType.Always"
+                           @bind-Value="TarefaModel.Description"
+                           id="TarefaModel.Description" />
+                <SfComboBox TValue="string"
+                            TItem="ProjectUserDto"
+                            Placeholder="Associate To"
+                            CssClass="e-outline"
+                            FloatLabelType="FloatLabelType.Always"
+                            DataSource="@_project.ProjectUsers"
+                            @bind-Value="TarefaModel.AssociatedUserId">
+                    <ComboBoxFieldSettings Value="ApplicationUserId"
+                                           Text="ApplicationUserName" />
                 </SfComboBox>
-                <SfTextBox Placeholder='Notes' Type="InputType.Text" CssClass="e-outline"
-                           FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.Notes" id="TarefaModel.Notes">
-                </SfTextBox>
-                <SfNumericTextBox  CssClass="e-outline" Format="c2"  Min="0" Placeholder="Hourly Rate"
-                                   Decimals="2" ValidateDecimalOnType="true"
-                                   FloatLabelType="FloatLabelType.Always" @bind-Value="TarefaModel.HourlyRate" id="TarefaModel.HourlyRate">
-                </SfNumericTextBox>
-                <SfButton Type="submit" CssClass="e-primary" class="w-100">@(TarefaModel.Id == null ? "Create":"Update")</SfButton>
+                <SfTextBox Placeholder="Notes"
+                           Type="InputType.Text"
+                           CssClass="e-outline"
+                           FloatLabelType="FloatLabelType.Always"
+                           @bind-Value="TarefaModel.Notes"
+                           id="TarefaModel.Notes" />
+                <SfNumericTextBox CssClass="e-outline"
+                                  Format="c2"
+                                  Min="0"
+                                  Placeholder="Hourly Rate"
+                                  Decimals="2"
+                                  ValidateDecimalOnType="true"
+                                  FloatLabelType="FloatLabelType.Always"
+                                  @bind-Value="TarefaModel.HourlyRate"
+                                  id="TarefaModel.HourlyRate" />
+                <SfButton Type="submit"
+                          CssClass="e-primary"
+                          class="w-100">
+                    @(TarefaModel.Id == null ? "Create" : "Update")
+                </SfButton>
             </EditForm>
         </Content>
     </DialogTemplates>
 </SfDialog>
 
-<SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="InviteDialogVisibility" IsModal="true">
+<SfDialog Target="#target"
+          Width="400px"
+          ShowCloseIcon="true"
+          @bind-Visible="InviteDialogVisibility"
+          IsModal="true">
     <DialogTemplates>
         <Header>Invite User</Header>
         <Content>
             <div class="w-100 flex flex-column gap-10" style="margin-top: 5px;">
-                <SfComboBox TValue="string" TItem="ApplicationUser" Placeholder="Select User" 
-                           CssClass="e-outline" FloatLabelType="FloatLabelType.Always"
-                           DataSource="@_availableUsers" @bind-Value="@selectedUserId">
-                    <ComboBoxFieldSettings Value="Id" Text="FullName"></ComboBoxFieldSettings>
+                <SfComboBox TValue="string"
+                            TItem="ApplicationUser"
+                            Placeholder="Select User"
+                            CssClass="e-outline"
+                            FloatLabelType="FloatLabelType.Always"
+                            DataSource="@_availableUsers"
+                            @bind-Value="@selectedUserId">
+                    <ComboBoxFieldSettings Value="Id"
+                                           Text="FullName" />
                 </SfComboBox>
                 <SfButton CssClass="e-primary" @onclick="InviteUser">Invite</SfButton>
             </div>
-        </Content>    
+        </Content>
     </DialogTemplates>
 </SfDialog>
 
-<SfDialog Target="#target" Width="500px" ShowCloseIcon="true" @bind-Visible="TimesheetDialogVisibility" IsModal="true">
+<SfDialog Target="#target"
+          Width="500px"
+          ShowCloseIcon="true"
+          @bind-Visible="TimesheetDialogVisibility"
+          IsModal="true">
     <DialogTemplates>
-        <Header>Log Time Entry - @DateTime.Today.ToString("MMMM dd, yyyy", new CultureInfo("en-US"))</Header>
+        <Header>
+            Log Time Entry - @DateTime.Today.ToString("MMMM dd, yyyy", new CultureInfo("en-US"))
+        </Header>
         <Content>
             <div class="w-100 flex flex-column gap-15" style="margin-top: 10px;">
                 <div class="flex flex-column gap-10">
-                    <SfComboBox TValue="Guid?" TItem="TarefaDto" 
-                               Placeholder="Select Task" CssClass="e-outline"
-                               DataSource="@_userTasks" @bind-Value="selectedTaskId"
-                               FloatLabelType="FloatLabelType.Always">
-                        <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
-                    </SfComboBox>                    
-                    <SfTextBox @bind-Value="workedHours" 
-                              Placeholder="Hours Worked (e.g., 2.5)" CssClass="e-outline"
-                              FloatLabelType="FloatLabelType.Always">
-                    </SfTextBox>
-                    <SfTextBox @bind-Value="timesheetNotes" 
-                              Placeholder="Notes (optional)" CssClass="e-outline"
+                    <SfComboBox TValue="Guid?"
+                                TItem="TarefaDto"
+                                Placeholder="Select Task"
+                                CssClass="e-outline"
+                                DataSource="@_userTasks"
+                                @bind-Value="selectedTaskId"
+                                FloatLabelType="FloatLabelType.Always">
+                        <ComboBoxFieldSettings Value="Id"
+                                               Text="Name" />
+                    </SfComboBox>
+                    <SfTextBox @bind-Value="workedHours"
+                              Placeholder="Hours Worked (e.g., 2.5)"
+                              CssClass="e-outline"
+                              FloatLabelType="FloatLabelType.Always" />
+                    <SfTextBox @bind-Value="timesheetNotes"
+                              Placeholder="Notes (optional)"
+                              CssClass="e-outline"
                               FloatLabelType="FloatLabelType.Always"
-                              Multiline="true" RowCount="3">
-                    </SfTextBox>
+                              Multiline="true"
+                              RowCount="3" />
                 </div>
-                
                 <div class="flex gap-10" style="margin-top: 10px;">
                     <SfButton CssClass="e-primary w-50" @onclick="SaveTimesheetEntry">Save Entry</SfButton>
                     <SfButton CssClass="e-outline w-50" @onclick="CloseTimesheetDialog">Cancel</SfButton>
@@ -199,11 +278,12 @@
     </DialogTemplates>
 </SfDialog>
 
-    <div>
-        <SfToast ID="ProjectPageId" @ref="ToastObj">
-            <ToastPosition X="Center"></ToastPosition>
-        </SfToast>
-    </div>
+<div>
+    <SfToast ID="ProjectPageId" @ref="ToastObj">
+        <ToastPosition X="Center"></ToastPosition>
+    </SfToast>
+</div>
+
 <SfDialogProvider />
 
 @code {
@@ -220,31 +300,30 @@
     private Guid ProjectId { get; set; }
     private bool _isInitialized = false;
     private ProjectDto _project = new ProjectDto();
-    private TarefaModel TarefaModel { get; set; } = new();    
+    private TarefaModel TarefaModel { get; set; } = new();
     private bool createTarefaView = false;
     private bool InviteDialogVisibility { get; set; } = false;
-    private string selectedUserId;    
+    private string selectedUserId;
     private bool TimesheetDialogVisibility { get; set; } = false;
     private Guid? selectedTaskId;
     private string workedHours = "";
     private string timesheetNotes = "";
     private List<TarefaDto> _userTasks = new List<TarefaDto>();
 
-
     private async Task getUsers()
     {
         _availableUsers = await UserManager.Users.ToListAsync();
         _availableUsers.RemoveAll(user => user.Id == userId);
     }
+
     public class colorResult
     {
         public string bgColor { get; set; }
         public string textColor { get; set; }
         public string bgColorOpacity { get; set; }
-
     }
-    private bool Visibility { get; set; } = false;
 
+    private bool Visibility { get; set; } = false;
 
     protected override Task OnInitializedAsync() => Task.CompletedTask;
 
@@ -257,10 +336,11 @@
             await IsOwner();
             await LoadProjectById();
             await LoadTarefasByProjectId(ProjectId);
-            await getUsers();             
+            await getUsers();
             StateHasChanged();
         }
     }
+
     private void openCreateNewTask()
     {
         TarefaModel = new TarefaModel();
@@ -283,7 +363,6 @@
         }
     }
 
-
     private async Task LoadProjectById()
     {
         _project = await ProjectsService.GetByIdAsync(ProjectId);
@@ -293,6 +372,7 @@
             return;
         }
     }
+
     public void ToggleCreateTarefaView()
     {
         createTarefaView = !createTarefaView;
@@ -301,6 +381,7 @@
             TarefaModel = new TarefaModel();
         }
     }
+
     private async Task LoadProjectUsers()
     {
         List<ProjectUserDto> projectUsers = await ProjectsService.GetProjectUsersAsync(ProjectId);
@@ -327,18 +408,17 @@
 
     public async Task CreateTarefa()
     {
-        
-        
         var res = new TarefaDto();
-        if(TarefaModel.Id != null ){
-
-        res = await TarefasService.UpdateAsync(TarefaModel.Id.Value, TarefaModel);
-        }else{
-
-        res = await TarefasService.CreateAsync(TarefaModel);
-        await UpdateProjectStatus();
-
+        if (TarefaModel.Id != null)
+        {
+            res = await TarefasService.UpdateAsync(TarefaModel.Id.Value, TarefaModel);
         }
+        else
+        {
+            res = await TarefasService.CreateAsync(TarefaModel);
+            await UpdateProjectStatus();
+        }
+
         if (res != null)
         {
             await LoadTarefasByProjectId(ProjectId);
@@ -347,12 +427,12 @@
             await UtilsService.ShowSuccessToast(ToastObj, res != null ? "Task Updated Successfully" : "Task Created Successfully");
             this.Visibility = false;
         }
-
     }
+
     private async Task IsOwner()
     {
-        var isOwner = await ProjectsService.GetByIdAsync(ProjectId);
-        if (userId.Equals(isOwner.ApplicationUserId))
+        var proj = await ProjectsService.GetByIdAsync(ProjectId);
+        if (userId.Equals(proj.ApplicationUserId))
         {
             this.isOwner = true;
             _allowDragAndDrop = true;
@@ -363,48 +443,56 @@
             _allowDragAndDrop = false;
         }
     }
+
     private async Task GetSessionUserId()
     {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         userId = user.FindFirst(ClaimTypes.NameIdentifier).Value;
     }
-    private async Task LoadTarefasByProjectId(Guid ProjectId)
+
+    private async Task LoadTarefasByProjectId(Guid projectId)
     {
-        var res = await ProjectsService.GetTarefasAsync(ProjectId);
+        var res = await ProjectsService.GetTarefasAsync(projectId);
         _tarefas = res;
         await LoadProjectUsers();
     }
+
     private async Task OnKanbanActionComplete(Syncfusion.Blazor.Kanban.ActionEventArgs<TarefaDto> args)
     {
         if (args.RequestType == "cardChange" && args.ChangedRecords?.Any() == true)
         {
             var changedRecord = args.ChangedRecords.First();
-            if(changedRecord.StatusDescription == changedRecord.Status.ToString() && changedRecord.AssociatedUserId == OldAssociatedUserId)
+            if (changedRecord.StatusDescription == changedRecord.Status.ToString()
+                && changedRecord.AssociatedUserId == OldAssociatedUserId)
             {
                 return;
             }
+
             changedRecord.Status = changedRecord.StatusDescription switch
             {
-                "Created" => TarefaStatus.Created,
+                "Created"    => TarefaStatus.Created,
                 "InProgress" => TarefaStatus.InProgress,
-                "OnHold" => TarefaStatus.OnHold,
-                "Completed" => TarefaStatus.Completed,
-                _ => changedRecord.Status
+                "OnHold"     => TarefaStatus.OnHold,
+                "Completed"  => TarefaStatus.Completed,
+                _            => changedRecord.Status
             };
-            TarefaModel model = new TarefaModel();
-            model.Id = changedRecord.Id;
-            model.AssociatedUserId = changedRecord.AssociatedUserId;
-            model.Code = changedRecord.Code;
-            model.Name = changedRecord.Name;
-            model.Description = changedRecord.Description;
-            model.StartDate = changedRecord.StartDate;
-            model.EndDate = changedRecord.EndDate;
-            model.Notes = changedRecord.Notes;
-            model.Status = changedRecord.Status;
-            model.ProjectId = ProjectId;
-            model.ApplicationUserId = changedRecord.ApplicationUserId;
-            model.HourlyRate = changedRecord.HourlyRate;
+
+            TarefaModel model = new TarefaModel
+            {
+                Id = changedRecord.Id,
+                AssociatedUserId = changedRecord.AssociatedUserId,
+                Code = changedRecord.Code,
+                Name = changedRecord.Name,
+                Description = changedRecord.Description,
+                StartDate = changedRecord.StartDate,
+                EndDate = changedRecord.EndDate,
+                Notes = changedRecord.Notes,
+                Status = changedRecord.Status,
+                ProjectId = ProjectId,
+                ApplicationUserId = changedRecord.ApplicationUserId,
+                HourlyRate = changedRecord.HourlyRate
+            };
 
             var result = await TarefasService.UpdateAsync(changedRecord.Id, model);
             if (result != null)
@@ -418,7 +506,6 @@
 
             await LoadTarefasByProjectId(ProjectId);
             await UpdateProjectStatus();
-
             await KanbanObj.RefreshAsync();
         }
     }
@@ -432,37 +519,69 @@
                 {
                     bgColor = "bg-color-created",
                     textColor = "color-created",
-                    bgColorOpacity =
-                "bg-color-created-opacity"
+                    bgColorOpacity = "bg-color-created-opacity"
                 };
             case ProjectStatus.Completed:
                 return new colorResult
                 {
                     bgColor = "bg-color-completed",
                     textColor = "color-completed",
-                    bgColorOpacity =
-                "bg-color-completed-opacity"
+                    bgColorOpacity = "bg-color-completed-opacity"
                 };
             case ProjectStatus.InProgress:
                 return new colorResult
                 {
                     bgColor = "bg-color-inprogress",
                     textColor = "color-inprogress",
-                    bgColorOpacity =
-                "bg-color-inprogress-opacity"
+                    bgColorOpacity = "bg-color-inprogress-opacity"
                 };
             case ProjectStatus.OnHold:
                 return new colorResult
                 {
                     bgColor = "bg-color-onhold",
                     textColor = "color-onhold",
-                    bgColorOpacity =
-                "bg-color-onhold-opacity"
+                    bgColorOpacity = "bg-color-onhold-opacity"
                 };
             default:
-                return new colorResult { };
+                return new colorResult();
         }
+    }
 
+    private colorResult GetStatusClass(string statusStr)
+    {
+        switch (statusStr)
+        {
+            case "Created":
+                return new colorResult
+                {
+                    bgColor = "bg-color-created",
+                    textColor = "color-created",
+                    bgColorOpacity = "bg-color-created-opacity"
+                };
+            case "Completed":
+                return new colorResult
+                {
+                    bgColor = "bg-color-completed",
+                    textColor = "color-completed",
+                    bgColorOpacity = "bg-color-completed-opacity"
+                };
+            case "InProgress":
+                return new colorResult
+                {
+                    bgColor = "bg-color-inprogress",
+                    textColor = "color-inprogress",
+                    bgColorOpacity = "bg-color-inprogress-opacity"
+                };
+            case "OnHold":
+                return new colorResult
+                {
+                    bgColor = "bg-color-onhold",
+                    textColor = "color-onhold",
+                    bgColorOpacity = "bg-color-onhold-opacity"
+                };
+            default:
+                return new colorResult();
+        }
     }
 
     public void CardClickHandler(CardClickEventArgs<TarefaDto> args)
@@ -487,10 +606,12 @@
             this.Visibility = true;
         }
     }
-      private void OnDialogOpen(DialogOpenEventArgs<TarefaDto> args)
+
+    private void OnDialogOpen(DialogOpenEventArgs<TarefaDto> args)
     {
         args.Cancel = true;
     }
+
     private async Task DeleteTask(Guid taskId)
     {
         bool isConfirmed = await DialogService.ConfirmAsync(
@@ -502,13 +623,13 @@
                 CancelButtonOptions = new DialogButtonOptions { Content = "Cancel" }
             });
 
-        if (isConfirmed) {
+        if (isConfirmed)
+        {
             await TarefasService.DeleteAsync(taskId);
             await LoadTarefasByProjectId(ProjectId);
             await UtilsService.ShowSuccessToast(ToastObj, "Task deleted");
             await UpdateProjectStatus();
         }
-
     }
 
     private void openInviteDialog()
@@ -523,13 +644,15 @@
             await UtilsService.ShowErrorToast(ToastObj, "Please select a user");
             return;
         }
-        ProjectInviteModel projectInviteModel = new ProjectInviteModel();
-        projectInviteModel.ProjectId = ProjectId;
-        projectInviteModel.InvitedApplicationUserId = selectedUserId;
-        projectInviteModel.SenderApplicationUserId = userId;
+        ProjectInviteModel projectInviteModel = new ProjectInviteModel
+        {
+            ProjectId = ProjectId,
+            InvitedApplicationUserId = selectedUserId,
+            SenderApplicationUserId = userId
+        };
 
         var result = await ProjectsService.CreateProjectInviteAsync(projectInviteModel);
-    
+
         if (result != null)
         {
             await LoadProjectById();
@@ -545,7 +668,7 @@
 
     private async Task RemoveMember(string memberId)
     {
-            bool isConfirmed = await DialogService.ConfirmAsync(
+        bool isConfirmed = await DialogService.ConfirmAsync(
             "Are you sure you want to remove this member?",
             "Remove",
             new DialogOptions
@@ -553,14 +676,18 @@
                 PrimaryButtonOptions = new DialogButtonOptions { Content = "Remove" },
                 CancelButtonOptions = new DialogButtonOptions { Content = "Cancel" }
             });
-            var tarefas = await ProjectsService.GetTarefasByProjectIdAndAssociatedUserIdAsync(ProjectId, memberId);
-            if (isConfirmed) {
-                if(tarefas.Count > 0){
-                    await UtilsService.ShowErrorToast(ToastObj, "Member has tasks assigned.");
-                    return;
-                }
-            else{
-                await ProjectsService.DeleteProjectUserByUserIdAndProjectId(memberId,ProjectId);                
+
+        var tarefas = await ProjectsService.GetTarefasByProjectIdAndAssociatedUserIdAsync(ProjectId, memberId);
+        if (isConfirmed)
+        {
+            if (tarefas.Count > 0)
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Member has tasks assigned.");
+                return;
+            }
+            else
+            {
+                await ProjectsService.DeleteProjectUserByUserIdAndProjectId(memberId, ProjectId);
                 await LoadTarefasByProjectId(ProjectId);
                 await UtilsService.ShowSuccessToast(ToastObj, "Member Removed");
             }
@@ -574,11 +701,13 @@
         workedHours = null;
         timesheetNotes = "";
         TimesheetDialogVisibility = true;
-    }   
+    }
 
-     private void LoadUserTasks()
+    private void LoadUserTasks()
     {
-    _userTasks = _tarefas.Where(t => t.AssociatedUserId == userId && t.Status != TarefaStatus.Placeholder).ToList();
+        _userTasks = _tarefas
+            .Where(t => t.AssociatedUserId == userId && t.Status != TarefaStatus.Placeholder)
+            .ToList();
     }
 
     private async Task SaveTimesheetEntry()
@@ -611,6 +740,7 @@
                 Notes = timesheetNotes ?? "",
                 UserId = userId
             };
+
             var res = await TimesheetService.GetByProjectIdAsyncAndUserId(ProjectId, userId);
             if (res != null && res.Any(t => t.TarefaId == selectedTaskId.Value && t.Date.Date == DateTime.Today))
             {
@@ -629,6 +759,7 @@
                         return h;
                     });
             }
+
             if (double.TryParse(timesheetModel.Hours, out double newEntryHours))
             {
                 if (totalHoursToday + newEntryHours > 24)
@@ -637,8 +768,8 @@
                     return;
                 }
             }
-            var result = await TimesheetService.CreateAsync(timesheetModel);
 
+            var result = await TimesheetService.CreateAsync(timesheetModel);
             if (result != null)
             {
                 await UtilsService.ShowSuccessToast(ToastObj, "Timesheet saved successfully");
@@ -665,7 +796,7 @@
 
     private async Task UpdateProjectStatus()
     {
-       var res = _tarefas.Where(t => t.Status != TarefaStatus.Placeholder).ToList();
+        var res = _tarefas.Where(t => t.Status != TarefaStatus.Placeholder).ToList();
 
         if (res.Count == 0 || res.All(t => t.Status == TarefaStatus.Created))
         {
@@ -687,7 +818,7 @@
         {
             _project.Status = ProjectStatus.InProgress;
         }
-        
+
         await ProjectsService.UpdateProjectStatusAsync(_project.Id, _project.Status);
     }
 
@@ -695,4 +826,4 @@
     {
         Navigation.NavigateTo($"/ProjectAdmin?ProjectId={ProjectId}");
     }
-    }
+}
