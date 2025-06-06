@@ -44,14 +44,12 @@
 @code {
     private string GetPageTitle()
     {
-        // Extrai o título da página com base no caminho da URL atual
         var path = NavigationManager.Uri.Split('/').LastOrDefault();
-  if (path.Equals("ProjectPage", StringComparison.OrdinalIgnoreCase))
-                    return "Project Details";
+        if (path.Equals("ProjectPage", StringComparison.OrdinalIgnoreCase))
+        return "Project Details";
         if (string.IsNullOrEmpty(path) || path.Equals(NavigationManager.BaseUri.TrimEnd('/').Split('/').LastOrDefault()))
             return "Dashboard";
         
-        // Converte a primeira letra para maiúscula
         if (!string.IsNullOrEmpty(path))
             return char.ToUpper(path[0]) + path.Substring(1);
         

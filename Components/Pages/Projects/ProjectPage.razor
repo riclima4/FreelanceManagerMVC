@@ -820,10 +820,8 @@
         }
 
         await ProjectsService.UpdateProjectStatusAsync(_project.Id, _project.Status);
-    }
-
-    private void NavigateToAdminPage()
+    }    private void NavigateToAdminPage()
     {
-        Navigation.NavigateTo($"/ProjectAdmin?ProjectId={ProjectId}");
+        Navigation.NavigateTo($"/projects/{ProjectId}/admin");
     }
 }

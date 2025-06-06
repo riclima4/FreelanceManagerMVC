@@ -81,7 +81,26 @@ namespace FreelanceManager.Services.Tarefas
         {
             int newNumber = await GetNextNumberAsync();
             return $"TAR{newNumber.ToString("0000")}";
+        }        public async Task<List<TarefaDto>> GetTarefasByProjectIdAsync(Guid projectId)
+        {
+            return await _unitOfWork.TarefasRepository
+                .GetEntityAsNoTracking(t => t.ProjectId == projectId)
+                .Include(t => t.ApplicationUser)
+                .Include(t => t.AssociatedUser)
+                .Select(t => new TarefaDto(t))
+                .ToListAsync();
         }
 
+        public async Task<List<TimesheetDto>> GetTimesheetsByProjectIdAsync(Guid projectId, DateTime startDate, DateTime endDate)
+        {
+            return await _unitOfWork.TimesheetsRepository
+                .GetEntityAsNoTracking(t => t.Tarefa.ProjectId == projectId && 
+                                           t.Date >= startDate && 
+                                           t.Date <= endDate)
+                .Include(t => t.Tarefa)
+                .ThenInclude(t => t.AssociatedUser)
+                .Select(t => new TimesheetDto(t))
+                .ToListAsync();
+        }
     }
 }

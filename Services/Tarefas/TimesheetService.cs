@@ -86,5 +86,15 @@ public class TimesheetService : ITimesheetService
     {
         int nextNumber = await GetNextNumberAsync();
         return $"TS-{nextNumber:D6}";
+    }    public async Task<List<TimesheetDto>> GetByProjectIdWithDateRangeAsync(Guid projectId, DateTime startDate, DateTime endDate)
+    {
+        return await _unitOfWork.TimesheetsRepository
+            .GetEntityAsNoTracking(t => t.Tarefa.ProjectId == projectId && 
+                                       t.Date >= startDate && 
+                                       t.Date <= endDate)
+            .Include(t => t.Tarefa)
+            .ThenInclude(t => t.AssociatedUser)
+            .Select(t => new TimesheetDto(t))
+            .ToListAsync();
     }
 }

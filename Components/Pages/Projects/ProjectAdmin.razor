@@ -1,0 +1,504 @@
+@page "/projects/{projectId:guid}/admin"
+@using FreelanceManager.Data
+@using FreelanceManager.Data.Enum
+@using FreelanceManager.IO.Projects
+@using FreelanceManager.IO.Tarefas
+@using FreelanceManager.Services.Projects
+@using FreelanceManager.Services.Tarefas
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
+@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@inject IProjectsService ProjectsService
+@inject ITarefasService TarefasService
+@inject UserManager<ApplicationUser> UserManager
+@inject NavigationManager Navigation
+@attribute [Authorize]
+
+<PageTitle>Project Admin - @(project?.Name ?? "Loading...")</PageTitle>
+
+<div class="project-admin-container">
+    @if (project != null)
+    {
+        <!-- Header Section -->
+        <div class="admin-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <button class="btn-back" @onclick="NavigateBack">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="project-info">
+                        <h1>@project.Name</h1>
+                        <p class="project-description">Project Administration & Analytics</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <span class="project-status @GetStatusClass(project.Status)">
+                        @project.Status
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Date Range Selector -->
+        <div class="date-range-section">
+            <div class="date-range-content">
+                <div class="preset-buttons">
+                    <SfButton CssClass="@GetPresetButtonClass("week")" @onclick="() => SetDateRange(DateRangePreset.ThisWeek)">
+                        This Week
+                    </SfButton>
+                    <SfButton CssClass="@GetPresetButtonClass("month")" @onclick="() => SetDateRange(DateRangePreset.ThisMonth)">
+                        This Month
+                    </SfButton>
+                    <SfButton CssClass="@GetPresetButtonClass("quarter")" @onclick="() => SetDateRange(DateRangePreset.ThisQuarter)">
+                        This Quarter
+                    </SfButton>
+                    <SfButton CssClass="@GetPresetButtonClass("year")" @onclick="() => SetDateRange(DateRangePreset.ThisYear)">
+                        This Year
+                    </SfButton>
+                    <SfButton CssClass="@GetPresetButtonClass("custom")" @onclick="() => SetDateRange(DateRangePreset.Custom)">
+                        Custom Range
+                    </SfButton>
+                </div>
+                <div class="date-pickers">
+                    <div class="date-picker-group">
+                        <label>From:</label>
+                        <SfDatePicker TValue="DateTime" @bind-Value="startDate" 
+                                     Format="dd/MM/yyyy" 
+                                     CssClass="date-picker"
+                                     ValueChange="OnDateRangeChanged" />
+                    </div>
+                    <div class="date-picker-group">
+                        <label>To:</label>
+                        <SfDatePicker TValue="DateTime" @bind-Value="endDate" 
+                                     Format="dd/MM/yyyy" 
+                                     CssClass="date-picker"
+                                     ValueChange="OnDateRangeChanged" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-icon total-hours">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="metric-content">
+                    <h3>@totalHours.ToString("F1")</h3>
+                    <p>Total Hours</p>
+                    <span class="metric-change positive">+@((totalHours - previousPeriodHours).ToString("F1"))h vs previous</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon revenue">
+                    <i class="fas fa-euro-sign"></i>
+                </div>
+                <div class="metric-content">
+                    <h3>€@totalRevenue.ToString("N2")</h3>
+                    <p>Total Revenue</p>
+                    <span class="metric-change positive">+€@((totalRevenue - previousPeriodRevenue).ToString("N2")) vs previous</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon tasks">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="metric-content">
+                    <h3>@completedTasks</h3>
+                    <p>Tasks Completed</p>
+                    <span class="metric-change">@activeTasks active tasks</span>
+                </div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-icon members">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="metric-content">
+                    <h3>@activeMembers</h3>
+                    <p>Active Members</p>
+                    <span class="metric-change">@totalMembers total members</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Hours Worked Over Time</h3>
+                </div>
+                <div class="chart-content">
+                    <SfChart Width="100%" Height="300px" Theme="Syncfusion.Blazor.Theme.Bootstrap5">
+                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" 
+                                         LabelFormat="dd/MM"
+                                         IntervalType="IntervalType.Days">
+                        </ChartPrimaryXAxis>
+                        <ChartPrimaryYAxis Title="Hours">
+                        </ChartPrimaryYAxis>
+                        <ChartSeriesCollection>
+                            <ChartSeries DataSource="@hoursData" 
+                                       XName="Date" 
+                                       YName="Hours" 
+                                       Type="ChartSeriesType.Column"
+                                       Fill="#8257E5">
+                                <ChartMarker Visible="true"></ChartMarker>
+                            </ChartSeries>
+                        </ChartSeriesCollection>
+                        <ChartTooltipSettings Enable="true" Format="Date: ${point.x}<br/>Hours: ${point.y}"></ChartTooltipSettings>
+                    </SfChart>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Revenue Over Time</h3>
+                </div>
+                <div class="chart-content">
+                    <SfChart Width="100%" Height="300px" Theme="Syncfusion.Blazor.Theme.Bootstrap5">
+                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" 
+                                         LabelFormat="dd/MM"
+                                         IntervalType="IntervalType.Days">
+                        </ChartPrimaryXAxis>
+                        <ChartPrimaryYAxis Title="Revenue (€)">
+                        </ChartPrimaryYAxis>
+                        <ChartSeriesCollection>
+                            <ChartSeries DataSource="@revenueData" 
+                                       XName="Date" 
+                                       YName="Revenue" 
+                                       Type="ChartSeriesType.Line"
+                                       Fill="#8257E5">
+                                <ChartMarker Visible="true"></ChartMarker>
+                            </ChartSeries>
+                        </ChartSeriesCollection>
+                        <ChartTooltipSettings Enable="true" Format="Date: ${point.x}<br/>Revenue: €${point.y}"></ChartTooltipSettings>
+                    </SfChart>
+                </div>
+            </div>
+        </div>
+
+        <!-- Team Performance Section -->
+        <div class="team-performance-section">
+            <div class="section-header">
+                <h3>Team Performance</h3>
+            </div>
+            <div class="team-grid">
+                @foreach (var member in teamPerformance)
+                {
+                    <div class="team-member-card">
+                        <div class="member-avatar">
+                            @GetUserInitials(member.UserName)
+                        </div>
+                        <div class="member-info">
+                            <h4>@member.UserName</h4>
+                            <p>@member.Role</p>
+                        </div>
+                        <div class="member-stats">
+                            <div class="stat">
+                                <span class="stat-value">@member.TotalHours.ToString("F1")</span>
+                                <span class="stat-label">Hours</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">@member.TasksCompleted</span>
+                                <span class="stat-label">Tasks</span>
+                            </div>
+                            <div class="stat">
+                                <span class="stat-value">€@member.Revenue.ToString("N0")</span>
+                                <span class="stat-label">Revenue</span>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Loading project data...</p>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public Guid ProjectId { get; set; }
+
+    private ProjectDto project;
+    private List<TimesheetDto> timesheets = new();
+    private List<TarefaDto> tasks = new();
+    private List<ProjectUser> projectUsers = new();
+    
+    // Date range properties
+    private DateTime startDate = DateTime.Today.AddDays(-30);
+    private DateTime endDate = DateTime.Today;
+    private DateRangePreset currentPreset = DateRangePreset.ThisMonth;
+    
+    // Metrics
+    private double totalHours;
+    private decimal totalRevenue;
+    private int completedTasks;
+    private int activeTasks;
+    private int activeMembers;
+    private int totalMembers;
+    private double previousPeriodHours;
+    private decimal previousPeriodRevenue;
+    
+    // Chart data
+    private List<ChartDataPoint> hoursData = new();
+    private List<ChartDataPoint> revenueData = new();
+    
+    // Team performance
+    private List<TeamMemberPerformance> teamPerformance = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadProjectData();
+        await LoadTimesheets();
+        await LoadTasks();
+        await LoadTeamData();
+        CalculateMetrics();
+        GenerateChartData();
+        CalculateTeamPerformance();
+    }    private async Task LoadProjectData()
+    {
+        try
+        {
+            project = await ProjectsService.GetByIdAsync(ProjectId);
+        }
+        catch (Exception)
+        {
+            // Handle error - could add logging here
+            Navigation.NavigateTo("/projects");
+        }
+    }    private async Task LoadTimesheets()
+    {
+        try
+        {
+            timesheets = await TarefasService.GetTimesheetsByProjectIdAsync(ProjectId, startDate, endDate);
+        }
+        catch (Exception)
+        {
+            // Handle error
+            timesheets = new List<TimesheetDto>();
+        }
+    }
+
+    private async Task LoadTasks()
+    {
+        try
+        {
+            tasks = await TarefasService.GetTarefasByProjectIdAsync(ProjectId);
+        }
+        catch (Exception)
+        {
+            // Handle error
+            tasks = new List<TarefaDto>();
+        }
+    }    private async Task LoadTeamData()
+    {
+        try
+        {
+            var projectUsersDto = await ProjectsService.GetProjectUsersAsync(ProjectId);
+            projectUsers = projectUsersDto.Select(pu => new ProjectUser 
+            { 
+                Id = pu.Id,
+                ProjectId = pu.ProjectId,
+                ApplicationUserId = pu.ApplicationUserId,
+                ApplicationUser = new ApplicationUser 
+                { 
+                    UserName = pu.ApplicationUser?.UserName,
+                    Email = pu.ApplicationUser?.Email
+                }
+            }).ToList();
+        }
+        catch (Exception)
+        {
+            projectUsers = new List<ProjectUser>();
+        }
+    }private void CalculateMetrics()
+    {
+        totalHours = timesheets.Sum(t => t.HoursWorked ?? 0);
+        totalRevenue = timesheets.Sum(t => (decimal)(t.HoursWorked ?? 0) * t.HourlyRate);
+          completedTasks = tasks.Count(t => t.Status == TarefaStatus.Completed);
+        activeTasks = tasks.Count(t => t.Status != TarefaStatus.Completed);
+        
+        var uniqueUsers = timesheets.Select(t => t.UserId).Distinct().Count();
+        activeMembers = uniqueUsers;
+        totalMembers = projectUsers.Count;
+        
+        // Calculate previous period metrics for comparison
+        var previousStart = startDate.AddDays(-(endDate - startDate).Days);
+        var previousEnd = startDate;
+        
+        var previousTimesheets = timesheets.Where(t => 
+            t.Data >= previousStart && t.Data < previousEnd).ToList();
+        
+        previousPeriodHours = previousTimesheets.Sum(t => t.HoursWorked ?? 0);
+        previousPeriodRevenue = previousTimesheets.Sum(t => (decimal)(t.HoursWorked ?? 0) * t.HourlyRate);
+    }
+
+    private void GenerateChartData()
+    {
+        hoursData.Clear();
+        revenueData.Clear();
+        
+        var dailyData = timesheets
+            .GroupBy(t => t.Data.Date)
+            .OrderBy(g => g.Key)
+            .ToDictionary(g => g.Key, g => new            {
+                Hours = g.Sum(t => t.HoursWorked ?? 0),
+                Revenue = g.Sum(t => (decimal)(t.HoursWorked ?? 0) * t.HourlyRate)
+            });
+        
+        for (var date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
+        {
+            var data = dailyData.ContainsKey(date) ? dailyData[date] : new { Hours = 0.0, Revenue = 0m };
+            
+            hoursData.Add(new ChartDataPoint { Date = date, Hours = data.Hours });
+            revenueData.Add(new ChartDataPoint { Date = date, Revenue = (double)data.Revenue });
+        }
+    }
+
+    private void CalculateTeamPerformance()
+    {
+        teamPerformance.Clear();
+        
+        var userPerformance = timesheets
+            .GroupBy(t => t.UserId)            .Select(g => new TeamMemberPerformance
+            {
+                UserId = g.Key,
+                UserName = g.First().User?.UserName ?? "Unknown User",
+                Role = "Team Member", // This could be enhanced with actual roles
+                TotalHours = g.Sum(t => t.HoursWorked ?? 0),
+                TasksCompleted = tasks.Count(t => t.AssociatedUserId == g.Key && t.Status == TarefaStatus.Completed),
+                Revenue = g.Sum(t => (decimal)(t.HoursWorked ?? 0) * t.HourlyRate)
+            })
+            .OrderByDescending(p => p.TotalHours)
+            .ToList();
+        
+        teamPerformance = userPerformance;
+    }
+
+    private async Task SetDateRange(DateRangePreset preset)
+    {
+        currentPreset = preset;
+        
+        switch (preset)
+        {
+            case DateRangePreset.ThisWeek:
+                var startOfWeek = DateTime.Today.AddDays(-(int)DateTime.Today.DayOfWeek);
+                startDate = startOfWeek;
+                endDate = startOfWeek.AddDays(6);
+                break;
+            case DateRangePreset.ThisMonth:
+                startDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                endDate = startDate.AddMonths(1).AddDays(-1);
+                break;
+            case DateRangePreset.ThisQuarter:
+                var quarterStart = new DateTime(DateTime.Today.Year, ((DateTime.Today.Month - 1) / 3) * 3 + 1, 1);
+                startDate = quarterStart;
+                endDate = quarterStart.AddMonths(3).AddDays(-1);
+                break;
+            case DateRangePreset.ThisYear:
+                startDate = new DateTime(DateTime.Today.Year, 1, 1);
+                endDate = new DateTime(DateTime.Today.Year, 12, 31);
+                break;
+            case DateRangePreset.Custom:
+                // Keep current dates for custom range
+                break;
+        }
+        
+        await RefreshData();
+    }
+
+    private async Task OnDateRangeChanged()
+    {
+        currentPreset = DateRangePreset.Custom;
+        await RefreshData();
+    }
+
+    private async Task RefreshData()
+    {
+        await LoadTimesheets();
+        CalculateMetrics();
+        GenerateChartData();
+        CalculateTeamPerformance();
+        StateHasChanged();
+    }
+
+    private void NavigateBack()
+    {
+        Navigation.NavigateTo($"/projects/{ProjectId}");
+    }    private string GetStatusClass(ProjectStatus status)
+    {
+        return status switch
+        {
+            ProjectStatus.InProgress => "status-active",
+            ProjectStatus.Completed => "status-completed",
+            ProjectStatus.OnHold => "status-on-hold",
+            _ => "status-inactive"
+        };
+    }
+
+    private string GetPresetButtonClass(string preset)
+    {
+        var isActive = currentPreset switch
+        {
+            DateRangePreset.ThisWeek => preset == "week",
+            DateRangePreset.ThisMonth => preset == "month",
+            DateRangePreset.ThisQuarter => preset == "quarter",
+            DateRangePreset.ThisYear => preset == "year",
+            DateRangePreset.Custom => preset == "custom",
+            _ => false
+        };
+        
+        return isActive ? "preset-btn preset-btn-active" : "preset-btn";
+    }
+
+    private string GetUserInitials(string userName)
+    {
+        if (string.IsNullOrEmpty(userName)) return "??";
+        
+        var parts = userName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+        {
+            return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+        }
+        return userName.Length >= 2 ? userName.Substring(0, 2).ToUpper() : userName.ToUpper();
+    }
+
+    // Supporting classes and enums
+    public enum DateRangePreset
+    {
+        ThisWeek,
+        ThisMonth,
+        ThisQuarter,
+        ThisYear,
+        Custom
+    }
+
+    public class ChartDataPoint
+    {
+        public DateTime Date { get; set; }
+        public double Hours { get; set; }
+        public double Revenue { get; set; }
+    }
+
+    public class TeamMemberPerformance
+    {
+        public string UserId { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public double TotalHours { get; set; }
+        public int TasksCompleted { get; set; }
+        public decimal Revenue { get; set; }
+    }
+}

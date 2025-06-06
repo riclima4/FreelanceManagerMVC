@@ -1,0 +1,492 @@
+/* Project Admin Page Styles */
+.project-admin-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--background-color, #f8f9fa);
+    min-height: 100vh;
+}
+
+/* Header Section */
+.admin-header {
+    background: linear-gradient(135deg, #8257E5 0%, #9c5ce9 100%);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    color: white;
+    box-shadow: 0 4px 20px rgba(130, 87, 229, 0.3);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.project-info h1 {
+    margin: 0 0 8px 0;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.project-description {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 16px;
+}
+
+.header-right .project-status {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-active {
+    background: rgba(40, 167, 69, 0.2);
+    color: #28a745;
+    border: 1px solid rgba(40, 167, 69, 0.3);
+}
+
+.status-completed {
+    background: rgba(23, 162, 184, 0.2);
+    color: #17a2b8;
+    border: 1px solid rgba(23, 162, 184, 0.3);
+}
+
+.status-on-hold {
+    background: rgba(255, 193, 7, 0.2);
+    color: #ffc107;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+.status-inactive {
+    background: rgba(108, 117, 125, 0.2);
+    color: #6c757d;
+    border: 1px solid rgba(108, 117, 125, 0.3);
+}
+
+/* Date Range Section */
+.date-range-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+}
+
+.date-range-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.preset-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.preset-btn {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    color: #495057;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.preset-btn:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.preset-btn-active {
+    background: #8257E5;
+    border-color: #8257E5;
+    color: white;
+}
+
+.preset-btn-active:hover {
+    background: #7048d9;
+    border-color: #7048d9;
+}
+
+.date-pickers {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.date-picker-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.date-picker-group label {
+    font-weight: 600;
+    color: #495057;
+    font-size: 14px;
+}
+
+/* Metrics Grid */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.metric-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.metric-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.metric-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: white;
+}
+
+.metric-icon.total-hours {
+    background: linear-gradient(135deg, #8257E5, #9c5ce9);
+}
+
+.metric-icon.revenue {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.metric-icon.tasks {
+    background: linear-gradient(135deg, #17a2b8, #20c997);
+}
+
+.metric-icon.members {
+    background: linear-gradient(135deg, #fd7e14, #ffc107);
+}
+
+.metric-content h3 {
+    margin: 0 0 8px 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #212529;
+}
+
+.metric-content p {
+    margin: 0 0 8px 0;
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.metric-change {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6c757d;
+}
+
+.metric-change.positive {
+    color: #28a745;
+}
+
+/* Charts Section */
+.charts-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.chart-container {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+}
+
+.chart-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.chart-header h3 {
+    margin: 0;
+    color: #212529;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.chart-content {
+    height: 300px;
+}
+
+/* Team Performance Section */
+.team-performance-section {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+}
+
+.section-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.section-header h3 {
+    margin: 0;
+    color: #212529;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.team-member-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.team-member-card:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+}
+
+.member-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8257E5, #9c5ce9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.member-info {
+    flex: 1;
+}
+
+.member-info h4 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #212529;
+}
+
+.member-info p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.member-stats {
+    display: flex;
+    gap: 16px;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-value {
+    display: block;
+    font-size: 16px;
+    font-weight: 700;
+    color: #212529;
+}
+
+.stat-label {
+    display: block;
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 2px;
+}
+
+/* Loading State */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 16px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e9ecef;
+    border-top: 4px solid #8257E5;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+    color: #6c757d;
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .project-admin-container {
+        padding: 16px;
+    }
+    
+    .admin-header {
+        padding: 20px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .charts-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .date-pickers {
+        flex-direction: column;
+    }
+    
+    .preset-buttons {
+        justify-content: center;
+    }
+    
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .team-member-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .member-stats {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .project-admin-container {
+        padding: 12px;
+    }
+    
+    .metric-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .preset-buttons {
+        flex-direction: column;
+    }
+    
+    .preset-btn {
+        text-align: center;
+    }
+}
+
+/* Syncfusion Component Overrides */
+.e-datepicker.date-picker {
+    width: 160px;
+}
+
+.e-datepicker.date-picker .e-input-group {
+    border-color: #dee2e6;
+    border-radius: 8px;
+}
+
+.e-datepicker.date-picker .e-input-group:focus-within {
+    border-color: #8257E5;
+    box-shadow: 0 0 0 2px rgba(130, 87, 229, 0.25);
+}
+
+.e-btn.preset-btn {
+    min-height: 36px;
+}
+
+/* Chart Customizations */
+.e-chart {
+    font-family: inherit;
+}
+
+.e-chart .e-chart-title {
+    font-weight: 600;
+    color: #212529;
+}
