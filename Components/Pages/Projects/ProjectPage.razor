@@ -601,6 +601,7 @@
                 Notes = data.Notes,
                 ApplicationUserId = data.ApplicationUserId,
                 HourlyRate = data.HourlyRate,
+                ProjectId = data.ProjectId,
             };
             TarefaModel = tarefa;
             this.Visibility = true;
@@ -742,11 +743,7 @@
             };
 
             var res = await TimesheetService.GetByProjectIdAsyncAndUserId(ProjectId, userId);
-            if (res != null && res.Any(t => t.TarefaId == selectedTaskId.Value && t.Date.Date == DateTime.Today))
-            {
-                await UtilsService.ShowErrorToast(ToastObj, "Timesheet entry for this task already exists for today");
-                return;
-            }
+
 
             double totalHoursToday = 0;
             if (res != null)

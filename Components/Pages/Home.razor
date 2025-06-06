@@ -4,6 +4,7 @@
 @inject IUtilsService UtilsService
 @inject SfDialogService DialogService
 @inject ITimesheetService TimesheetService
+@inject IClientsService ClientsService
 
 @page "/home"
 @using System.Globalization
@@ -11,8 +12,10 @@
 @using FreelanceManager.Data.Enum
 @using FreelanceManager.IO.Projects
 @using FreelanceManager.IO.Tarefas
+@using FreelanceManager.IO.Clients
 @using FreelanceManager.Services.Projects
 @using FreelanceManager.Services.Tarefas
+@using FreelanceManager.Services.Clients
 @using Microsoft.AspNetCore.Authorization
 @using Syncfusion.Blazor
 @using Syncfusion.Blazor.ProgressBar
@@ -57,31 +60,22 @@
                 <div class="stat-title">Hours Worked this Month</div>
                 <div class="stat-value">@hoursTracked</div>
             </div>
-        </div>
-
-        <div class="stat-card invoices">
+        </div>        <div class="stat-card invoices">
             <div class="stat-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><path d="M20 8v6"></path><path d="M23 11h-6"></path></svg>
             </div>
             <div class="stat-details">
-                <div class="stat-title">Faturas Pendentes</div>
-                <div class="stat-value">@pendingInvoices</div>
-                <div class="stat-trend negative">
-                    <span class="trend-arrow">↓</span> 2 em relação ao mês passado
-                </div>
+                <div class="stat-title">Total Clients</div>
+                <div class="stat-value">@clientCount</div>
             </div>
         </div>
 
         <div class="stat-card earnings">
             <div class="stat-icon">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-            </div>
-            <div class="stat-details">
-                <div class="stat-title">Ganhos Totais</div>
+            </div>            <div class="stat-details">
+                <div class="stat-title">Monthly Earnings</div>
                 <div class="stat-value">@totalEarnings.ToString("C", new CultureInfo("pt-PT"))</div>
-                <div class="stat-trend positive">
-                    <span class="trend-arrow">↑</span> €1.250 em relação ao mês passado
-                </div>
             </div>
         </div>
     </div>
@@ -221,18 +215,20 @@
 @code {
     private SfToast ToastObj;
     private string userId;
-    private string nome;
+    private string nome;    
     private List<ProjectDto> projects = new List<ProjectDto>();
     private List<TarefaDto> inProgressTasks = new List<TarefaDto>();
     private List<ProjectInviteDto> _projectInvites = new();
     private List<TimesheetDto> _userTimeSheet = new List<TimesheetDto>();
+    private List<ClientDto> _userClients = new List<ClientDto>();
     protected override async Task OnInitializedAsync()
     {
-        await GetSessionUserId();
+        await GetSessionUserId();        
         await GetUserProjects();
         await GetInProgressTasks();
         await LoadProjectInvites();
         await GetUserTimeSheet();
+        await GetUserClients();
         UpdateDashboardStats();
     }
     
@@ -243,10 +239,14 @@
         userId = user.FindFirst(ClaimTypes.NameIdentifier).Value;
         nome = user.FindFirst(ClaimTypes.Name).Value;
     }
-    
-    private async Task GetUserTimeSheet()
+      private async Task GetUserTimeSheet()
     {
         _userTimeSheet = await TimesheetService.GetByUserIdAsync(userId);
+    }
+    
+    private async Task GetUserClients()
+    {
+        _userClients = await ClientsService.GetAllByApplicationUserIdAsync(userId);
     }
     private async Task GetUserProjects()
     {
@@ -258,33 +258,43 @@
         var allTasks = await TarefasService.GetPersonalByApplicationUserIdAsync(userId);
         
         inProgressTasks = allTasks.Where(t => t.Status == TarefaStatus.InProgress).ToList();
-    }
-
-    private void UpdateDashboardStats()
+    }    private void UpdateDashboardStats()
     {
         activeProjects = projects.Count(p => p.Status == ProjectStatus.InProgress);
         
-        if (_userTimeSheet != null && _userTimeSheet.Any())
+        var currentMonthValue = DateTime.Now.Month;
+        var currentYearValue = DateTime.Now.Year;        
+        var currentMonthTimesheets = _userTimeSheet?.Where(ts => ts.Date.Month == currentMonthValue && ts.Date.Year == currentYearValue) ?? new List<TimesheetDto>();
+          if (currentMonthTimesheets.Any())
         {
-            hoursTracked = (int)_userTimeSheet.Sum(ts => int.Parse(ts.Hours));        
-            }
+            hoursTracked = (int)currentMonthTimesheets.Sum(ts => ts.HoursWorked);
+            
+
+            
+            var monthlyEarnings = currentMonthTimesheets
+                .Where(ts => ts.HourlyRate > 0)
+                .Sum(ts => (decimal)ts.HoursWorked * ts.HourlyRate);
+            
+            totalEarnings = monthlyEarnings;
+        }
         else
         {
             hoursTracked = 0;
+            totalEarnings = 0m;
         }
         
+        clientCount = _userClients?.Count ?? 0;
     }
 
     private async Task LoadProjectInvites()
     {
         var allInvites = await ProjectsService.GetProjectInvitesByUserIdAsync(userId);
         _projectInvites = allInvites.Where(i => i.Status == ProjectInviteStatus.Pending).ToList();
-    }
-
+    }    
     private int activeProjects = 0;
     private int hoursTracked ;
-    private int pendingInvoices = 3;
-    private decimal totalEarnings = 5280.50m;
+    private int clientCount = 0;
+    private decimal totalEarnings = 0m;
 
    
     private async Task HandleInvite(Guid inviteId, bool accept)

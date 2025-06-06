@@ -18,10 +18,12 @@ public class TimesheetService : ITimesheetService
     public async Task<List<TimesheetDto>> GetAllAsync() => await _unitOfWork.TimesheetsRepository.GetEntityAsNoTracking().Select(t => new TimesheetDto(t)).ToListAsync();
     public async Task<TimesheetDto> GetByIdAsync(Guid id) => await _unitOfWork.TimesheetsRepository.GetEntityAsNoTracking(t => t.Id == id).Select(t => new TimesheetDto(t)).FirstAsync();    public async Task<List<TimesheetDto>> GetByUserIdAsync(string userId)
     {
-        return await _unitOfWork.TimesheetsRepository
-            .GetEntityAsNoTracking(t => t.UserId== userId)
-            .Select(t => new TimesheetDto(t))
+        var timesheets = await _unitOfWork.TimesheetsRepository
+            .GetEntityAsNoTracking(t => t.UserId == userId)
+            .Include(t => t.Tarefa)
             .ToListAsync();
+            
+        return timesheets.Select(t => new TimesheetDto(t)).ToList();
     }
     
 
@@ -88,13 +90,22 @@ public class TimesheetService : ITimesheetService
         return $"TS-{nextNumber:D6}";
     }    public async Task<List<TimesheetDto>> GetByProjectIdWithDateRangeAsync(Guid projectId, DateTime startDate, DateTime endDate)
     {
-        return await _unitOfWork.TimesheetsRepository
+        var timesheets = await _unitOfWork.TimesheetsRepository
             .GetEntityAsNoTracking(t => t.Tarefa.ProjectId == projectId && 
                                        t.Date >= startDate && 
                                        t.Date <= endDate)
             .Include(t => t.Tarefa)
             .ThenInclude(t => t.AssociatedUser)
-            .Select(t => new TimesheetDto(t))
             .ToListAsync();
+            
+        return timesheets.Select(t => 
+        {
+            var dto = new TimesheetDto(t);
+            if (t.Tarefa?.AssociatedUser != null)
+            {
+                dto.User = t.Tarefa.AssociatedUser;
+            }
+            return dto;
+        }).ToList();
     }
 }

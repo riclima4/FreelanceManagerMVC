@@ -12,6 +12,8 @@
 @using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Grids
+@rendermode InteractiveServer
+
 @inject IProjectsService ProjectsService
 @inject ITarefasService TarefasService
 @inject ITimesheetService TimesheetService
@@ -22,6 +24,7 @@
 <PageTitle>Project Admin - @(project?.Name ?? "Loading...")</PageTitle>
 
 <div class="project-admin-container">
+
     @if (project != null)
     {
         <!-- Header Section -->
@@ -128,19 +131,14 @@
                     <span class="metric-change">@totalMembers total members</span>
                 </div>
             </div>
-        </div>
-
-        <!-- Charts Section -->
+        </div>        <!-- Charts Section -->
         <div class="charts-section">
             <div class="chart-container">
                 <div class="chart-header">
-                    <h3>Hours Worked Over Time</h3>
-                    <div class="debug-info">
-                        <small style="color: #666;">
-                            Debug: @hoursData.Count data points | Total Hours: @totalHours | Date Range: @startDate.ToString("dd/MM/yyyy") - @endDate.ToString("dd/MM/yyyy")
-                        </small>
-                    </div>
-                </div>                <div class="chart-content">                    @if (hoursData.Any())
+                    <h3>Daily Worked Hours</h3>
+                </div>                
+                <div class="chart-content">
+                    @if (hoursData.Any())
                     {
                         <SfChart @ref="hoursChart" Width="100%" Height="300px" Theme="Syncfusion.Blazor.Theme.Bootstrap5">
                             <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" 
@@ -164,8 +162,7 @@
                         </SfChart>
                     }
                     else
-                    {
-                        <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: #666;">
+                    {                        <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: #666;">
                             <p>No data available for the selected date range</p>
                         </div>
                     }
@@ -174,13 +171,9 @@
             
             <div class="chart-container">
                 <div class="chart-header">
-                    <h3>Hours Worked by Team</h3>
-                    <div class="debug-info">
-                        <small style="color: #666;">
-                            Debug: @teamHoursData.Count team members | @timesheets.Count timesheets loaded | @teamPerformance.Count performance records
-                        </small>
-                    </div>
-                </div>                <div class="chart-content">                    @if (teamHoursData.Any())
+                    <h3>Total Hours by Member</h3>
+                </div>                <div class="chart-content">
+                    @if (teamHoursData.Any())
                     {
                         <SfChart @ref="teamChart" Width="100%" Height="300px" Theme="Syncfusion.Blazor.Theme.Bootstrap5">
                             <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category" 
@@ -202,80 +195,8 @@
                         </SfChart>
                     }
                     else
-                    {
-                        <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: #666;">
+                    {                        <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: #666;">
                             <p>No team data available for the selected date range</p>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <!-- Data Debug Information -->
-        <div class="debug-section" style="background: #f8f9fa; padding: 15px; margin: 20px 0; border-radius: 5px;">
-            <h4>Debug Information</h4>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <h5>Data Loading Status:</h5>
-                    <ul>
-                        <li>Project: @(project?.Name ?? "Not loaded")</li>
-                        <li>Timesheets Count: @timesheets.Count</li>
-                        <li>Tasks Count: @tasks.Count</li>
-                        <li>Project Users: @projectUsers.Count</li>
-                        <li>Chart Data Points: @hoursData.Count</li>
-                        <li>Team Hours Data: @teamHoursData.Count</li>
-                    </ul>
-                </div>
-                <div>
-                    <h5>Raw Data Sample:</h5>
-                    @if (timesheets.Any())
-                    {
-                        <ul>
-                            @foreach (var timesheet in timesheets.Take(3))
-                            {
-                                <li>@timesheet.Data.ToString("dd/MM/yyyy"): @timesheet.HoursWorked hours by @(timesheet.User?.UserName ?? timesheet.UserId)</li>
-                            }
-                        </ul>
-                    }
-                    else
-                    {
-                        <p style="color: red;">No timesheets found for this project and date range!</p>
-                    }
-                      @if (teamHoursData.Any())
-                    {
-                        <h6>Team Hours:</h6>
-                        <ul>
-                            @foreach (var team in teamHoursData.Take(3))
-                            {
-                                <li>@team.UserName: @team.Hours hours</li>
-                            }
-                        </ul>
-                    }
-                    
-                    <h6>Chart Data Sample:</h6>
-                    @if (hoursData.Any())
-                    {
-                        <div style="margin: 10px 0;">
-                            <strong>Hours Data (first 5):</strong>
-                            <ul style="font-size: 12px;">
-                                @foreach (var point in hoursData.Take(5))
-                                {
-                                    <li>@point.Date.ToString("dd/MM/yyyy"): @point.Hours hours</li>
-                                }
-                            </ul>
-                        </div>
-                    }
-                    
-                    @if (teamHoursData.Any())
-                    {
-                        <div style="margin: 10px 0;">
-                            <strong>Team Data (all):</strong>
-                            <ul style="font-size: 12px;">
-                                @foreach (var team in teamHoursData)
-                                {
-                                    <li>"@team.UserName": @team.Hours hours</li>
-                                }
-                            </ul>
                         </div>
                     }
                 </div>
@@ -321,9 +242,9 @@
     {
         <div class="loading-container">
             <div class="loading-spinner"></div>
-            <p>Loading project data...</p>
-        </div>
+            <p>Loading project data...</p>        </div>
     }
+
 </div>
 
 @code {
@@ -334,28 +255,23 @@
     private List<TarefaDto> tasks = new();
     private List<ProjectUser> projectUsers = new();
     
-    // Chart references
     private SfChart hoursChart;
     private SfChart teamChart;
     
-    // Date range properties
     private DateTime startDate = DateTime.Today.AddDays(-30);
     private DateTime endDate = DateTime.Today;
     private DateRangePreset currentPreset = DateRangePreset.ThisMonth;
     
-    // Metrics
     private double totalHours;
     private decimal totalRevenue;
     private int completedTasks;
     private int activeTasks;
-    private int activeMembers;
-    private int totalMembers;
+    private int activeMembers;    private int totalMembers;
     private double previousPeriodHours;
-    private decimal previousPeriodRevenue;    // Chart data
-    private List<ChartDataPoint> hoursData = new();
-    private List<TeamHoursData> teamHoursData = new();
+    private decimal previousPeriodRevenue;
     
-    // Team performance
+    private List<ChartDataPoint> hoursData = new();    private List<TeamHoursData> teamHoursData = new();
+    
     private List<TeamMemberPerformance> teamPerformance = new();
 
     protected override async Task OnInitializedAsync()
@@ -364,36 +280,30 @@
         await LoadTimesheets();
         await LoadTasks();
         await LoadTeamData();
-        CalculateMetrics();
-        GenerateChartData();
+        CalculateMetrics();        GenerateChartData();
         CalculateTeamPerformance();
-    }    private async Task LoadProjectData()
+    }
+    
+    private async Task LoadProjectData()
     {
         try
-        {
+        {            
             project = await ProjectsService.GetByIdAsync(ProjectId);
         }
         catch (Exception)
         {
-            // Handle error - could add logging here
             Navigation.NavigateTo("/projects");
         }
-    }    private async Task LoadTimesheets()
+    }
+    
+    private async Task LoadTimesheets()
     {
         try
         {
-            Console.WriteLine($"Loading timesheets for ProjectId: {ProjectId}, DateRange: {startDate:dd/MM/yyyy} - {endDate:dd/MM/yyyy}");
             timesheets = await TimesheetService.GetByProjectIdWithDateRangeAsync(ProjectId, startDate, endDate);
-            Console.WriteLine($"Loaded {timesheets.Count} timesheets");
-            
-            foreach (var timesheet in timesheets.Take(3))
-            {
-                Console.WriteLine($"  Timesheet: {timesheet.Date:dd/MM/yyyy}, Hours: {timesheet.HoursWorked}, User: {timesheet.User?.UserName ?? "Unknown"}");
-            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading timesheets: {ex.Message}");
             timesheets = new List<TimesheetDto>();
         }
     }
@@ -401,15 +311,15 @@
     private async Task LoadTasks()
     {
         try
-        {
+        {            
             tasks = await TarefasService.GetTarefasByProjectIdAsync(ProjectId);
         }
         catch (Exception)
         {
-            // Handle error
             tasks = new List<TarefaDto>();
         }
-    }    
+    }
+    
     private async Task LoadTeamData()
     {
         try
@@ -428,112 +338,79 @@
             }).ToList();
         }
         catch (Exception)
-        {
+        {            
             projectUsers = new List<ProjectUser>();
         }
-    }private void CalculateMetrics()
+    }
+    
+    private void CalculateMetrics()
     {
-        totalHours = timesheets.Sum(t => t.HoursWorked ?? 0);
-        totalRevenue = timesheets.Sum(t => (decimal)(t.HoursWorked ?? 0) * t.HourlyRate);
-          completedTasks = tasks.Count(t => t.Status == TarefaStatus.Completed);
+        totalHours = timesheets.Sum(t => t.HoursWorked);
+        totalRevenue = timesheets.Sum(t => (decimal)t.HoursWorked * t.HourlyRate);
+        
+        completedTasks = tasks.Count(t => t.Status == TarefaStatus.Completed);
         activeTasks = tasks.Count(t => t.Status != TarefaStatus.Completed);
         
         var uniqueUsers = timesheets.Select(t => t.UserId).Distinct().Count();
         activeMembers = uniqueUsers;
         totalMembers = projectUsers.Count;
         
-        // Calculate previous period metrics for comparison
         var previousStart = startDate.AddDays(-(endDate - startDate).Days);
         var previousEnd = startDate;
         
         var previousTimesheets = timesheets.Where(t => 
-            t.Data >= previousStart && t.Data < previousEnd).ToList();
-        
-        previousPeriodHours = previousTimesheets.Sum(t => t.HoursWorked ?? 0);
-        previousPeriodRevenue = previousTimesheets.Sum(t => (decimal)(t.HoursWorked ?? 0) * t.HourlyRate);
-    }    private void GenerateChartData()
+            t.Date >= previousStart && t.Date < previousEnd).ToList();
+            
+        previousPeriodHours = previousTimesheets.Sum(t => t.HoursWorked);        
+        previousPeriodRevenue = previousTimesheets.Sum(t => (decimal)t.HoursWorked * t.HourlyRate);
+    }
+    
+    private void GenerateChartData()
     {
-        Console.WriteLine($"GenerateChartData called. Timesheets count: {timesheets.Count}");
-        
         hoursData.Clear();
         teamHoursData.Clear();
         
         var dailyData = timesheets
-            .GroupBy(t => t.Data.Date)
+            .GroupBy(t => t.Date.Date)
             .OrderBy(g => g.Key)
             .ToDictionary(g => g.Key, g => new
             {
-                Hours = g.Sum(t => t.HoursWorked ?? 0)
+                Hours = g.Sum(t => t.HoursWorked)
             });
-        
-        Console.WriteLine($"Daily data groups: {dailyData.Count}");
         
         for (var date = startDate.Date; date <= endDate.Date; date = date.AddDays(1))
         {
             var data = dailyData.ContainsKey(date) ? dailyData[date] : new { Hours = 0.0 };
-            
             hoursData.Add(new ChartDataPoint { Date = date, Hours = Math.Round(data.Hours, 2) });
         }
         
-        Console.WriteLine($"Hours data points created: {hoursData.Count}");
-        Console.WriteLine($"Sample hours data: {string.Join(", ", hoursData.Take(5).Select(h => $"{h.Date:dd/MM}: {h.Hours}h"))}");
-        
-        // Generate team hours data for the chart
         var teamHours = timesheets
             .GroupBy(t => t.UserId)
             .Select(g => new TeamHoursData
             {
                 UserName = (g.First().User?.UserName ?? $"User {g.Key}").Trim(),
-                Hours = Math.Round(g.Sum(t => t.HoursWorked ?? 0), 2)
+                Hours = Math.Round(g.Sum(t => t.HoursWorked), 2)
             })
-            .Where(t => t.Hours > 0) // Only include users with actual hours
+            .Where(t => t.Hours > 0)
             .OrderByDescending(t => t.Hours)
             .ToList();
         
         teamHoursData = teamHours;
-        
-        Console.WriteLine($"Team hours data created: {teamHoursData.Count}");
-        foreach (var team in teamHoursData)
-        {
-            Console.WriteLine($"  '{team.UserName}': {team.Hours} hours");
-        }
-        
-        // Add test data if no real data exists
-        if (!hoursData.Any(h => h.Hours > 0))
-        {
-            Console.WriteLine("No real hours data found, adding test data");
-            hoursData.Clear();
-            for (int i = 0; i < 7; i++)
-            {
-                hoursData.Add(new ChartDataPoint 
-                { 
-                    Date = DateTime.Today.AddDays(-6 + i), 
-                    Hours = 2.0 + i 
-                });
-            }
-        }
-        
-        if (!teamHoursData.Any())
-        {
-            Console.WriteLine("No real team data found, adding test data");
-            teamHoursData.Add(new TeamHoursData { UserName = "Test User", Hours = 10.0 });
-        }
     }
 
     private void CalculateTeamPerformance()
-    {
-        teamPerformance.Clear();
+    {        teamPerformance.Clear();
         
-        var userPerformance = timesheets
-            .GroupBy(t => t.UserId)            
+        var userPerformance = timesheets            
+        .GroupBy(t => t.UserId)
             .Select(g => new TeamMemberPerformance
             {
                 UserId = g.Key,
                 UserName = g.First().User?.UserName ?? "Unknown User",
-                Role = "Team Member", // This could be enhanced with actual roles
-                TotalHours = g.Sum(t => t.HoursWorked ?? 0),
+                Role = "Team Member",
+                TotalHours = g.Sum(t => t.HoursWorked),
                 TasksCompleted = tasks.Count(t => t.AssociatedUserId == g.Key && t.Status == TarefaStatus.Completed),
-                Revenue = g.Sum(t => (decimal)(t.HoursWorked ?? 0) * t.HourlyRate)
+                Revenue = g.Sum(t => (decimal)t.HoursWorked * t.HourlyRate)
             })
             .OrderByDescending(p => p.TotalHours)
             .ToList();
@@ -562,11 +439,10 @@
                 endDate = quarterStart.AddMonths(3).AddDays(-1);
                 break;
             case DateRangePreset.ThisYear:
-                startDate = new DateTime(DateTime.Today.Year, 1, 1);
+                startDate = new DateTime(DateTime.Today.Year, 1, 1);                
                 endDate = new DateTime(DateTime.Today.Year, 12, 31);
                 break;
             case DateRangePreset.Custom:
-                // Keep current dates for custom range
                 break;
         }
         
@@ -575,16 +451,16 @@
 
     private async Task OnDateRangeChanged()
     {
-        currentPreset = DateRangePreset.Custom;
+        currentPreset = DateRangePreset.Custom;        
         await RefreshData();
-    }    private async Task RefreshData()
-    {
-        await LoadTimesheets();
+    }
+    
+    private async Task RefreshData()
+    {        await LoadTimesheets();
         CalculateMetrics();
         GenerateChartData();
         CalculateTeamPerformance();
         
-        // Force chart refresh
         if (hoursChart != null)
         {
             await hoursChart.RefreshAsync();
@@ -598,9 +474,10 @@
     }
 
     private void NavigateBack()
-    {
-        Navigation.NavigateTo($"/projects/{ProjectId}");
-    }    private string GetStatusClass(ProjectStatus status)
+    {        Navigation.NavigateTo($"/projects");
+    }
+    
+    private string GetStatusClass(ProjectStatus status)
     {
         return status switch
         {
@@ -634,11 +511,9 @@
         if (parts.Length >= 2)
         {
             return $"{parts[0][0]}{parts[1][0]}".ToUpper();
-        }
-        return userName.Length >= 2 ? userName.Substring(0, 2).ToUpper() : userName.ToUpper();
+        }        return userName.Length >= 2 ? userName.Substring(0, 2).ToUpper() : userName.ToUpper();
     }
-
-    // Supporting classes and enums
+    
     public enum DateRangePreset
     {
         ThisWeek,
@@ -646,11 +521,14 @@
         ThisQuarter,
         ThisYear,
         Custom
-    }    public class ChartDataPoint
+    }
+      public class ChartDataPoint
     {
         public DateTime Date { get; set; }
         public double Hours { get; set; }
-    }public class TeamHoursData
+    }
+    
+    public class TeamHoursData
     {
         public string UserName { get; set; } = string.Empty;
         public double Hours { get; set; }
@@ -660,7 +538,7 @@
     {
         public string UserId { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
-        public string Role { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;        
         public double TotalHours { get; set; }
         public int TasksCompleted { get; set; }
         public decimal Revenue { get; set; }

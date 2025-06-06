@@ -261,8 +261,7 @@
     {
         try
         {
-            // Implementação direta da exclusão sem confirmação por dialog
-            // Uma confirmação por dialog poderia ser adicionada ao IUtilsService no futuro
+     
             await ClientsService.DeleteAsync(clientId);
             await UtilsService.ShowSuccessToast(ToastObj, "Client deleted successfully");
             await LoadClients();
