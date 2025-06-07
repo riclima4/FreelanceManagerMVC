@@ -146,6 +146,7 @@
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
+    align-items: end;
 }
 
 .date-picker-group {
@@ -158,6 +159,43 @@
     font-weight: 600;
     color: #495057;
     font-size: 14px;
+}
+
+.report-button-group {
+    display: flex;
+    align-items: flex-end;
+    margin-left: auto;
+}
+
+.btn-generate-report {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    border: none !important;
+    color: white !important;
+    padding: 12px 20px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    height: 42px !important;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3) !important;
+}
+
+.btn-generate-report:hover {
+    background: linear-gradient(135deg, #218838 0%, #1db584 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4) !important;
+}
+
+.btn-generate-report:active {
+    transform: translateY(0) !important;
+}
+
+.btn-generate-report i {
+    font-size: 16px;
 }
 
 /* Metrics Grid */
@@ -419,9 +457,21 @@
     .charts-section {
         grid-template-columns: 1fr;
     }
-    
-    .date-pickers {
+      .date-pickers {
         flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .report-button-group {
+        margin-left: 0;
+        margin-top: 16px;
+        justify-content: center;
+    }
+    
+    .btn-generate-report {
+        width: 100% !important;
+        max-width: 300px !important;
+        justify-content: center !important;
     }
     
     .preset-buttons {
@@ -488,4 +538,16 @@
 .e-chart .e-chart-title {
     font-weight: 600;
     color: #212529;
+}
+
+.project-status-simple {
+    color: white;
+    border: 2px solid white;
+    background: transparent;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }

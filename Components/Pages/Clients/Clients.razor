@@ -1,20 +1,26 @@
 @page "/Clients"
 @inject IClientsService ClientsService
 @inject IUtilsService UtilsService
+@inject IReportService ReportService
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
 @using System.Security.Claims
 @using FreelanceManager.IO.Clients
 @using FreelanceManager.Services.Clients
 @using FreelanceManager.Services.Utils
 @using Microsoft.AspNetCore.Authorization
+@using Syncfusion.Blazor.DropDowns
 
 @rendermode InteractiveServer
 @attribute [Authorize]
 
-<div class="clients-container">
+<div class="clients-container">    
     <div class="page-header">
         <h3>Clients</h3>
-        <SfButton CssClass="e-primary" @onclick="openCreateNewClient">New Client +</SfButton>
+        <div class="flex gap-10">
+            <SfButton CssClass="e-primary" @onclick="openGenerateReport" IconCss="e-icons e-download">Generate Report</SfButton>
+            <SfButton CssClass="e-primary" @onclick="openCreateNewClient">New Client +</SfButton>
+        </div>
     </div>
     
     <div class="search-container">
@@ -88,10 +94,12 @@
         </div>
     }
 </div>
+    <div>
+        <SfToast ID="toast_1" @ref="ToastObj">
+            <ToastPosition X="Center"></ToastPosition>
+        </SfToast>
+    </div>
 
-<SfToast ID="toast_1" @ref="ToastObj">
-    <ToastPosition X="Center"></ToastPosition>
-</SfToast>
 <SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="clientDialogVisibility" IsModal="true">
     <DialogTemplates>
         <Header> Create Client </Header>
@@ -144,19 +152,63 @@
                                         "Update")
                 </SfButton>
 
-            </EditForm>
+            </EditForm>        
+            </Content>
+    </DialogTemplates>
+</SfDialog>
+
+<SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="reportDialogVisibility" 
+          IsModal="true">
+    <DialogTemplates>
+        <Header> Generate Client Report </Header>
+        <Content>            
+            <div class="w-100 flex flex-column gap-10" style="margin-top: 5px;">
+                <SfComboBox TValue="Guid?" TItem="ClientDto" Placeholder="Select Client" 
+                           DataSource="@clients" @bind-Value="selectedClientId" CssClass="e-outline"
+                           FloatLabelType="FloatLabelType.Always">
+                    <ComboBoxFieldSettings Value="Id" Text="Name"></ComboBoxFieldSettings>
+                </SfComboBox>
+                
+                <SfDatePicker Placeholder='Start Date' CssClass="e-outline" @bind-Value="reportStartDate" 
+                              id="reportStartDate" FloatLabelType="FloatLabelType.Always">
+                </SfDatePicker>
+                
+                <SfDatePicker Placeholder='End Date' CssClass="e-outline" @bind-Value="reportEndDate"
+                              id="reportEndDate" FloatLabelType="FloatLabelType.Always">
+                </SfDatePicker>
+                
+                <SfButton CssClass="e-primary" class="w-100" @onclick="GenerateClientReport">Generate Report</SfButton>
+            </div>
         </Content>
     </DialogTemplates>
 </SfDialog>
+
+<script>
+    window.downloadFile = (dataUrl, fileName) => {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+</script>
+
+
 @code {
     SfToast ToastObj;
     private ClientModel ClientModel = new ClientModel();
     private string userId;
     private bool clientDialogVisibility = false;
+    private bool reportDialogVisibility = false;
     private List<ClientDto> clients = new List<ClientDto>();
     private List<ClientDto> filteredClients = new List<ClientDto>();
     private string searchText = "";
     private bool isLoading = true;
+    
+    private Guid? selectedClientId;
+    private DateTime reportStartDate = DateTime.Now.AddDays(-30);
+    private DateTime reportEndDate = DateTime.Now;
 
     protected override async Task OnInitializedAsync()
     {
@@ -181,10 +233,8 @@
         isLoading = true;
         clients = await ClientsService.GetAllByApplicationUserIdAsync(userId);
         
-        // Depuração para verificar se os clientes estão sendo carregados
         Console.WriteLine($"Loaded {clients.Count} clients for user {userId}");
         
-        // Se não estiver carregando clientes, tente com GetAllAsync
         if (clients == null || clients.Count == 0)
         {
             Console.WriteLine("No clients found for user, trying to load all clients");
@@ -194,14 +244,13 @@
         ApplyFilter();
         isLoading = false;
         
-        // Força a atualização da UI
         StateHasChanged();
     }
 
     private void openCreateNewClient()
     {
         ClientModel = new ClientModel();
-        ClientModel.ApplicationUserId = userId;  // Definindo o ApplicationUserId do usuário atual
+        ClientModel.ApplicationUserId = userId;  
         clientDialogVisibility = true;
     }
 
@@ -256,17 +305,15 @@
         ClientModel.Phone = client.Phone;
         clientDialogVisibility = true;
     }
-    
-    private async Task DeleteClient(Guid clientId)
+      private async Task DeleteClient(Guid clientId)
     {
         try
         {
-     
             await ClientsService.DeleteAsync(clientId);
             await UtilsService.ShowSuccessToast(ToastObj, "Client deleted successfully");
             await LoadClients();
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             await UtilsService.ShowErrorToast(ToastObj, "Error deleting client");
         }
@@ -291,8 +338,58 @@
                     (c.Email?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
                     (c.Phone?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
                     (c.City?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
-                    (c.Country?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false))
-                .ToList();
+                    (c.Country?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false))                .ToList();
+        }
+    }    private void openGenerateReport()
+    {
+        selectedClientId = null;
+        reportStartDate = DateTime.Now.AddDays(-30);
+        reportEndDate = DateTime.Now;
+        this.reportDialogVisibility = true;
+    }
+
+    private async Task GenerateClientReport()
+    {
+        try
+        {
+            if (!selectedClientId.HasValue)
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Please select a client");
+                return;
+            }
+
+            if (reportStartDate > reportEndDate)
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Start date must be before end date");
+                return;
+            }
+
+            var pdfStream = await ReportService.GenerateClientReportPdfAsync(selectedClientId.Value, reportStartDate, reportEndDate);
+            
+            if (pdfStream != null)
+            {
+                var selectedClient = clients.FirstOrDefault(c => c.Id == selectedClientId.Value);
+                var clientName = selectedClient?.Name ?? "Client";
+                var fileName = $"{clientName}_Report_{reportStartDate:yyyy-MM-dd}_to_{reportEndDate:yyyy-MM-dd}.pdf";
+                
+                var bytes = pdfStream.ToArray();
+                
+                var base64 = Convert.ToBase64String(bytes);
+                var dataUrl = $"data:application/pdf;base64,{base64}";
+                
+                await JSRuntime.InvokeVoidAsync("downloadFile", dataUrl, fileName);
+                
+                await UtilsService.ShowSuccessToast(ToastObj, "Client report PDF downloaded successfully!");
+                this.reportDialogVisibility = false;
+            }
+            else
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Failed to generate client report PDF - no data found for the selected date range");
+            }
+        }
+        catch (Exception ex)
+        {
+            await UtilsService.ShowErrorToast(ToastObj, $"Error generating client report: {ex.Message}");
         }
     }
 }

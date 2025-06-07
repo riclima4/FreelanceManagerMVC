@@ -127,6 +127,17 @@ namespace FreelanceManager.Services.Projects
             return $"PROJ{newNumber.ToString("0000")}";
         }
 
+        public async Task<List<ProjectDto>> GetByClientIdAsync(Guid clientId)
+        {
+            return await _unitOfWork
+                .ProjectsRepository
+                .GetEntityAsNoTracking(p => p.ClientId == clientId)
+                .Include(p => p.Client)
+                .Include(p => p.Tarefas)
+                .Include(p => p.ProjectUsers)
+                .Select(p => new ProjectDto(p))
+                .ToListAsync();
+        }
         #region ProjectUsers
 
 

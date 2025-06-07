@@ -4,8 +4,10 @@
 @inject ITarefasService TarefasService
 @inject IUtilsService UtilsService
 @inject IClientsService ClientsService
+@inject IReportService ReportService
 @inject NavigationManager NavigationManager
 @inject SfDialogService DialogService
+@inject IJSRuntime JSRuntime
 
 @using System.Security.Claims;
 @using FreelanceManager.Services.Projects
@@ -21,18 +23,19 @@
 
 @using Microsoft.AspNetCore.Authorization
 @using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Calendars
 
 @attribute [Authorize]
 
 <PageTitle>Projects</PageTitle>
 <div class="flex">
     <div class="flex flex-column gap-16 w-100">
-        <div class="flex flex-column gap-10">
-            <div class="flex justify-content-space-between align-items-center">
-                <h3>Projects</h3>
-                <SfButton CssClass="e-primary" @onclick="openCreateNewProject">New
-                    Project
-                    +</SfButton>
+        <div class="flex flex-column gap-10">            <div class="flex justify-content-space-between align-items-center">
+                <h3>Projects</h3>                
+                <div class="flex gap-10">
+                    <SfButton CssClass="e-primary" @onclick="openGenerateReport" IconCss="e-icons e-download">Generate Report</SfButton>
+                    <SfButton CssClass="e-primary" @onclick="openCreateNewProject">New Project +</SfButton>
+                </div>
             </div>
             <p hidden="@(_personalProjects.Count > 0)">No Projects created!</p>
             <div hidden="@(_personalProjects.Count == 0)" class="flex gap-16 flex-wrap ">
@@ -146,8 +149,7 @@
                 </EditForm>
             </Content>
         </DialogTemplates>
-    </SfDialog>
-    <SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="tarefaDialogVisibility" 
+    </SfDialog>    <SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="tarefaDialogVisibility" 
               IsModal="true">
         <DialogTemplates>
             <Header> Create Task </Header>
@@ -174,8 +176,36 @@
             </Content>
         </DialogTemplates>
     </SfDialog>
+      <SfDialog Target="#target" Width="400px" ShowCloseIcon="true" @bind-Visible="reportDialogVisibility" 
+              IsModal="true">
+        <DialogTemplates>
+            <Header> Generate Report </Header>
+            <Content>
+                <div class="w-100 flex flex-column gap-10" style="margin-top: 5px;">
+                    <SfDatePicker Placeholder='Start Date' CssClass="e-outline" @bind-Value="reportStartDate" 
+                                  id="reportStartDate" FloatLabelType="FloatLabelType.Always">
+                    </SfDatePicker>
+                    <SfDatePicker Placeholder='End Date' CssClass="e-outline" @bind-Value="reportEndDate"
+                                  id="reportEndDate" FloatLabelType="FloatLabelType.Always">
+                    </SfDatePicker>
+                    <SfButton CssClass="e-primary" class="w-100" @onclick="GenerateReport">Generate Report</SfButton>
+                </div>
+            </Content>
+        </DialogTemplates>
+    </SfDialog>
 </div>
 <SfDialogProvider />
+
+<script>
+    window.downloadFile = (dataUrl, fileName) => {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+</script>
 
 @code {
     SfToast ToastObj;
@@ -183,12 +213,13 @@
     private List<ProjectDto> _personalProjects = new List<ProjectDto>();
     private List<TarefaDto> _tarefas = new List<TarefaDto>();
     private List<ClientDto> _clients = new();
-    private string userId;
-
-    private ProjectModel ProjectModel { get; set; } = new();
+    private string userId;    private ProjectModel ProjectModel { get; set; } = new();
     private TarefaModel TarefaModel { get; set; } = new();
+    private DateTime reportStartDate = DateTime.Now.AddDays(-30);
+    private DateTime reportEndDate = DateTime.Now;
     private bool tarefaDialogVisibility = false;
     private bool projectDialogVisibility = false;
+    private bool reportDialogVisibility = false;
     protected override async Task OnInitializedAsync()
     {
         await GetSessionUserId();
@@ -423,15 +454,14 @@
         TarefaModel.ApplicationUserId = userId;
         TarefaModel.AssociatedUserId = userId;
         this.tarefaDialogVisibility = true;
-    }
-        private void openCreateNewProject()
+    }        private void openCreateNewProject()
     {
         ProjectModel = new ProjectModel();
-        ProjectModel.ApplicationUserId = userId;
+        ProjectModel.ApplicationUserId = userId;        
         this.projectDialogVisibility = true;
     }
 
-public void CardClickHandler(CardClickEventArgs<TarefaDto> args)
+    public void CardClickHandler(CardClickEventArgs<TarefaDto> args)
     {
         var data = args.Data;
         if (data != null)
@@ -448,9 +478,66 @@ public void CardClickHandler(CardClickEventArgs<TarefaDto> args)
                 Notes = data.Notes,
                 ApplicationUserId = data.ApplicationUserId,
                 HourlyRate = data.HourlyRate,
-            };
-            TarefaModel = tarefa;
+            };            TarefaModel = tarefa;
             this.tarefaDialogVisibility = true;
         }
+    }    private void openGenerateReport()
+    {
+        reportStartDate = DateTime.Now.AddDays(-30);
+        reportEndDate = DateTime.Now;
+        this.reportDialogVisibility = true;
     }
-}
+
+    private async Task GenerateReport()
+    {
+        try
+        {
+            if (reportStartDate > reportEndDate)
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Start date must be before end date");
+                return;
+            }
+
+            var report = await ReportService.GeneratePersonalReportAsync(userId, reportStartDate, reportEndDate);
+            
+            if (report != null)
+            {
+                
+                if (report.DailyReports.Count > 0)
+                {
+                    var pdfStream = await ReportService.GeneratePersonalReportPdfAsync(userId, reportStartDate, reportEndDate);
+                    
+                    if (pdfStream != null)
+                    {
+                        var fileName = $"Report_{reportStartDate:yyyy-MM-dd}_to_{reportEndDate:yyyy-MM-dd}.pdf";
+                        
+                        var bytes = pdfStream.ToArray();
+                        
+                        var base64 = Convert.ToBase64String(bytes);
+                        var dataUrl = $"data:application/pdf;base64,{base64}";
+                        
+                        await JSRuntime.InvokeVoidAsync("downloadFile", dataUrl, fileName);
+                        
+                        await UtilsService.ShowSuccessToast(ToastObj, "Report PDF downloaded successfully!");
+                        this.reportDialogVisibility = false;
+                    }
+                    else
+                    {
+                        await UtilsService.ShowErrorToast(ToastObj, "Failed to generate report PDF");
+                    }
+                }
+                else
+                {
+                    await UtilsService.ShowSuccessToast(ToastObj, "No data found for the selected date range");
+                }
+            }
+            else
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Failed to generate report data");
+            }
+        }
+        catch (Exception ex)
+        {
+            await UtilsService.ShowErrorToast(ToastObj, $"Error generating report: {ex.Message}");
+        }
+    }}

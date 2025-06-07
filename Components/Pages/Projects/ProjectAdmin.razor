@@ -5,6 +5,7 @@
 @using FreelanceManager.IO.Tarefas
 @using FreelanceManager.Services.Projects
 @using FreelanceManager.Services.Tarefas
+@using FreelanceManager.Services.Utils
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using System.Security.Claims
@@ -12,13 +13,18 @@
 @using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Notifications
+
 @rendermode InteractiveServer
 
 @inject IProjectsService ProjectsService
 @inject ITarefasService TarefasService
 @inject ITimesheetService TimesheetService
+@inject IReportService ReportService
+@inject IUtilsService UtilsService
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 @attribute [Authorize]
 
 <PageTitle>Project Admin - @(project?.Name ?? "Loading...")</PageTitle>
@@ -27,7 +33,6 @@
 
     @if (project != null)
     {
-        <!-- Header Section -->
         <div class="admin-header">
             <div class="header-content">
                 <div class="header-left">
@@ -40,14 +45,13 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <span class="project-status @GetStatusClass(project.Status)">
+                    <span class="project-status-simple">
                         @project.Status
                     </span>
                 </div>
             </div>
         </div>
 
-        <!-- Date Range Selector -->
         <div class="date-range-section">
             <div class="date-range-content">
                 <div class="preset-buttons">
@@ -66,7 +70,7 @@
                     <SfButton CssClass="@GetPresetButtonClass("custom")" @onclick="() => SetDateRange(DateRangePreset.Custom)">
                         Custom Range
                     </SfButton>
-                </div>
+                </div>                
                 <div class="date-pickers">
                     <div class="date-picker-group">
                         <label>From:</label>
@@ -74,7 +78,7 @@
                                      Format="dd/MM/yyyy" 
                                      CssClass="date-picker"
                                      ValueChange="OnDateRangeChanged" />
-                    </div>
+                    </div>                    
                     <div class="date-picker-group">
                         <label>To:</label>
                         <SfDatePicker TValue="DateTime" @bind-Value="endDate" 
@@ -82,6 +86,13 @@
                                      CssClass="date-picker"
                                      ValueChange="OnDateRangeChanged" />
                     </div>
+                    <div class="date-picker-group">
+                        <SfButton CssClass="e-primary" 
+                                  @onclick="GenerateProjectReport"
+                                  IconCss="e-icons e-download">
+                            Generate Report
+                        </SfButton>                    
+                        </div>
                 </div>
             </div>
         </div>
@@ -131,7 +142,8 @@
                     <span class="metric-change">@totalMembers total members</span>
                 </div>
             </div>
-        </div>        <!-- Charts Section -->
+        </div>       
+         <!-- Charts Section -->
         <div class="charts-section">
             <div class="chart-container">
                 <div class="chart-header">
@@ -162,7 +174,8 @@
                         </SfChart>
                     }
                     else
-                    {                        <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: #666;">
+                    {                        
+                        <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: #666;">
                             <p>No data available for the selected date range</p>
                         </div>
                     }
@@ -195,13 +208,15 @@
                         </SfChart>
                     }
                     else
-                    {                        <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: #666;">
+                    {                        
+                        <div style="display: flex; align-items: center; justify-content: center; height: 300px; color: #666;">
                             <p>No team data available for the selected date range</p>
                         </div>
                     }
                 </div>
             </div>
         </div>
+
 
         <!-- Team Performance Section -->
         <div class="team-performance-section">
@@ -242,10 +257,29 @@
     {
         <div class="loading-container">
             <div class="loading-spinner"></div>
-            <p>Loading project data...</p>        </div>
+            <p>Loading project data...</p>        
+        </div>
     }
 
 </div>
+
+    <div>
+        <SfToast ID="ProjectAdminToast" @ref="ToastObj">
+            <ToastPosition X="Center"></ToastPosition>
+        </SfToast>
+    </div>
+
+<script>
+    window.downloadFile = (dataUrl, fileName) => {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+</script>
+
 
 @code {
     [Parameter] public Guid ProjectId { get; set; }
@@ -266,21 +300,26 @@
     private decimal totalRevenue;
     private int completedTasks;
     private int activeTasks;
-    private int activeMembers;    private int totalMembers;
+    private int activeMembers;    
+    private int totalMembers;
     private double previousPeriodHours;
     private decimal previousPeriodRevenue;
     
-    private List<ChartDataPoint> hoursData = new();    private List<TeamHoursData> teamHoursData = new();
+    private List<ChartDataPoint> hoursData = new();    
+        private List<TeamHoursData> teamHoursData = new();
     
     private List<TeamMemberPerformance> teamPerformance = new();
 
+    private SfToast ToastObj;
+    
     protected override async Task OnInitializedAsync()
     {
         await LoadProjectData();
         await LoadTimesheets();
         await LoadTasks();
         await LoadTeamData();
-        CalculateMetrics();        GenerateChartData();
+        CalculateMetrics();        
+        GenerateChartData();
         CalculateTeamPerformance();
     }
     
@@ -456,7 +495,8 @@
     }
     
     private async Task RefreshData()
-    {        await LoadTimesheets();
+    {        
+        await LoadTimesheets();
         CalculateMetrics();
         GenerateChartData();
         CalculateTeamPerformance();
@@ -471,22 +511,48 @@
         }
         
         await InvokeAsync(StateHasChanged);
-    }
-
+    }    
     private void NavigateBack()
     {        Navigation.NavigateTo($"/projects");
     }
     
-    private string GetStatusClass(ProjectStatus status)
+    private async Task GenerateProjectReport()
     {
-        return status switch
+        try
         {
-            ProjectStatus.InProgress => "status-active",
-            ProjectStatus.Completed => "status-completed",
-            ProjectStatus.OnHold => "status-on-hold",
-            _ => "status-inactive"
-        };
+            if (startDate > endDate)
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Start date must be before end date");
+                return;
+            }
+
+            var pdfStream = await ReportService.GenerateProjectReportPdfAsync(ProjectId, startDate, endDate);
+            
+            if (pdfStream != null)
+            {
+                var fileName = $"Project_{project.Name}_{startDate:yyyy-MM-dd}_to_{endDate:yyyy-MM-dd}.pdf";
+                
+                var bytes = pdfStream.ToArray();
+                
+                var base64 = Convert.ToBase64String(bytes);
+                var dataUrl = $"data:application/pdf;base64,{base64}";
+                
+                await JSRuntime.InvokeVoidAsync("downloadFile", dataUrl, fileName);
+                
+                await UtilsService.ShowSuccessToast(ToastObj, "Project report PDF downloaded successfully!");
+            }
+            else
+            {
+                await UtilsService.ShowErrorToast(ToastObj, "Failed to generate project report PDF");
+            }
+        }
+        catch (Exception ex)
+        {
+            await UtilsService.ShowErrorToast(ToastObj, $"Error generating project report: {ex.Message}");
+        }
     }
+    
+ 
 
     private string GetPresetButtonClass(string preset)
     {
@@ -501,9 +567,7 @@
         };
         
         return isActive ? "preset-btn preset-btn-active" : "preset-btn";
-    }
-
-    private string GetUserInitials(string userName)
+    }    private string GetUserInitials(string userName)
     {
         if (string.IsNullOrEmpty(userName)) return "??";
         
@@ -513,6 +577,7 @@
             return $"{parts[0][0]}{parts[1][0]}".ToUpper();
         }        return userName.Length >= 2 ? userName.Substring(0, 2).ToUpper() : userName.ToUpper();
     }
+
     
     public enum DateRangePreset
     {
