@@ -402,6 +402,7 @@
             model.EndDate = changedRecord.EndDate;
             model.Notes = changedRecord.Notes;
             model.Status = changedRecord.Status;
+            model.HourlyRate = changedRecord.HourlyRate;
 
             var result = await TarefasService.UpdateAsync(changedRecord.Id, model);
             if (result != null)
